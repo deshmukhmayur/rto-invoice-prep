@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<!--
+  PROTOTYPE - throwaway. Do not ship.
+  Variants of the RTO Invoice Prep main window (upload -> review -> export),
+  switchable via ?variant=A|B|C|D and the floating bar (arrow keys work).
+  Variant D additionally carries a scenario panel (top-right) exercising the
+  empty, transitional and error states from ticket 12 of the
+  rto-invoice-fixer map (.scratch/rto-invoice-fixer/map.md).
+  Run: open this file in any browser. No persistence; sample files are simulated.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RTO Invoice Prep — UI prototype</title>
+<style>
+  :root { --mono: "Courier New", ui-monospace, Consolas, monospace; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body { font-size: 15px; }
+  button { font: inherit; cursor: pointer; }
+  input, select { font: inherit; }
+  :focus-visible { outline: 3px solid #F2A93B; outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  .proto-banner {
+    position: fixed; bottom: 18px; left: 18px; z-index: 90;
+    font: 600 10px/1 var(--mono); letter-spacing: .12em;
+    color: #777; background: #fff; border: 1px dashed #bbb;
+    padding: 5px 8px; pointer-events: none;
+  }
+
+  .switcher {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    z-index: 100; display: flex; align-items: center; gap: 4px;
+    background: #101214; color: #f2f2f2; border-radius: 999px;
+    padding: 6px 8px; box-shadow: 0 6px 24px rgba(0,0,0,.35);
+  }
+  .switcher button {
+    background: none; border: 0; color: #f2f2f2; font-size: 15px;
+    width: 30px; height: 30px; border-radius: 50%;
+  }
+  .switcher button:hover { background: #2a2d31; }
+  .switcher .label {
+    font: 600 12px/1.2 system-ui, sans-serif; letter-spacing: .03em;
+    min-width: 180px; text-align: center; user-select: none;
+  }
+  .switcher .label small { display: block; font-weight: 400; color: #9aa0a6; font-size: 10px; }
+
+  .toast {
+    position: fixed; bottom: 76px; left: 50%; transform: translateX(-50%);
+    background: #2E7D4F; color: #fff; font: 12px var(--mono);
+    padding: 10px 18px; z-index: 95;
+  }
+
+  /* ============================================================
+     VARIANT A — The Register
+     ============================================================ */
+  .va {
+    min-height: 100vh;
+    background:
+      repeating-linear-gradient(to bottom, transparent 0 27px, rgba(90,120,90,.16) 27px 28px),
+      #E9EDE0;
+    color: #26301F;
+    font-family: Georgia, "Times New Roman", serif;
+    padding: 40px 0 130px;
+  }
+  .va .sheet { max-width: 880px; margin: 0 auto; padding: 0 30px; }
+
+  .va .masthead { text-align: center; border-bottom: 3px double #40503A; padding-bottom: 16px; }
+  .va .masthead h1 {
+    display: inline-block; font-size: 20px; font-weight: 700;
+    letter-spacing: .24em; text-transform: uppercase;
+    border: 2px solid #40503A; border-radius: 3px; padding: 9px 24px 8px;
+    box-shadow: 0 0 0 4px #E9EDE0, 0 0 0 5px #40503A;
+    transform: rotate(-.4deg);
+  }
+  .va .masthead p {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .09em;
+    margin-top: 14px; color: #6B7562; text-transform: uppercase;
+  }
+
+  .va .paste {
+    margin: 28px 0 26px; border: 2px dashed #7C8F70; background: rgba(255,255,255,.45);
+    padding: 20px 16px; text-align: center;
+  }
+  .va .paste:hover { background: rgba(255,255,255,.8); }
+  .va .paste strong { letter-spacing: .04em; font-size: 15px; }
+  .va .paste span { display: block; font-family: var(--mono); font-size: 11px; color: #6B7562; margin-top: 6px; text-transform: uppercase; letter-spacing: .06em; }
+  .va .paste select {
+    margin-top: 12px; font: 11px var(--mono); background: #fff;
+    border: 1px solid #7C8F70; padding: 4px 6px;
+  }
+
+  .va ol.rows { list-style: none; counter-reset: folio; }
+  .va ol.rows > li {
+    counter-increment: folio; position: relative;
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 18px 4px 18px 0; border-bottom: 1px solid rgba(90,120,90,.35);
+  }
+  .va ol.rows > li::before {
+    content: counter(folio, decimal-leading-zero);
+    font-family: var(--mono); font-size: 12px; color: #6B7562;
+    padding-top: 3px; text-align: right;
+  }
+  .va .folio-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .va .folio-head .fname { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+  .va .folio-head .who { font-size: 13px; color: #3C4A35; font-style: italic; }
+  .va .folio-head .spacer { flex: 1; }
+  .va .x {
+    background: none; border: 1px solid #7C8F70; color: #6B7562;
+    width: 24px; height: 24px; border-radius: 2px; font-size: 13px; line-height: 1;
+  }
+  .va .x:hover { background: #40503A; color: #E9EDE0; }
+
+  .va .entries { margin-top: 10px; }
+  .va .entries .f {
+    display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 13px; padding: 2.5px 0;
+  }
+  .va .entries .f .k {
+    width: 215px; color: #6B7562; font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: .07em;
+  }
+  .va .entries .f .o { color: #8A9682; text-decoration: line-through; }
+  .va .entries .f .arr { color: #8A9682; }
+  .va .entries .f .n { font-weight: 700; }
+  .va .entries .f .n.up { color: #2E5D3A; }
+
+  .va .save-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 12px;
+    font-family: var(--mono); font-size: 11px; color: #6B7562;
+  }
+  .va .save-row input {
+    flex: 1; max-width: 330px; font: 12px var(--mono);
+    border: 0; border-bottom: 1px solid #7C8F70; background: transparent;
+    padding: 3px 2px; color: #26301F;
+  }
+  .va .save-row .dl {
+    font: 11px var(--mono); border: 1px solid #40503A;
+    background: transparent; color: #40503A; padding: 4px 10px;
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .va .save-row .dl:hover { background: #40503A; color: #E9EDE0; }
+
+  .va .stamp {
+    position: absolute; right: 30px; top: 50%;
+    transform: translateY(-50%) rotate(-8deg);
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase; text-align: center;
+    color: #B23A2A; border: 2.5px solid #B23A2A; border-radius: 3px;
+    padding: 8px 12px; opacity: .9; mix-blend-mode: multiply; max-width: 250px;
+    animation: stampIn .18s ease-out;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes stampIn { from { transform: translateY(-50%) rotate(-8deg) scale(1.5); opacity: 0; } }
+  }
+  .va .stamp::after { content: ""; position: absolute; inset: 2px; border: 1px solid #B23A2A; border-radius: 2px; opacity: .6; }
+  .va li.refused .folio-head .who { color: #8A5A50; }
+  .va .refusals { margin-top: 10px; font-size: 13px; }
+  .va .refusals li { list-style: none; }
+  .va .refusals li::before { content: "— "; }
+  .va li.refused .refusals { max-width: calc(100% - 260px); }
+  .va li.refused .entries, .va li.refused .save-row { opacity: .45; }
+
+  .va .footer-block {
+    margin-top: 36px; padding-top: 18px; border-top: 3px double #40503A;
+    display: flex; align-items: end; gap: 26px; flex-wrap: wrap;
+  }
+  .va .footer-block .dirs { flex: 1; min-width: 280px; font-family: var(--mono); font-size: 12px; }
+  .va .footer-block .dirs label {
+    display: block; font-size: 10px; text-transform: uppercase;
+    letter-spacing: .09em; color: #6B7562; margin-bottom: 4px;
+  }
+  .va .footer-block .dirs input {
+    width: 100%; font: 12px var(--mono); border: 0;
+    border-bottom: 1px solid #7C8F70; background: transparent;
+    padding: 4px 2px; color: #26301F;
+  }
+  .va .grand { font-family: var(--mono); font-size: 12px; text-align: right; }
+  .va .grand .go {
+    display: block; margin-top: 8px;
+    font: 700 13px var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    background: #40503A; color: #E9EDE0; border: 0; padding: 12px 28px;
+  }
+  .va .grand .go:disabled { opacity: .35; cursor: not-allowed; }
+  .va .grand .zip {
+    display: block; margin-top: 8px; background: none; border: 0;
+    color: #6B7562; font: 11px var(--mono); text-decoration: underline;
+  }
+
+  .va .carbon-toggle {
+    position: fixed; top: 14px; right: 16px; z-index: 80;
+    font: 11px var(--mono); letter-spacing: .08em;
+    background: transparent; border: 1px solid #7C8F70; color: #40503A; padding: 6px 12px;
+  }
+  .va .carbon {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 430px; z-index: 85;
+    background: #D9D9D2; border-left: 1px solid #9A9A92;
+    box-shadow: -12px 0 30px rgba(0,0,0,.28);
+    font-family: var(--mono); font-size: 11px; color: #33332E;
+    padding: 48px 20px 20px; overflow: auto;
+  }
+  .va .carbon h2 {
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    margin-bottom: 12px; color: #55554E;
+  }
+  .va .carbon .close { position: absolute; top: 12px; right: 12px; background: none; border: 0; font-size: 15px; }
+  .va .carbon pre { white-space: pre-wrap; line-height: 1.6; }
+  .va .carbon .ref { color: #B23A2A; }
+
+  /* ============================================================
+     VARIANT B — The Counter
+     ============================================================ */
+  .vb {
+    min-height: 100vh; background: #262321; color: #E8E6DF;
+    font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
+    display: flex; flex-direction: column; padding-bottom: 110px;
+  }
+  .vb .bar {
+    background: #1D1B19; border-bottom: 1px solid #3A362F;
+    display: flex; align-items: baseline; gap: 14px; padding: 15px 22px;
+  }
+  .vb .bar h1 { font-size: 17px; letter-spacing: .2em; text-transform: uppercase; font-weight: 700; color: #F2A93B; }
+  .vb .bar .tag { font-size: 11px; letter-spacing: .1em; color: #8C877D; text-transform: uppercase; }
+  .vb .bar .count { margin-left: auto; font-family: var(--mono); font-size: 12px; color: #8C877D; }
+
+  .vb .floor { flex: 1; display: grid; grid-template-columns: 240px 1fr 290px; }
+  @media (max-width: 980px) { .vb .floor { grid-template-columns: 1fr; } }
+
+  .vb .tray { border-right: 1px solid #3A362F; padding: 20px 16px; }
+  .vb .tray .dz {
+    border: 2px dashed #4A463E; padding: 28px 12px; text-align: center;
+    font-size: 13px; letter-spacing: .07em; text-transform: uppercase; color: #8C877D;
+  }
+  .vb .tray .dz:hover { border-color: #F2A93B; color: #F2A93B; }
+  .vb .tray h3 {
+    font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+    color: #8C877D; margin: 18px 0 8px;
+  }
+  .vb .tray button.add {
+    display: block; width: 100%; text-align: left; margin-bottom: 6px;
+    background: #2E2A25; color: #C9C4B8; border: 1px solid #3F3B33;
+    font: 11px var(--mono); padding: 7px 9px;
+  }
+  .vb .tray button.add:hover { border-color: #F2A93B; }
+
+  .vb .stack { padding: 22px 26px; }
+
+  .vb .receipt {
+    position: relative; background: #FBFAF4; color: #262321;
+    margin: 0 0 24px; padding: 16px 18px 18px 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.45);
+    -webkit-mask:
+      radial-gradient(circle 5px at 5px 50%, transparent 97%, #000) -5px 0/10px 100% repeat-y,
+      linear-gradient(#000 0 0) 10px 0/calc(100% - 10px) 100% no-repeat;
+    mask:
+      radial-gradient(circle 5px at 5px 50%, transparent 97%, #000) -5px 0/10px 100% repeat-y,
+      linear-gradient(#000 0 0) 10px 0/calc(100% - 10px) 100% no-repeat;
+  }
+  .vb .receipt .top {
+    display: flex; align-items: baseline; gap: 10px;
+    border-bottom: 1px dashed #B9B5A6; padding-bottom: 8px;
+  }
+  .vb .receipt .top .fn { font: 700 13px var(--mono); }
+  .vb .receipt .top .who { font-size: 12px; color: #6A6558; text-transform: uppercase; letter-spacing: .05em; }
+  .vb .receipt .top .x {
+    margin-left: auto; background: none; border: 1px solid #C9C4B4; color: #85806F;
+    width: 24px; height: 24px; border-radius: 50%; font-size: 12px;
+  }
+  .vb .receipt .top .x:hover { background: #B23A2A; border-color: #B23A2A; color: #fff; }
+  .vb .figs { font-family: var(--mono); font-size: 12px; margin-top: 8px; }
+  .vb .figs .f { display: flex; align-items: baseline; padding: 3px 0; }
+  .vb .figs .f .k { flex: 1; text-transform: uppercase; letter-spacing: .05em; font-size: 10.5px; color: #6A6558; }
+  .vb .figs .f .o { color: #A39E8F; text-decoration: line-through; margin-right: 8px; }
+  .vb .figs .f .arr { color: #A39E8F; margin-right: 8px; }
+  .vb .figs .f .n { font-weight: 700; }
+  .vb .figs .f .n.up { color: #2E7D4F; }
+  .vb .tear { margin-top: 10px; display: flex; gap: 8px; align-items: center; }
+  .vb .tear input {
+    flex: 1; font: 11px var(--mono); border: 1px dashed #C9C4B4;
+    background: transparent; padding: 5px 6px; color: #262321;
+  }
+  .vb .tear button {
+    font: 700 10px var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    background: #F2A93B; border: 0; padding: 7px 12px; color: #262321;
+  }
+  .vb .tear button:hover { background: #E09000; }
+
+  .vb .receipt.refused { background: #F4EDE4; }
+  .vb .refuse { font-family: var(--mono); font-size: 11.5px; color: #B23A2A; margin-top: 10px; line-height: 1.6; }
+  .vb .refuse b { letter-spacing: .05em; }
+  .vb .refuse .rip {
+    display: inline-block; border: 2px solid #B23A2A; padding: 2px 9px;
+    font-weight: 700; letter-spacing: .14em; transform: rotate(-3deg); margin-bottom: 6px;
+  }
+  .vb .refuse .found { color: #85806F; }
+
+  .vb .till {
+    border-left: 1px solid #3A362F; padding: 22px 16px;
+    position: sticky; top: 0; align-self: start;
+  }
+  .vb .till h3 { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #F2A93B; margin-bottom: 4px; }
+  .vb .till label {
+    display: block; font-size: 10px; letter-spacing: .13em; text-transform: uppercase;
+    color: #8C877D; margin: 14px 0 4px;
+  }
+  .vb .till input[type=text] {
+    width: 100%; font: 11px var(--mono); background: #2E2A25; color: #E8E6DF;
+    border: 1px solid #3F3B33; padding: 7px 8px;
+  }
+  .vb .till .big {
+    width: 100%; margin-top: 20px; padding: 14px 0;
+    font: 700 13px var(--mono); letter-spacing: .13em; text-transform: uppercase;
+    background: #F2A93B; color: #262321; border: 0;
+  }
+  .vb .till .big:hover { background: #E09000; }
+  .vb .till .big:disabled { background: #3F3B33; color: #6A6558; cursor: not-allowed; }
+  .vb .till .note { font-family: var(--mono); font-size: 10px; color: #6A6558; margin-top: 10px; line-height: 1.6; }
+
+  /* ============================================================
+     VARIANT C — The Inspector
+     ============================================================ */
+  .vc {
+    min-height: 100vh; background: #EBEDF0; color: #171B1F;
+    font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+    display: flex; flex-direction: column; padding-bottom: 100px;
+  }
+  .vc .chrome {
+    background: #FAFBFC; border-bottom: 1px solid #D3D7DB;
+    display: flex; align-items: center; gap: 14px; padding: 10px 18px;
+  }
+  .vc .chrome h1 { font-size: 15px; font-weight: 600; }
+  .vc .chrome .ver { font: 10px var(--mono); color: #7A828A; }
+  .vc .chrome .actions { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .vc .chrome .dir { display: flex; align-items: center; gap: 6px; font: 11px var(--mono); color: #4A525A; }
+  .vc .chrome .dirpick {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px solid #D3D7DB;
+    padding: 5px 8px; font: 11px var(--mono); color: #171B1F; max-width: 250px;
+  }
+  .vc .chrome .dirpick:hover { border-color: #171B1F; }
+  .vc .chrome .dirpick .path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vc .chrome .primary { background: #171B1F; color: #fff; border: 0; padding: 8px 14px; font-size: 13px; font-weight: 600; }
+  .vc .chrome .primary:disabled { background: #B6BCC2; cursor: not-allowed; }
+  .vc .combo { position: relative; display: flex; }
+  .vc .combo .caret {
+    background: #171B1F; color: #fff; border: 0; border-left: 1px solid #4A525A;
+    width: 28px; font-size: 10px; align-self: stretch; padding: 0;
+  }
+  .vc .combo .caret:hover:not(:disabled) { background: #2A3138; }
+  .vc .combo .caret:disabled { background: #B6BCC2; border-left-color: #98A0A8; cursor: not-allowed; }
+  .vc .zipmenu {
+    position: absolute; top: calc(100% + 4px); right: 0; z-index: 50;
+    min-width: 300px; background: #fff; border: 1px solid #D3D7DB;
+    box-shadow: 0 8px 24px rgba(23,27,31,.18);
+  }
+  .vc .zipmenu button {
+    display: block; width: 100%; text-align: left; background: none; border: 0;
+    padding: 9px 12px; font-size: 12.5px; color: #171B1F;
+  }
+  .vc .zipmenu button:hover { background: #F1F3F5; }
+  .vc .zipmenu button small { display: block; font: 10px var(--mono); color: #7A828A; margin-top: 2px; }
+
+  .vc .desk { flex: 1; display: grid; grid-template-columns: 272px 1fr; }
+  @media (max-width: 900px) { .vc .desk { grid-template-columns: 1fr; } }
+
+  .vc .rail { border-right: 1px solid #D3D7DB; background: #F1F3F5; padding: 12px 0; }
+  .vc .upload-block {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    margin: 0 12px 12px; border: 2px dashed #B6BCC2; border-radius: 6px;
+    background: rgba(255,255,255,.6); padding: 22px 10px 18px; color: #171B1F;
+  }
+  .vc .upload-block:hover { border-color: #171B1F; background: #fff; }
+  .vc .upload-block .ub-t { font: 600 13px system-ui, sans-serif; }
+  .vc .upload-block .ub-s { font-size: 11px; color: #7A828A; }
+  .vc .ingest { margin: 0 12px 12px; font-size: 11.5px; color: #171B1F; }
+  .vc .ingest .ibar { height: 4px; background: #E4E7EA; border-radius: 2px; margin-top: 5px; overflow: hidden; }
+  .vc .ingest .ibar > div { height: 100%; background: #171B1F; }
+  .vc .rail select { margin: 0 12px; width: calc(100% - 24px); font-size: 11px; padding: 5px; border: 1px solid #B6BCC2; background: #fff; }
+  .vc .rail ul { list-style: none; margin-top: 10px; }
+  .vc .rail li {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 14px; border-left: 3px solid transparent; cursor: pointer;
+  }
+  .vc .rail li:hover { background: #E4E7EA; }
+  .vc .rail li.sel { background: #fff; border-left-color: #171B1F; }
+  .vc .rail .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .vc .rail .dot.ok { background: #2E7D4F; }
+  .vc .rail .dot.bad { background: #B23A2A; }
+  .vc .rail .nm { font-size: 12px; font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vc .rail .x { margin-left: auto; background: none; border: 0; color: #9AA0A6; font-size: 13px; }
+  .vc .rail .x:hover { color: #B23A2A; }
+
+  .vc .view { padding: 26px 30px; }
+  .vc .doc {
+    background: #fff; max-width: 780px; margin: 0 auto;
+    box-shadow: 0 1px 3px rgba(23,27,31,.18), 0 8px 28px rgba(23,27,31,.12);
+    padding: 26px 30px 30px;
+  }
+  .vc .dochead {
+    display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+    border-bottom: 1px solid #E4E7EA; padding-bottom: 12px;
+  }
+  .vc .dochead .fn { font: 600 13px var(--mono); }
+  .vc .dochead .meta { font-size: 12px; color: #7A828A; }
+  .vc .flag {
+    display: inline-block; font: 700 10px var(--mono); letter-spacing: .12em;
+    text-transform: uppercase; padding: 3px 8px;
+  }
+  .vc .flag.pass { background: #E2F0E7; color: #2E7D4F; }
+  .vc .flag.fail { background: #FAE3DF; color: #B23A2A; }
+  .vc .dochead .out { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .vc .details {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 18px;
+    margin-top: 16px; padding-bottom: 14px; border-bottom: 1px solid #E4E7EA;
+  }
+  .vc .details .k { display: block; font: 600 10px system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #7A828A; margin-bottom: 2px; }
+  .vc .details .v { font: 12.5px var(--mono); color: #171B1F; }
+  .vc .details .v.unreadable { color: #9AA0A6; }
+  .vc .details-note { margin-top: 16px; font-size: 12px; color: #7A828A; }
+  .vc .dochead .out .dl-icon {
+    background: transparent; border: 0; border-radius: 4px;
+    width: 32px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+    color: #171B1F;
+  }
+  .vc .dochead .out .dl-icon:hover { background: #EBEDF0; }
+
+  .vc .facsimile { position: relative; margin-top: 20px; font-family: var(--mono); font-size: 12px; }
+  .vc .facsimile .fr { display: flex; align-items: baseline; padding: 6px 10px; border-bottom: 1px solid #F0F2F4; }
+  .vc .facsimile .fr .lbl { flex: 1; color: #3C444C; }
+  .vc .facsimile .fr .amt { color: #171B1F; }
+  .vc .facsimile .fr .amt.old { color: #A3ABB3; text-decoration: line-through; margin-right: 10px; }
+  .vc .facsimile .fr .amt.new { font-weight: 700; background: #FDF3DC; outline: 2px solid #F0B429; padding: 1px 6px; }
+  .vc .facsimile .fr.removed .lbl { color: #A3ABB3; text-decoration: line-through; }
+  .vc .facsimile .fr.removed .amt { color: #A3ABB3; text-decoration: line-through; }
+  .vc .facsimile .fr .why { font: 600 10px system-ui, sans-serif; color: #B23A2A; margin-left: 10px; letter-spacing: .04em; }
+
+  .vc .anno {
+    margin-top: 18px; font-size: 13px; line-height: 1.6;
+    border-left: 4px solid #F0B429; background: #FDF7EC;
+    padding: 12px 16px; color: #5B4A21;
+  }
+  .vc .anno b { color: #8A5A10; }
+  .vc .anno .hand { font-style: italic; }
+  .vc .anno.refused { border-left-color: #B23A2A; background: #FAEEEC; color: #6E2A1E; }
+  .vc .anno.refused b { color: #B23A2A; }
+
+  .vc .totals-line {
+    max-width: 780px; margin: 18px auto 0;
+    display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+    font: 11px var(--mono); color: #4A525A;
+  }
+  .vc .totals-line .dir { display: flex; align-items: center; gap: 6px; }
+  .vc .totals-line .dir input { font: 11px var(--mono); border: 1px solid #D3D7DB; padding: 4px 6px; width: 240px; }
+
+  /* ============================================================
+     VARIANT D — The Native Window (Fluent / Win11)
+     ============================================================ */
+  .vd {
+    min-height: 100vh; background: #F3F3F3; color: #1B1B1B;
+    font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+    display: flex; flex-direction: column; padding-bottom: 100px;
+  }
+  .vd .cmdbar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 14px; background: #FBFBFB; border-bottom: 1px solid #E5E5E5;
+    flex-wrap: wrap;
+  }
+  .vd .menugroup { display: flex; align-items: center; gap: 4px; }
+  .vd .ghost {
+    background: transparent; border: 0; border-radius: 4px;
+    padding: 6px 10px; font: 12.5px "Segoe UI", system-ui, sans-serif; color: #1B1B1B;
+  }
+  .vd .ghost:hover { background: rgba(0,0,0,.045); }
+  .vd .menuwrap { position: relative; display: inline-flex; }
+  .vd .cmdbar .dir { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #5E5E5E; margin-left: auto; }
+  .vd .cmdbar .dirpick {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: #fff; border: 1px solid #D6D6D6; border-radius: 4px;
+    padding: 6px 10px; font: 12px var(--mono); color: #1B1B1B; max-width: 280px;
+  }
+  .vd .cmdbar .dirpick:hover { border-color: #005FB8; }
+  .vd .cmdbar .dirpick .path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vd .combo { position: relative; display: flex; }
+  .vd .cmdbar .combo .primary {
+    background: #005FB8; color: #fff; border: 1px solid #005FB8;
+    border-radius: 4px 0 0 4px; padding: 7px 14px; font-size: 13px; font-family: inherit;
+  }
+  .vd .cmdbar .combo .primary:hover:not(:disabled) { background: #1B6EC2; }
+  .vd .cmdbar .combo .primary:active:not(:disabled) { background: #0057A3; color: rgba(255,255,255,.75); }
+  .vd .cmdbar .combo .primary:disabled { background: #F5F5F5; color: #A6A6A6; border-color: #E5E5E5; }
+  .vd .cmdbar .combo .caret {
+    background: #005FB8; color: #fff; border: 1px solid #005FB8; border-left: 1px solid rgba(255,255,255,.45);
+    border-radius: 0 4px 4px 0; width: 26px; font-size: 10px;
+    align-self: stretch; padding: 0;
+  }
+  .vd .cmdbar .combo .caret:hover:not(:disabled) { background: #1B6EC2; }
+  .vd .cmdbar .combo .caret:disabled { background: #F5F5F5; color: #A6A6A6; border-color: #E5E5E5; border-left-color: #E5E5E5; }
+  .vd .zipmenu {
+    position: absolute; top: calc(100% + 4px); right: 0; z-index: 50;
+    min-width: 300px; background: #fff; border: 1px solid #E5E5E5;
+    border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,.14);
+    padding: 4px;
+  }
+  .vd .zipmenu button {
+    display: block; width: 100%; text-align: left; background: none; border: 0;
+    border-radius: 4px; padding: 9px 10px; font-size: 13px; font-family: inherit; color: #1B1B1B;
+  }
+  .vd .zipmenu button:hover { background: #F5F5F5; }
+  .vd .zipmenu button small { display: block; font-size: 11px; color: #6B6B6B; margin-top: 2px; }
+
+  .vd .flyout {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 60;
+    min-width: 250px; background: #fff; border: 1px solid #E5E5E5;
+    border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,.14);
+    padding: 4px;
+  }
+  .vd .flyout .grp {
+    font-size: 11px; color: #6B6B6B;
+    padding: 8px 10px 3px; margin: 0;
+  }
+  .vd .flyout .grp:first-child { padding-top: 4px; }
+  .vd .flyout button {
+    display: flex; width: 100%; justify-content: space-between; gap: 16px;
+    align-items: baseline; background: none; border: 0; border-radius: 4px;
+    padding: 8px 10px; font: 13px "Segoe UI", system-ui, sans-serif; color: #1B1B1B; text-align: left;
+  }
+  .vd .flyout button:hover { background: #F5F5F5; }
+  .vd .flyout .accel { font: 11px var(--mono); color: #6B6B6B; }
+  .vd .flyout hr { border: 0; border-top: 1px solid #EDEDED; margin: 4px 6px; }
+
+  .vd .modal-backdrop {
+    position: fixed; inset: 0; z-index: 88;
+    background: rgba(0,0,0,.32);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .vd .modal {
+    background: #fff; border: 1px solid #E5E5E5; border-radius: 8px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.24);
+    width: min(600px, calc(100vw - 48px)); max-height: 80vh;
+    display: flex; flex-direction: column;
+  }
+  .vd .modal-head {
+    display: flex; align-items: center;
+    padding: 14px 18px; border-bottom: 1px solid #EDEDED;
+  }
+  .vd .modal-head h3 { font-size: 14px; font-weight: 600; }
+  .vd .log-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    margin-right: 6px;
+    background: #fff; border: 1px solid #D6D6D6; border-radius: 4px;
+    padding: 6px 12px; font: 600 12.5px "Segoe UI", system-ui, sans-serif; color: #1B1B1B;
+  }
+  .vd .modal-head .log-btn:first-of-type { margin-left: auto; }
+  .vd .log-btn svg { color: #005FB8; }
+  .vd .log-btn:hover { border-color: #005FB8; color: #005FB8; background: #F0F7FD; }
+  .vd .modal-head .log-btn + .modal-close { margin-left: 0; }
+  .vd .modal-close {
+    margin-left: auto; background: none; border: 0; border-radius: 4px;
+    color: #6B6B6B; font-size: 14px; width: 30px; height: 30px;
+  }
+  .vd .modal-close:hover { background: rgba(0,0,0,.05); color: #1B1B1B; }
+  .vd .modal-body { padding: 14px 18px 18px; overflow: auto; }
+  .vd .modal-body p { font-size: 13px; line-height: 1.6; color: #3B3B3B; margin: 0 0 10px; }
+  .vd .modal-body p:last-child { margin-bottom: 0; }
+  .vd .modal-body .ver { font: 11px var(--mono); color: #6B6B6B; }
+  .vd .about-head { display: flex; gap: 14px; align-items: center; margin-bottom: 4px; }
+  .vd .about-icon {
+    width: 40px; height: 40px; flex: none; border-radius: 8px;
+    background: linear-gradient(135deg, #2FA1E3, #005FB8);
+    color: #fff; font: 700 16px "Segoe UI", system-ui, sans-serif;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .vd .about-name { font-size: 16px; font-weight: 600; }
+  .vd .runtime-line { font: 12px "Segoe UI", system-ui, sans-serif; color: #6B6B6B; margin: 2px 0 4px; }
+  .vd .runtime-line .dim { color: #9B9B9B; }
+  .vd .about-links { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
+  .vd .about-links .dot, .vd .about-sub .dot { color: #9B9B9B; }
+  .vd .about-sub { display: flex; gap: 6px; align-items: baseline; margin: 2px 0 3px; }
+  .vd .linklike {
+    background: none; border: 0; color: #005FB8;
+    font: 12.5px "Segoe UI", system-ui, sans-serif;
+    padding: 2px 4px; border-radius: 4px; cursor: pointer;
+  }
+  .vd .linklike:hover { text-decoration: underline; }
+  .vd .linklike.small { font-size: 11.5px; padding: 0 2px; }
+  .vd .modal.plain { position: relative; }
+  .vd .modal-close.floating { position: absolute; top: 10px; right: 10px; }
+  /* About modal — airy proportions (overrides the compact shared modal) */
+  .vd .modal.plain .modal-body { padding: 26px 28px 24px; }
+  .vd .modal.plain .about-head { gap: 16px; margin-bottom: 14px; }
+  .vd .modal.plain .about-icon { width: 48px; height: 48px; border-radius: 10px; font-size: 19px; }
+  .vd .modal.plain .about-name { font-size: 18px; letter-spacing: .01em; }
+  .vd .modal.plain .about-sub { margin: 3px 0 5px; }
+  .vd .modal.plain .tagline { font-style: italic; color: #5E5E5E; font-size: 13px; }
+  .vd .modal.plain p { font-size: 13.5px; line-height: 1.65; margin: 0 0 14px; }
+  .vd .modal.plain .runtime-line { margin: 4px 0 6px; }
+  .vd .modal.plain .about-links { margin-top: 18px; padding-top: 14px; border-top: 1px solid #EDEDED; gap: 10px; }
+  .vd .modal.plain .linklike { font-size: 13px; padding: 3px 6px; }
+  .vd .modal-body pre {
+    font: 11px var(--mono); line-height: 1.65; white-space: pre-wrap; color: #3B3B3B;
+    background: #F9F9F9; border: 1px solid #EDEDED; border-radius: 6px; padding: 12px 14px;
+  }
+  .vd .modal-body .ref { color: #C42B1C; }
+
+  .vd .desk { flex: 1; display: grid; grid-template-columns: 280px 1fr; }
+  @media (max-width: 900px) { .vd .desk { grid-template-columns: 1fr; } }
+
+  .vd .rail { border-right: 1px solid #E5E5E5; padding: 10px; }
+  .vd { position: relative; }
+  .vd .upload-block {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    width: 100%; border: 1px dashed #C9C9C9; border-radius: 6px;
+    background: rgba(255,255,255,.6); padding: 24px 10px 20px;
+    color: #1B1B1B;
+  }
+  .vd .upload-block:hover { border-color: #005FB8; background: #F0F7FD; }
+  .vd .upload-block svg { color: #005FB8; }
+  .vd .upload-block .ub-t { font: 600 13px "Segoe UI", system-ui, sans-serif; }
+  .vd .upload-block .ub-s { font-size: 11px; color: #6B6B6B; }
+  .vd .ingest { margin-top: 10px; font-size: 11.5px; color: #1B1B1B; }
+  .vd .ingest .ibar { height: 4px; background: #E5E5E5; border-radius: 2px; margin-top: 5px; overflow: hidden; }
+  .vd .ingest .ibar > div { height: 100%; background: #005FB8; }
+  .vd.dragging::after {
+    content: "\1F4C4\00a0\00a0 Drop PDFs to add them";
+    position: fixed; inset: 8px; z-index: 70; pointer-events: none;
+    border: 2px dashed #005FB8; border-radius: 8px;
+    background: rgba(0,95,184,.22); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    font: 600 16px "Segoe UI", system-ui, sans-serif; color: #005FB8;
+  }
+  .vd .rail select {
+    margin-top: 10px; width: 100%; font: 12px inherit; font-family: inherit;
+    background: #fff; border: 1px solid #D6D6D6; border-radius: 4px; padding: 6px;
+  }
+  .vd .rail ul { list-style: none; margin-top: 10px; }
+  .vd .rail li {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: 4px; cursor: pointer; border-left: none;
+  }
+  .vd .rail li:hover { background: rgba(0,0,0,.035); }
+  .vd .rail li.sel { background: rgba(0,0,0,.06); }
+  .vd .rail .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .vd .rail .dot.ok { background: #0F7B0F; }
+  .vd .rail .dot.bad { background: #C42B1C; }
+  .vd .rail .nm { font-size: 12px; font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vd .rail .x { margin-left: auto; background: none; border: 0; color: #6B6B6B; font-size: 12px; border-radius: 3px; }
+  .vd .rail .x:hover { color: #C42B1C; }
+
+  .vd .view { padding: 20px 24px; }
+  .vd .doc {
+    background: #fff; max-width: 780px; margin: 0 auto;
+    border: 1px solid #E5E5E5; border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.04);
+    padding: 24px 28px 28px;
+  }
+  .vd .dochead {
+    display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+    border-bottom: 1px solid #EDEDED; padding-bottom: 12px;
+  }
+  .vd .dochead .fn { font: 600 12.5px var(--mono); }
+  .vd .dochead .meta { font-size: 12px; color: #5E5E5E; }
+  .vd .flag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 10px;
+  }
+  .vd .flag.pass { background: #EAF4EA; color: #0F7B0F; }
+  .vd .flag.fail { background: #FDE7E9; color: #C42B1C; }
+  .vd .dochead .out { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .vd .details {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 18px;
+    margin-top: 16px; padding-bottom: 14px; border-bottom: 1px solid #EDEDED;
+  }
+  .vd .details .k { display: block; font: 600 10.5px "Segoe UI", system-ui, sans-serif; color: #6B6B6B; margin-bottom: 2px; }
+  .vd .details .v { font: 12.5px var(--mono); color: #1B1B1B; }
+  .vd .details .v.unreadable { color: #9B9B9B; }
+  .vd .details-note { margin-top: 16px; font-size: 12px; color: #6B6B6B; }
+  .vd .dochead .out .dl-icon {
+    background: transparent; border: 0; border-radius: 4px;
+    width: 32px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+    color: #005FB8;
+  }
+  .vd .dochead .out .dl-icon:hover { background: rgba(0,95,184,.08); }
+
+  .vd .facsimile { position: relative; margin-top: 18px; font-family: var(--mono); font-size: 12px; }
+  .vd .facsimile .fr { display: flex; align-items: baseline; padding: 7px 10px; border-bottom: 1px solid #F3F3F3; border-radius: 4px; }
+  .vd .facsimile .fr .lbl { flex: 1; color: #3B3B3B; }
+  .vd .facsimile .fr .amt { color: #1B1B1B; }
+  .vd .facsimile .fr .amt.old { color: #A6A6A6; text-decoration: line-through; margin-right: 10px; }
+  .vd .facsimile .fr .amt.new {
+    font-weight: 700; background: #FFF4CE; border: 1.5px solid #EDC33F;
+    border-radius: 3px; padding: 1px 6px;
+  }
+  .vd .facsimile .fr.removed .lbl { color: #A6A6A6; text-decoration: line-through; }
+  .vd .facsimile .fr.removed .amt { color: #A6A6A6; text-decoration: line-through; }
+  .vd .facsimile .fr .why { font: 600 10.5px "Segoe UI", system-ui, sans-serif; color: #C42B1C; margin-left: 10px; }
+
+  .vd .facsimile .fr.words { font-size: 11px; }
+  .vd .facsimile .fr.words .lbl { flex: 0 0 auto; margin-right: 16px; }
+  .vd .facsimile .fr.words .amt.new { background: none; border: 0; padding: 0; font-weight: 700; }
+
+  .vd .anno {
+    margin-top: 16px; font-size: 13px; line-height: 1.6;
+    border-left: 3px solid #EDC33F; background: #FFFBE8;
+    border-radius: 0 4px 4px 0;
+    padding: 12px 16px; color: #5B4A21;
+  }
+  .vd .anno b { color: #8A5A10; }
+  .vd .anno .hand { font-style: italic; }
+  .vd .anno.refused { border-left-color: #C42B1C; background: #FDF3F4; color: #6E2A1E; }
+  .vd .anno.refused b { color: #C42B1C; }
+
+  .vd .totals-line {
+    max-width: 780px; margin: 14px auto 0;
+    display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+    font-size: 12px; color: #6B6B6B;
+  }
+
+  /* ============================================================
+     Ticket 12 — empty, transitional and error states (Variant D)
+     ============================================================ */
+  .scenpanel {
+    position: fixed; top: 12px; right: 12px; z-index: 96;
+    background: #fff; border: 1px solid #E5E5E5; border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.16); padding: 6px;
+    font: 12px "Segoe UI", system-ui, sans-serif; max-width: 250px;
+  }
+  .scenpanel .head {
+    display: flex; align-items: center; gap: 4px; width: 100%;
+    background: none; border: 0; border-radius: 4px;
+    padding: 4px 8px; cursor: pointer; text-align: left;
+  }
+  .scenpanel .head:hover { background: #F5F5F5; }
+  .scenpanel .head .caret { font-size: 9px; color: #6B6B6B; width: 10px; }
+  .scenpanel h4 {
+    font-size: 10.5px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: #6B6B6B; padding: 0; margin: 0; flex: 1;
+  }
+  .scenpanel button {
+    display: block; width: 100%; text-align: left; background: none; border: 0;
+    border-radius: 4px; padding: 6px 8px; font: 12px "Segoe UI", system-ui, sans-serif;
+    color: #1B1B1B; line-height: 1.35;
+  }
+  .scenpanel button:hover { background: #F5F5F5; }
+  .scenpanel button.on { background: rgba(0,95,184,.1); color: #005FB8; font-weight: 600; }
+  .scenpanel button small { display: block; font-size: 10.5px; color: #6B6B6B; font-weight: 400; }
+
+  .vd .empty-state, .vc .empty-state {
+    max-width: 520px; margin: 48px auto 0; text-align: center;
+    border: 1px dashed #C9C9C9; border-radius: 8px;
+    background: rgba(255,255,255,.6); padding: 56px 32px;
+  }
+  .vd .empty-state svg, .vc .empty-state svg { color: #C9C9C9; }
+  .vd .empty-state h2, .vc .empty-state h2 { font-size: 16px; font-weight: 600; margin: 12px 0 6px; }
+  .vd .empty-state p, .vc .empty-state p { font-size: 12.5px; color: #6B6B6B; line-height: 1.6; margin: 0; }
+
+  .vd .rail .ph {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; font-size: 12px; color: #6B6B6B; font-family: var(--mono);
+  }
+  .vd .rail .ph .spin {
+    width: 9px; height: 9px; border-radius: 50%; flex: none;
+    border: 2px solid #D6D6D6; border-top-color: #005FB8;
+    animation: phspin 1s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) { .vd .rail .ph .spin { animation: none; } }
+  .vd .rail .sum {
+    margin-top: 10px; padding: 8px 10px; border-radius: 4px;
+    background: #FDF3F4; color: #C42B1C; font-size: 11.5px; line-height: 1.5;
+  }
+  .vd .rail .dot.err { background: #fff; border: 2px solid #C42B1C; }
+  .vd .rail .wrote {
+    margin-left: auto; color: #0F7B0F; font-size: 11px; font-weight: 600; flex: none;
+  }
+  .vd .rail .failtag {
+    margin-left: auto; color: #C42B1C; font-size: 12px; font-weight: 700; flex: none;
+  }
+
+  .vd .cmdbar .dirpick.baddir { border-color: #C42B1C; background: #FDF3F4; }
+  .vd .cmdbar .dirpick.baddir .path { color: #C42B1C; }
+  .vd .cmdbar .dirwarn { color: #C42B1C; font-size: 13px; flex: none; }
+
+  .vd .dir-banner {
+    max-width: 780px; margin: 0 auto 14px;
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid #C42B1C; border-left: 3px solid #C42B1C; border-radius: 0 4px 4px 0;
+    background: #FDF3F4; color: #6E2A1E;
+    padding: 10px 14px; font-size: 12.5px;
+  }
+  .vd .dir-banner b { color: #C42B1C; }
+  .vd .dir-banner button {
+    background: #fff; border: 1px solid #D6D6D6; border-radius: 4px;
+    padding: 4px 10px; font: 600 12px "Segoe UI", system-ui, sans-serif; color: #1B1B1B;
+    margin-left: auto;
+  }
+  .vd .dir-banner button:hover { border-color: #005FB8; color: #005FB8; }
+
+  .vd .errpanel {
+    margin-top: 16px; font-size: 13px; line-height: 1.6;
+    border-left: 3px solid #8A8886; background: #F4F4F4;
+    border-radius: 0 4px 4px 0; padding: 12px 16px; color: #3B3B3B;
+  }
+  .vd .errpanel b { color: #1B1B1B; }
+  .vd .errpanel .acts { margin-top: 10px; display: flex; gap: 8px; }
+  .vd .errpanel .act {
+    background: #fff; border: 1px solid #D6D6D6; border-radius: 4px;
+    padding: 5px 12px; font: 600 12px "Segoe UI", system-ui, sans-serif; color: #1B1B1B;
+  }
+  .vd .errpanel .act:hover { border-color: #005FB8; color: #005FB8; }
+
+  .vd .writefail {
+    margin-top: 16px; font-size: 13px; line-height: 1.6;
+    border-left: 3px solid #C42B1C; background: #FDF3F4;
+    border-radius: 0 4px 4px 0; padding: 12px 16px; color: #6E2A1E;
+  }
+  .vd .writefail b { color: #C42B1C; }
+  .vd .writefail .act {
+    background: #fff; border: 1px solid #D6D6D6; border-radius: 4px;
+    padding: 5px 12px; font: 600 12px "Segoe UI", system-ui, sans-serif; color: #1B1B1B;
+    margin-top: 10px;
+  }
+  .vd .writefail .act:hover { border-color: #C42B1C; color: #C42B1C; }
+
+  .vd .modal-body .logempty {
+    font-size: 13px; color: #6B6B6B; line-height: 1.6;
+  }
+  .vd .modal-body .logempty p { margin: 0 0 10px; }
+
+  @media (prefers-color-scheme: dark) {
+    .scenpanel { background: #2B2B2B; border-color: #3D3D3D; }
+    .scenpanel .head:hover { background: rgba(255,255,255,.06); }
+    .scenpanel .head .caret { color: #9D9D9D; }
+    .scenpanel h4 { color: #9D9D9D; }
+    .scenpanel button { color: #F3F3F3; }
+    .scenpanel button:hover { background: rgba(255,255,255,.06); }
+    .scenpanel button.on { background: rgba(76,194,255,.12); color: #4CC2FF; }
+    .scenpanel button small { color: #9D9D9D; }
+    .vd .empty-state { background: rgba(255,255,255,.04); border-color: #5A5A5A; }
+    .vd .empty-state svg { color: #5A5A5A; }
+    .vd .empty-state p { color: #9D9D9D; }
+    .vd .rail .ph { color: #9D9D9D; }
+    .vd .rail .ph .spin { border-color: #3D3D3D; border-top-color: #4CC2FF; }
+    .vd .rail .sum { background: #3A2320; color: #FF8C7D; }
+    .vd .rail .dot.err { background: #2B2B2B; border-color: #FF8C7D; }
+    .vd .rail .wrote { color: #6CCB5F; }
+    .vd .rail .failtag { color: #FF8C7D; }
+    .vd .cmdbar .dirpick.baddir { border-color: #E0665A; background: #3A2320; }
+    .vd .cmdbar .dirpick.baddir .path { color: #FF8C7D; }
+    .vd .cmdbar .dirwarn { color: #FF8C7D; }
+    .vd .dir-banner { background: #3A2320; border-color: #E0665A; color: #E8B0AA; }
+    .vd .dir-banner b { color: #FF8C7D; }
+    .vd .dir-banner button { background: #2B2B2B; border-color: #3D3D3D; color: #F3F3F3; }
+    .vd .dir-banner button:hover { border-color: #4CC2FF; color: #4CC2FF; }
+    .vd .errpanel { background: #2B2B2B; border-left-color: #9D9D9D; color: #D6D6D6; }
+    .vd .errpanel b { color: #F3F3F3; }
+    .vd .errpanel .act, .vd .writefail .act { background: #2B2B2B; border-color: #3D3D3D; color: #F3F3F3; }
+    .vd .errpanel .act:hover { border-color: #4CC2FF; color: #4CC2FF; }
+    .vd .writefail .act:hover { border-color: #FF8C7D; color: #FF8C7D; }
+    .vd .writefail { background: #3A2320; border-left-color: #E0665A; color: #E8B0AA; }
+    .vd .writefail b { color: #FF8C7D; }
+    .vd .modal-body .logempty { color: #9D9D9D; }
+  }
+  /* ============================================================
+     System dark theme (prefers-color-scheme) — Variant D.
+     No theme picker in v1: the app follows the OS setting.
+     A/B/C set their own body background inline via JS, so the
+     body default below only affects D (and overscroll).
+     ============================================================ */
+  @media (prefers-color-scheme: dark) {
+    body { background: #202020; }
+    .vd {
+      background: #202020; color: #F3F3F3; color-scheme: dark;
+    }
+    .vd .cmdbar { background: #272727; border-bottom-color: #383838; }
+    .vd .ghost { color: #F3F3F3; }
+    .vd .ghost:hover { background: rgba(255,255,255,.06); }
+    .vd .cmdbar .dir { color: #C8C8C8; }
+    .vd .cmdbar .dirpick { background: #2B2B2B; border-color: #3D3D3D; color: #F3F3F3; }
+    .vd .cmdbar .dirpick:hover { border-color: #4CC2FF; }
+    .vd .zipmenu { background: #2B2B2B; border-color: #3D3D3D; }
+    .vd .zipmenu button { color: #F3F3F3; }
+    .vd .zipmenu button:hover { background: rgba(255,255,255,.06); }
+    .vd .flyout { background: #2B2B2B; border-color: #3D3D3D; }
+    .vd .flyout button { color: #F3F3F3; }
+    .vd .flyout button:hover { background: rgba(255,255,255,.06); }
+    .vd .flyout .grp, .vd .flyout .accel { color: #9D9D9D; }
+    .vd .flyout hr { border-top-color: #3D3D3D; }
+    .vd .modal { background: #2B2B2B; border-color: #3D3D3D; }
+    .vd .modal-head { border-bottom-color: #3D3D3D; }
+    .vd .modal-close { color: #C8C8C8; }
+    .vd .modal-close:hover { background: rgba(255,255,255,.08); color: #F3F3F3; }
+    .vd .modal-body p { color: #D6D6D6; }
+    .vd .modal-body pre { background: #1D1D1D; border-color: #3D3D3D; color: #D6D6D6; }
+    .vd .log-btn { background: #2B2B2B; border-color: #3D3D3D; color: #F3F3F3; }
+    .vd .log-btn svg { color: #4CC2FF; }
+    .vd .log-btn:hover { border-color: #4CC2FF; color: #4CC2FF; background: rgba(76,194,255,.08); }
+  .vd .log-btn + .log-btn { margin-left: 0; }
+    .vd .linklike { color: #4CC2FF; }
+    .vd .runtime-line { color: #9D9D9D; }
+    .vd .runtime-line .dim, .vd .about-links .dot, .vd .about-sub .dot { color: #767676; }
+    .vd .tagline { color: #C8C8C8; }
+    .vd .rail { border-right-color: #383838; }
+    .vd .upload-block { background: rgba(255,255,255,.04); border-color: #5A5A5A; color: #F3F3F3; }
+    .vd .upload-block:hover { border-color: #4CC2FF; background: rgba(76,194,255,.06); }
+    .vd .upload-block svg { color: #4CC2FF; }
+    .vd .upload-block .ub-s { color: #9D9D9D; }
+    .vd .ingest { color: #F3F3F3; }
+    .vd .ingest .ibar { background: #3D3D3D; }
+    .vd .ingest .ibar > div { background: #4CC2FF; }
+    .vd .rail select { background: #2B2B2B; border-color: #3D3D3D; color: #F3F3F3; }
+    .vd .rail li:hover { background: rgba(255,255,255,.05); }
+    .vd .rail li.sel { background: rgba(255,255,255,.09); }
+    .vd .rail .nm { color: #F3F3F3; }
+    .vd .rail .x { color: #9D9D9D; }
+    .vd .rail .x:hover { color: #FF8C7D; }
+    .vd .doc { background: #2B2B2B; }
+    .vd .dochead { border-bottom-color: #3D3D3D; }
+    .vd .dochead .fn { color: #F3F3F3; }
+    .vd .dochead .out .dl-icon { color: #4CC2FF; }
+    .vd .dochead .out .dl-icon:hover { background: rgba(76,194,255,.1); }
+    .vd .details { border-bottom-color: #3D3D3D; }
+    .vd .details .k { color: #9D9D9D; }
+    .vd .details .v { color: #F3F3F3; }
+    .vd .details .v.unreadable { color: #767676; }
+    .vd .details-note { color: #9D9D9D; }
+    .vd .facsimile .fr { border-bottom-color: #333; }
+    .vd .facsimile .fr .lbl { color: #C8C8C8; }
+    .vd .facsimile .fr .amt { color: #F3F3F3; }
+    .vd .facsimile .fr .amt.old { color: #6F6F6F; }
+    .vd .facsimile .fr .amt.new { background: rgba(240,180,41,.16); border-color: #B8963F; }
+    .vd .facsimile .fr.removed .lbl, .vd .facsimile .fr.removed .amt { color: #6F6F6F; }
+    .vd .anno { background: #2F2A17; border-left-color: #B8963F; color: #D8C79A; }
+    .vd .anno b { color: #E0B95C; }
+    .vd .anno.refused { background: #3A2320; border-left-color: #E0665A; color: #E8B0AA; }
+    .vd .anno.refused b { color: #FF8C7D; }
+    .vd .totals-line { color: #9D9D9D; }
+    .vd .dragging::after { border-color: #4CC2FF; background: rgba(76,194,255,.16); color: #4CC2FF; }
+  }
+</style>
+</head>
+<body>
+<div class="proto-banner">PROTOTYPE · THROWAWAY</div>
+<div id="app"></div>
+<div class="switcher" id="switcher">
+  <button id="prev" aria-label="Previous variant">←</button>
+  <div class="label" id="vlabel"></div>
+  <button id="next" aria-label="Next variant">→</button>
+</div>
+
+<script>
+"use strict";
+
+/* External links — dev: replace the TODO values with the real URLs. */
+const APP_LINKS = {
+  website: "https://TODO.github.io/rto-invoice-prep/",            // GitHub Pages site
+  docs: "https://TODO.github.io/rto-invoice-prep/docs/",          // GitHub Pages docs
+  repo: "https://github.com/TODO/rto-invoice-prep",               // source repository
+  bugTemplate: "https://github.com/TODO/rto-invoice-prep/issues/new?template=bug_report.yml",
+  featureTemplate: "https://github.com/TODO/rto-invoice-prep/issues/new?template=feature_request.yml",
+};
+function openExternal(url) {
+  // Electron: shell.openExternal(url). Prototype: best effort.
+  if (typeof window !== "undefined" && window.open) window.open(url, "_blank", "noopener");
+}
+
+/* ============================================================
+   Data. s1799 is the real sample pair (ground truth, to the paisa);
+   the rest are simulated files chosen to exercise every UI state.
+   ============================================================ */
+const money = n => n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const FIGURES = ["taxable", "cgst", "sgst", "exshowroom", "roundOff", "grand"];
+const FIG_LABELS = {
+  taxable: "Taxable value",
+  cgst: "CGST",
+  sgst: "SGST",
+  exshowroom: "Ex-showroom price",
+  roundOff: "Round off",
+  grand: "Grand total (after round off)",
+};
+
+const POOL = {
+  s1799: {
+    file: "10000BI26S0001.pdf", invoice: "10000BI26S0001",
+    customer: "Aarav Sharma", model: "HF Deluxe · Black Nexus Blue", chassis: "MBLHAW502T5H00001",
+    date: "19/09/2026 16:37", engine: "HA11F4T5H00001",
+    old: { taxable: 54092.88, cgst: 4868.36, sgst: 4868.36, exshowroom: 63829.60, roundOff: 0.40, grand: 63830.00 },
+    nu:  { taxable: 55872.88, cgst: 5028.56, sgst: 5028.56, exshowroom: 65930.00, roundOff: 0.00, grand: 65930.00 },
+    wordsOld: "Rupees Sixty Three Thousand Eight Hundred Thirty Only",
+    wordsNew: "Rupees Sixty Five Thousand Nine Hundred Thirty Only",
+    discountFrom: "1,780.00",
+    subTotal: "55,872.88",
+  },
+  s1812: {
+    file: "10000BI26S0002.pdf", invoice: "10000BI26S0002",
+    customer: "Vikram Rao", model: "Passion Plus XTEC", chassis: "MBLHAW503P6K00002",
+    date: "19/09/2026 17:12", engine: "HA11F4T5H00002",
+    old: { taxable: 69956.34, cgst: 6296.07, sgst: 6296.07, exshowroom: 82548.48, roundOff: -0.48, grand: 82548.00 },
+    nu:  { taxable: 72456.34, cgst: 6521.07, sgst: 6521.07, exshowroom: 85498.48, roundOff: 0.52, grand: 85499.00 },
+    wordsOld: "Rupees Eighty Two Thousand Five Hundred Forty Eight Only",
+    wordsNew: "Rupees Eighty Five Thousand Four Hundred Ninety Nine Only",
+    discountFrom: "2,500.00",
+    subTotal: "72,456.34",
+  },
+  s1825: {
+    file: "10000BI26S0003.pdf", invoice: "10000BI26S0003",
+    customer: "Neha Iyer", model: "Splendor Plus", chassis: "MBLHAW506N9K00003",
+    date: "20/09/2026 10:02", engine: "HA11F4T5H00003",
+    refused: [
+      { field: "Discount row", msg: "No Discount row found in the totals block." },
+      { field: "Likely cause", msg: "Wrong file picked, or this invoice was already prepared." },
+    ],
+  },
+  s1831: {
+    file: "10000BI26S0004.pdf", invoice: "10000BI26S0004",
+    customer: "Karan Malhotra", model: "Glamour 125", chassis: "MBLHAW508X5K00004",
+    date: "20/09/2026 11:45", engine: "HA11F4T5H00004",
+    found: { subTotal: "61,200.00", discount: "1,000.00", taxable: "61,800.00" },
+    refused: [
+      { field: "Taxable Value", msg: "Sub Total − Discount = 60,200.00, but Taxable Value reads 61,800.00." },
+      { field: "Totals block", msg: "Extra line item between Sub Total and Taxable Value (insurance, road tax or accessories). This template variant is not supported." },
+    ],
+  },
+  s1840: {
+    file: "10000BI26S0005.pdf", invoice: "10000BI26S0005",
+    customer: "Meera Pillai", model: "HF Deluxe", chassis: "MBLHAW501M2K00005",
+    date: "19/09/2026 18:20", engine: null,  // demo: field found but not parsable
+    refused: [
+      { field: "Discount", msg: "Discount is 0.00 — nothing to remove." },
+    ],
+  },
+  sdamaged: {
+    file: "scan-stapled-p1.pdf", invoice: "—",
+    customer: "—", model: "—", chassis: "—",
+    refused: [
+      { field: "Taxable Value", msg: "Taxable Value amount not found — page 1 totals block unreadable." },
+    ],
+  },
+  scrash: {
+    file: "invoice-encrypted.pdf", invoice: "—",
+    customer: "—", model: "—", chassis: "—",
+    crashed: { msg: "The file is encrypted with a password or its structure is damaged beyond reading (pdf-lib could not open it)." },
+  },
+};
+
+let uid = 0;
+const mkRow = key => ({ id: ++uid, key });
+
+const state = {
+  rows: [mkRow("s1799"), mkRow("s1812"), mkRow("s1825"), mkRow("s1831")],
+  outputDir: "C:\\Users\\Demo\\Downloads",
+  zipName: "rto-invoices-2026-09-23.zip",
+  names: {},
+  selected: null,
+  carbonOpen: false,
+  zipMenuOpen: false,
+  menuOpen: null,       // null | "file" | "view" | "help"
+  modal: null,          // null | "log" | "help" | "about"
+  ingest: null,         // null | { total, done, pending: [filename] }
+  dragging: false,
+  toast: null,
+  /* ticket 12 state-machine extras */
+  scenario: "normal",   // which empty/error scenario is on stage
+  scenOpen: true,       // scenario panel expanded?
+  dirBad: false,        // output folder unwritable / not set
+  exportResult: null,   // null | { ok: [rowId], failed: { id, msg } }
+};
+
+const rowOf = id => state.rows.find(r => r.id === id);
+const dataOf = row => POOL[row.key];
+const outName = row => state.names[row.id] || dataOf(row).file.replace(/\.pdf$/i, "-RTO.pdf");
+
+function setToast(msg) {
+  state.toast = msg;
+  render();
+  setTimeout(() => { if (state.toast === msg) { state.toast = null; render(); } }, 2800);
+}
+
+function addRow(key) {
+  if (!key || state.rows.some(r => r.key === key)) return;
+  state.rows.push(mkRow(key));
+  render();
+}
+
+function removeRow(id) {
+  state.rows = state.rows.filter(r => r.id !== id);
+  if (state.selected === id) state.selected = state.rows[0] ? state.rows[0].id : null;
+  render();
+}
+
+function exportAll() {
+  const ok = state.rows.filter(r => !dataOf(r).refused && !dataOf(r).crashed);
+  if (!ok.length) {
+    setToast("Nothing to export — every file was refused or errored.");
+    return;
+  }
+  if (state.dirBad) {
+    setToast("Export failed — the output folder can't be written to. Pick another folder.");
+    return;
+  }
+  if (state.scenario === "export-fail" && !state.exportResult) {
+    /* Simulated mid-batch disk-full: first row written, second fails. */
+    state.exportResult = {
+      ok: [ok[0].id],
+      failed: { id: ok[1] ? ok[1].id : ok[0].id, msg: "The disk is full — Windows could not write " + outName(ok[1] || ok[0]) + "." },
+    };
+    render();
+    return;
+  }
+  setToast("Would write " + ok.length + " PDF" + (ok.length === 1 ? "" : "s") + " to " + state.outputDir + " (nothing written — prototype)");
+}
+
+/* ============================================================
+   Ticket 12 — scenario staging (Variant D only)
+   Each scenario is a full main-window state; switching resets
+   the relevant slice of state. Questions the dev reacts to:
+   - "Back to empty" is staged identically to first launch on purpose.
+   - Log is session-scoped, so "empty log" = fresh session, nothing read yet.
+   ============================================================ */
+const SCENARIOS = [
+  { key: "normal",      label: "Normal batch", sub: "the populated path from ticket 11" },
+  { key: "empty",       label: "First launch", sub: "no files yet — what the window says" },
+  { key: "ingest",      label: "Reading files", sub: "placeholder rows while extraction runs" },
+  { key: "draghover",   label: "Drag hover", sub: "whole-window drop affordance (also real: drag any file in)" },
+  { key: "refusedonly", label: "Every file refused", sub: "what does the export side do?" },
+  { key: "dirbad",      label: "Output folder unwritable", sub: "warning on the picker + banner" },
+  { key: "exportfail",  label: "Export failure mid-batch", sub: "disk full on the second file — click Export" },
+  { key: "crash",       label: "Parser crash", sub: "encrypted/damaged PDF — never a silent row" },
+  { key: "logempty",    label: "Empty log", sub: "fresh session, log opened" },
+];
+
+function applyScenario(key) {
+  const s = {
+    normal:      () => { state.rows = ["s1799","s1812","s1825","s1831"].map(mkRow); },
+    empty:       () => { state.rows = []; },
+    ingest:      () => {
+      state.rows = [mkRow("s1799")];
+      state.ingest = { total: 4, done: 1, pending: ["10000BI26S0005.pdf", "10720BI26S1851.pdf", "10720BI26S1862.pdf"] };
+    },
+    draghover:   () => { state.rows = []; state.dragging = true; },
+    refusedonly: () => { state.rows = ["s1825","s1831","sdamaged"].map(mkRow); },
+    dirbad:      () => { state.rows = ["s1799","s1812"].map(mkRow); state.dirBad = true; },
+    exportfail:  () => { state.rows = ["s1799","s1812","sdamaged"].map(mkRow); },
+    crash:       () => { state.rows = ["s1799","scrash"].map(mkRow); },
+    logempty:    () => { state.rows = []; state.modal = "log"; },
+  }[key];
+  state.scenario = key;
+  state.dirBad = false;
+  state.exportResult = null;
+  state.ingest = null;
+  state.dragging = false;
+  state.selected = null;
+  state.menuOpen = null;
+  state.zipMenuOpen = false;
+  s();
+  if (state.rows.length && state.selected == null) state.selected = state.rows[0].id;
+  render();
+}
+
+function scenarioPanel() {
+  const items = SCENARIOS.map(sc =>
+      '<button class="' + (state.scenario === sc.key ? "on" : "") + '" data-act="scenario" data-key="' + sc.key + '">' +
+        sc.label + '<small>' + sc.sub + '</small>' +
+      '</button>').join("");
+  return '<div class="scenpanel">' +
+    '<button class="head" data-act="scenario-toggle" title="' + (state.scenOpen ? "Hide" : "Show") + ' the state panel">' +
+      '<span class="caret">' + (state.scenOpen ? "▾" : "▸") + '</span>' +
+      '<h4>States · ticket 12</h4>' +
+    '</button>' +
+    (state.scenOpen ? items : "") +
+  '</div>';
+}
+
+/* ============================================================
+   Shared fragments
+   ============================================================ */
+function oldNewRows(row, cls) {
+  const d = dataOf(row);
+  let html = FIGURES.map(k =>
+    '<span class="f"><span class="k">' + FIG_LABELS[k] + '</span>' +
+    '<span class="o">' + money(d.old[k]) + '</span><span class="arr">→</span>' +
+    '<span class="n ' + (d.nu[k] > d.old[k] ? "up" : "") + '">' + money(d.nu[k]) + '</span></span>'
+  ).join("");
+  html += '<span class="f"><span class="k">Discount row</span>' +
+    '<span class="o">' + d.discountFrom + '</span><span class="arr">→</span>' +
+    '<span class="n">removed</span></span>';
+  return html;
+}
+
+function refusalHtml(d) {
+  return d.refused.map(r => "<div><b>" + r.field + ":</b> " + r.msg + "</div>").join("");
+}
+
+function batchLogHtml() {
+  if (!state.rows.length && !state.exportResult) return "";
+  return state.rows.map(row => {
+    const d = dataOf(row);
+    if (d.crashed) {
+      return '<span class="ref">ERROR    ' + d.file + '\n          ' + d.crashed.msg + '</span>';
+    }
+    if (d.refused) {
+      return '<span class="ref">REFUSED  ' + d.file + '\n          ' +
+        d.refused.map(r => r.field + ": " + r.msg).join("\n          ") + '</span>';
+    }
+    const failed = state.exportResult && state.exportResult.failed.id === row.id;
+    if (failed) {
+      return "OK       " + d.file +
+        "\n  taxable " + money(d.old.taxable) + " → " + money(d.nu.taxable) +
+        "\n  total   " + money(d.old.grand) + " → " + money(d.nu.grand) +
+        "\n" + '<span class="ref">  FAILED  ' + state.exportResult.failed.msg + '</span>';
+    }
+    return "OK       " + d.file +
+      "\n  taxable " + money(d.old.taxable) + " → " + money(d.nu.taxable) +
+      "\n  total   " + money(d.old.grand) + " → " + money(d.nu.grand) +
+      "\n  wrote   " + state.outputDir + "\\" + outName(row);
+  }).join("\n\n");
+}
+
+/* ============================================================
+   VARIANT A — The Register
+   ============================================================ */
+function variantA() {
+  const okCount = state.rows.filter(r => !dataOf(r).refused).length;
+  const refusedCount = state.rows.length - okCount;
+  const poolKeys = Object.keys(POOL).filter(k => !state.rows.some(r => r.key === k));
+  const carbon = state.carbonOpen ? (
+    '<aside class="carbon">' +
+    '<button class="close" data-act="carbon-close">✕</button>' +
+    '<h2>rto-invoice-prep.log — this batch</h2>' +
+    '<pre>' + batchLogHtml() + '</pre></aside>'
+  ) : "";
+
+  return '<div class="va">' +
+    '<button class="carbon-toggle" data-act="carbon-toggle">View log (carbon copy)</button>' +
+    '<div class="sheet">' +
+      '<header class="masthead">' +
+        '<h1>RTO Invoice Prep</h1>' +
+        '<p>Prepare dealership invoices for RTO registration · v0.1 prototype</p>' +
+      '</header>' +
+
+      '<div class="paste">' +
+        '<strong>Paste invoices into the register</strong>' +
+        '<span>drag PDFs here · or add from the tray</span>' +
+        (poolKeys.length
+          ? '<select data-act="add"><option value="">+ add a sample PDF…</option>' +
+            poolKeys.map(k => '<option value="' + k + '">' + POOL[k].file + '</option>').join("") +
+            '</select>'
+          : "") +
+      '</div>' +
+
+      '<ol class="rows">' +
+      state.rows.map(row => {
+        const d = dataOf(row);
+        const head =
+          '<div class="folio-head">' +
+            '<span class="fname">' + d.file + '</span>' +
+            '<span class="who">' + d.customer + ' · ' + d.model + '</span>' +
+            '<span class="spacer"></span>' +
+            '<button class="x" title="Remove from batch" data-act="remove" data-id="' + row.id + '">✕</button>' +
+          '</div>';
+
+        if (d.refused) {
+          return '<li class="refused">' +
+            '<div>' + head +
+              '<ul class="refusals">' +
+                d.refused.map(r => '<li><b>' + r.field + ':</b> ' + r.msg + '</li>').join("") +
+              '</ul>' +
+              '<div class="stamp">' + d.refused[0].field + '<br>refused</div>' +
+            '</div></li>';
+        }
+        return '<li>' +
+          '<div>' + head +
+            '<div class="entries">' + oldNewRows(row) +
+              '<span class="f"><span class="k">Amount in words</span>' +
+              '<span class="o">' + d.wordsOld + '</span><span class="arr">→</span>' +
+              '<span class="n">' + d.wordsNew + '</span></span>' +
+            '</div>' +
+            '<div class="save-row">' +
+              '<span>saves as</span>' +
+              '<input data-act="name" data-id="' + row.id + '" value="' + outName(row) + '">' +
+              '<button class="dl" data-act="save-one" data-id="' + row.id + '">Save this one</button>' +
+            '</div>' +
+          '</div></li>';
+      }).join("") +
+      '</ol>' +
+
+      '<div class="footer-block">' +
+        '<div class="dirs">' +
+          '<label>Output directory</label>' +
+          '<input data-act="outdir" value="' + state.outputDir + '">' +
+        '</div>' +
+        '<div class="grand">' +
+          okCount + ' of ' + state.rows.length + ' ready · ' + refusedCount + ' refused' +
+          '<button class="go" data-act="export-all" ' + (okCount ? "" : "disabled") + '>Export ' + okCount + ' file' + (okCount === 1 ? "" : "s") + '</button>' +
+          '<button class="zip" data-act="toast-zip">or zip as ' + state.zipName + '</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>' + carbon;
+}
+
+/* ============================================================
+   VARIANT B — The Counter
+   ============================================================ */
+function variantB() {
+  const ok = state.rows.filter(r => !dataOf(r).refused);
+  const refused = state.rows.length - ok.length;
+  const poolKeys = Object.keys(POOL).filter(k => !state.rows.some(r => r.key === k));
+  const toast = state.toast ? '<div class="toast">' + state.toast + '</div>' : "";
+
+  return '<div class="vb">' +
+    '<header class="bar">' +
+      '<h1>RTO Invoice Prep</h1>' +
+      '<span class="tag">prepare dealership invoices for RTO registration</span>' +
+      '<span class="count">' + ok.length + ' ready / ' + state.rows.length + ' on the counter</span>' +
+    '</header>' +
+    '<div class="floor">' +
+
+      '<aside class="tray">' +
+        '<div class="dz">Drop PDFs<br>on the counter</div>' +
+        '<h3>Add a sample</h3>' +
+        (poolKeys.length
+          ? poolKeys.map(k => '<button class="add" data-act="add-direct" data-key="' + k + '">＋ ' + POOL[k].file + '</button>').join("")
+          : '<div style="font:11px var(--mono);color:#6A6558">tray empty — everything loaded</div>') +
+      '</aside>' +
+
+      '<main class="stack">' +
+        (state.rows.length === 0
+          ? '<p style="color:#8C877D;font-size:13px;margin-top:18px">Nothing on the counter. Drop some invoices in.</p>'
+          : "") +
+        state.rows.map(row => {
+          const d = dataOf(row);
+          const head =
+            '<div class="top">' +
+              '<span class="fn">' + d.file + '</span>' +
+              '<span class="who">' + d.customer + ' · ' + d.model + '</span>' +
+              '<button class="x" title="Remove" data-act="remove" data-id="' + row.id + '">✕</button>' +
+            '</div>';
+          if (d.refused) {
+            return '<article class="receipt refused">' + head +
+              '<div class="refuse"><span class="rip">Refused</span><br>' +
+                d.refused.map(r => '<b>' + r.field + ':</b> ' + r.msg).join("<br>") +
+                (d.found
+                  ? '<div class="found">found — Sub Total ' + d.found.subTotal + ', Discount ' + d.found.discount +
+                    ', Taxable Value ' + d.found.taxable + '</div>'
+                  : "") +
+              '</div></article>';
+          }
+          return '<article class="receipt">' + head +
+            '<div class="figs">' + oldNewRows(row) +
+              '<div class="tear">' +
+                '<input data-act="name" data-id="' + row.id + '" value="' + outName(row) + '">' +
+                '<button data-act="save-one" data-id="' + row.id + '">Tear off ↓</button>' +
+              '</div>' +
+            '</div>' +
+          '</article>';
+        }).join("") +
+      '</main>' +
+
+      '<aside class="till">' +
+        '<h3>Tear off the batch</h3>' +
+        '<label>Output directory</label>' +
+        '<input type="text" data-act="outdir" value="' + state.outputDir + '">' +
+        '<label>Zip name</label>' +
+        '<input type="text" data-act="zipname" value="' + state.zipName + '">' +
+        '<button class="big" data-act="export-all" ' + (ok.length ? "" : "disabled") + '>Export ' + ok.length + ' file' + (ok.length === 1 ? "" : "s") + '</button>' +
+        '<p class="note">' + (refused
+          ? refused + ' refused file' + (refused === 1 ? " is" : "s are") + ' skipped and logged.'
+          : 'Originals are never touched. Every export is logged.') + '</p>' +
+      '</aside>' +
+    '</div>' +
+  '</div>' + toast;
+}
+
+/* ============================================================
+   VARIANT C — The Inspector (shared inner layout, reused by D)
+   ============================================================ */
+function inspectorRailInner(poolKeys) {
+  const anyBad = state.rows.some(r => dataOf(r).refused || dataOf(r).crashed);
+  const okCount = state.rows.filter(r => !dataOf(r).refused && !dataOf(r).crashed).length;
+  let html = '<button class="upload-block" data-act="upload-block">' +
+      '<svg width="22" height="22" viewBox="0 0 16 16" aria-hidden="true">' +
+        '<path fill="currentColor" d="M8 2.5a.75.75 0 0 1 .75.75v5.19l1.72-1.72a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06l1.72 1.72V3.25A.75.75 0 0 1 8 2.5z"/>' +
+        '<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M2.5 10.5v2A1.5 1.5 0 0 0 4 14h8a1.5 1.5 0 0 0 1.5-1.5v-2"/>' +
+      '</svg>' +
+      '<span class="ub-t">Upload invoices</span>' +
+      '<span class="ub-s">or drop PDFs anywhere in this window</span>' +
+    '</button>';
+  html += (state.ingest
+    ? '<div class="ingest">Reading ' + state.ingest.done + ' of ' + state.ingest.total + '…' +
+      '<div class="ibar"><div style="width:' + Math.round(100 * state.ingest.done / state.ingest.total) + '%"></div></div></div>'
+    : "");
+  html += (poolKeys.length
+    ? '<select data-act="add"><option value="">+ add a sample PDF…</option>' +
+      poolKeys.map(k => '<option value="' + k + '">' + POOL[k].file + '</option>').join("") +
+      '</select>'
+    : "");
+  html += '<ul>' +
+    state.rows.map(row => {
+      const dd = dataOf(row);
+      const written = state.exportResult && state.exportResult.ok.includes(row.id);
+      const failed = state.exportResult && state.exportResult.failed.id === row.id;
+      const dot = dd.crashed ? "err" : dd.refused ? "bad" : "ok";
+      const tail = dd.crashed
+        ? '<span class="failtag" title="Reading this file failed">!</span>'
+        : written
+          ? '<span class="wrote" title="Written to the output folder">Saved ✓</span>'
+          : failed
+            ? '<span class="failtag" title="Write failed">!</span>'
+            : "";
+      return '<li class="' + (row.id === state.selected ? "sel" : "") + '" data-act="select" data-id="' + row.id + '">' +
+        '<span class="dot ' + dot + '"></span>' +
+        '<span class="nm">' + dd.file + '</span>' +
+        tail +
+        '<button class="x" title="Remove" data-act="remove" data-id="' + row.id + '">✕</button>' +
+      '</li>';
+    }).join("");
+  if (state.ingest) {
+    html += state.ingest.pending.map(nm =>
+      '<li class="ph"><span class="spin"></span><span class="nm">reading ' + nm + '…</span></li>').join("");
+  }
+  html += '</ul>';
+  if (state.rows.length && !okCount) {
+    html += '<div class="sum">All ' + state.rows.length + ' files were refused or could not be read — there is nothing to export. Remove a file with ✕ or check its reason.</div>';
+  }
+  return html;
+}
+
+function inspectorExportControls(ok) {
+  const exportBlocked = state.dirBad || (!ok.length && state.rows.length && !state.rows.some(r => !dataOf(r).refused && !dataOf(r).crashed));
+  const blockedReason = state.dirBad
+    ? "Fix the output folder first"
+    : (!ok.length ? "Nothing to export" : "");
+  const label = state.dirBad
+    ? "Export blocked"
+    : (!ok.length && state.rows.length ? "Nothing to export" : "Export " + ok.length + " file" + (ok.length === 1 ? "" : "s"));
+  return '<span class="dir">Output directory ' +
+      '<button class="dirpick' + (state.dirBad ? " baddir" : "") + '" data-act="pick-dir" ' +
+        (state.dirBad ? 'title="This folder could not be written to — pick another folder"' : 'title="Choose output folder"') + '>' +
+        (state.dirBad ? '<span class="dirwarn" aria-hidden="true">⚠</span>' : "") +
+        '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path fill="#005FB8" d="M1.5 3.5A1.5 1.5 0 0 1 3 2h3l1.5 1.5H13A1.5 1.5 0 0 1 14.5 5v7a1.5 1.5 0 0 1-1.5 1.5H3A1.5 1.5 0 0 1 1.5 12V3.5z"/></svg>' +
+        '<span class="path">' + (state.dirBad ? state.outputDir + " (unwritable)" : state.outputDir) + '</span>' +
+      '</button>' +
+    '</span>' +
+    '<span class="combo">' +
+      '<button class="primary" data-act="export-all" ' + (exportBlocked ? "disabled" : "") + ' title="' + (blockedReason || "") + '">' + label + '</button>' +
+      '<button class="caret" data-act="zipmenu-toggle" aria-label="More export options" title="Zip options" ' + (exportBlocked ? "disabled" : "") + '>▾</button>' +
+      (state.zipMenuOpen
+        ? '<div class="zipmenu">' +
+            '<button data-act="toast-zip">Export as Zip</button>' +
+          '</div>'
+        : "") +
+    '</span>';
+}
+
+function kv(k, v) {
+  const val = (v == null || v === "" || v === "—")
+    ? '<span class="v unreadable">~unreadable~</span>'
+    : '<span class="v">' + v + '</span>';
+  return '<span class="kv"><span class="k">' + k + '</span>' + val + '</span>';
+}
+
+function detailsBlock(d) {
+  if (d.invoice === "—") {
+    return '<div class="details-note">Invoice details could not be extracted.</div>';
+  }
+  return '<div class="details">' +
+    kv("Invoice no.", d.invoice) +
+    kv("Customer", d.customer) +
+    kv("Invoice date", d.date) +
+    kv("Model", d.model) +
+    kv("Chassis no.", d.chassis) +
+    kv("Engine no.", d.engine) +
+  '</div>';
+}
+
+function downloadIconBtn(sel) {
+  return '<button class="dl-icon" data-act="save-one" data-id="' + sel.id + '" title="Download the prepared PDF" aria-label="Download the prepared PDF">' +
+    '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">' +
+      '<path fill="currentColor" d="M8 1a.75.75 0 0 1 .75.75v6.19l1.72-1.72a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06l1.72 1.72V1.75A.75.75 0 0 1 8 1z"/>' +
+      '<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M2.5 10.5v2A1.5 1.5 0 0 0 4 14h8a1.5 1.5 0 0 0 1.5-1.5v-2"/>' +
+    '</svg>' +
+  '</button>';
+}
+
+function inspectorMain(sel, d) {
+  if (state.dirBad) {
+    return '<div class="dir-banner">' +
+        '<span><b>The output folder can\u2019t be written to.</b> Prepared PDFs will fail to save until another folder is picked.</span>' +
+        '<button data-act="pick-dir">Pick another folder</button>' +
+      '</div>' + inspectorMainInner(sel, d);
+  }
+  return inspectorMainInner(sel, d);
+}
+
+function emptyStateInner() {
+  return '<svg width="40" height="40" viewBox="0 0 16 16" aria-hidden="true">' +
+      '<path fill="currentColor" d="M3 1.5A1.5 1.5 0 0 0 1.5 3v10A1.5 1.5 0 0 0 3 14.5h10A1.5 1.5 0 0 0 14.5 13V5.5a1.5 1.5 0 0 0-1.5-1.5H8.2L6.6 2.3A1.5 1.5 0 0 0 5.6 1.5H3z"/>' +
+      '<path fill="#fff" d="M8 6a.6.6 0 0 1 .6.6v2.3l.9-.9a.6.6 0 1 1 .85.85l-2 2a.6.6 0 0 1-.85 0l-2-2a.6.6 0 1 1 .85-.85l.9.9V6.6A.6.6 0 0 1 8 6z"/>' +
+    '</svg>' +
+    '<h2>No invoices yet</h2>' +
+    '<p>Drop PDFs anywhere in this window, use <b>File → Upload Invoice</b>,<br>or the Upload block in the left rail.</p>' +
+    '<p style="margin-top:10px">Nothing is stored between sessions \u2014 the batch lives only in this window.</p>';
+}
+
+function inspectorMainInner(sel, d) {
+  if (!d && !state.ingest) {
+    /* First launch and back-to-empty are staged identically on purpose —
+       the question for the dev is whether they should differ. */
+    return '<div class="empty-state">' + emptyStateInner() + '</div>';
+  }
+  if (d && d.crashed) {
+    return '<div class="doc">' +
+      '<div class="dochead"><span class="fn">' + d.file + '</span></div>' +
+      '<div class="details-note">Invoice details could not be extracted.</div>' +
+      '<div class="errpanel">' +
+        '<b>Something went wrong reading this file.</b> ' + d.crashed.msg +
+        '<div class="acts">' +
+          '<button class="act" data-act="log-open">Open Log</button>' +
+          '<button class="act" data-act="report-bug">Report a bug</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  if (d && d.refused) {
+    const failed = state.exportResult && state.exportResult.failed.id === sel.id;
+    return '<div class="doc">' +
+      '<div class="dochead">' +
+        '<span class="fn">' + d.file + '</span>' +
+      '</div>' +
+      detailsBlock(d) +
+      '<div class="facsimile">' +
+        (d.found
+          ? '<div class="fr"><span class="lbl">Sub Total</span><span class="amt">' + d.found.subTotal + '</span></div>' +
+            '<div class="fr"><span class="lbl">Discount</span><span class="amt">' + d.found.discount + '</span></div>' +
+            '<div class="fr removed"><span class="lbl">Taxable Value</span><span class="amt">' + d.found.taxable + '</span><span class="why">✕ does not add up</span></div>'
+          : '<div class="fr removed"><span class="lbl">Totals block</span><span class="amt">unreadable</span><span class="why">✕ field not found</span></div>') +
+        '<div class="fr"><span class="lbl">…</span></div>' +
+      '</div>' +
+      '<div class="anno refused">' +
+        refusalHtml(d) +
+        '<div class="hand" style="margin-top:6px">This file will not be exported. Remove it with ✕ in the left rail if it was picked by mistake.</div>' +
+      '</div>' +
+      (failed
+        ? '<div class="writefail"><b>Export failed for this file.</b> ' + state.exportResult.failed.msg +
+          '<br><button class="act" data-act="retry-export" data-id="' + sel.id + '">Retry this file</button></div>'
+        : "") +
+    '</div>';
+  }
+  if (!d) {
+    return '<div class="doc"><div class="facsimile"><div class="fr"><span class="lbl">Reading…</span></div></div></div>';
+  }
+  const written = state.exportResult && state.exportResult.ok.includes(sel.id);
+  const failed = state.exportResult && state.exportResult.failed.id === sel.id;
+  return '<div class="doc">' +
+    '<div class="dochead">' +
+      '<span class="fn">' + d.file + '</span>' +
+      (written ? '<span class="flag pass">Saved ✓</span>' : failed ? '<span class="flag fail">Write failed</span>' : "") +
+      '<span class="out">' + downloadIconBtn(sel) + '</span>' +
+    '</div>' +
+    detailsBlock(d) +
+    '<div class="facsimile">' +
+      '<div class="fr"><span class="lbl">Sub Total</span><span class="amt">' + d.subTotal + '</span></div>' +
+      '<div class="fr removed"><span class="lbl">Discount</span><span class="amt">' + d.discountFrom + '</span><span class="why">✕ removed</span></div>' +
+      FIGURES.map(k =>
+        '<div class="fr">' +
+          '<span class="lbl">' + FIG_LABELS[k] + '</span>' +
+          '<span class="amt old">' + money(d.old[k]) + '</span>' +
+          '<span class="amt new">' + money(d.nu[k]) + '</span>' +
+        '</div>').join("") +
+      '<div class="fr words"><span class="lbl">Amount in words</span>' +
+        '<span class="amt old">' + d.wordsOld + '</span>' +
+        '<span class="amt new">' + d.wordsNew + '</span>' +
+      '</div>' +
+    '</div>' +
+    (failed
+      ? '<div class="writefail"><b>Export failed for this file.</b> ' + state.exportResult.failed.msg +
+        ' Files already written stay in the folder — fix the problem, then retry.' +
+        '<br><button class="act" data-act="retry-export" data-id="' + sel.id + '">Retry this file</button></div>'
+      : written
+        ? '<div class="anno"><b>Saved.</b> Written to ' + state.outputDir + ' \\ ' + outName(sel) + '. The original was not modified.</div>'
+        : "") +
+  '</div>' +
+  '<div class="totals-line">' +
+    '<span>Saves alongside the originals — they are never overwritten.</span>' +
+  '</div>';
+}
+
+function inspectorState() {
+  if ((state.selected == null || !rowOf(state.selected)) && state.rows.length) {
+    state.selected = state.rows[0].id;
+  }
+  const sel = rowOf(state.selected);
+  return {
+    sel: sel,
+    d: sel ? dataOf(sel) : null,
+    ok: state.rows.filter(r => !dataOf(r).refused && !dataOf(r).crashed),
+    poolKeys: Object.keys(POOL).filter(k => !state.rows.some(r => r.key === k)),
+  };
+}
+
+function variantC() {
+  const s = inspectorState();
+  return '<div class="vc">' +
+    '<header class="chrome">' +
+      '<h1>RTO Invoice Prep</h1>' +
+      '<span class="ver">v0.1 prototype</span>' +
+      '<div class="actions">' + inspectorExportControls(s.ok) + '</div>' +
+    '</header>' +
+    '<div class="desk">' +
+      '<aside class="rail">' + inspectorRailInner(s.poolKeys) + '</aside>' +
+      '<main class="view">' + inspectorMain(s.sel, s.d) + '</main>' +
+    '</div>' +
+  '</div>' + (state.toast ? '<div class="toast">' + state.toast + '</div>' : "");
+}
+
+/* ============================================================
+   VARIANT D — The Native Window
+   same layout as C, dressed in Microsoft Fluent (Win11) styling;
+   standard OS titlebar (no custom chrome), toolbar carries
+   menus on the left and output/export controls on the right
+   ============================================================ */
+function menuItem(label, accel, act, accessKey) {
+  let shown = label;
+  if (accessKey) {
+    const i = label.toLowerCase().indexOf(accessKey.toLowerCase());
+    if (i >= 0) shown = label.slice(0, i) + "<u>" + label.slice(i, i + 1) + "</u>" + label.slice(i + 1);
+  }
+  return '<button data-act="' + act + '"><span>' + shown + '</span>' +
+    (accel ? '<span class="accel">' + accel + '</span>' : "") + '</button>';
+}
+
+function fileMenu() {
+  return '<div class="flyout">' +
+    menuItem("Upload Invoice", "Ctrl+O", "upload-invoice", "U") +
+    '<hr>' +
+    menuItem("New Window", "Ctrl+Shift+N", "toast-newwin", "N") +
+    '<hr>' +
+    menuItem("Quit", "Ctrl+Q", "quit", "Q") +
+  '</div>';
+}
+
+function viewMenu() {
+  return '<div class="flyout">' +
+    menuItem("Zoom in", "Ctrl +", "toast-zoom-in", "i") +
+    menuItem("Zoom out", "Ctrl −", "toast-zoom-out", "o") +
+    menuItem("Reset zoom", "Ctrl 0", "toast-zoom-reset", "R") +
+    '<hr>' +
+    menuItem("Developer Tools", "F12", "toast-devtools", "T") +
+  '</div>';
+}
+
+function helpMenu() {
+  return '<div class="flyout">' +
+    menuItem("User guide", "", "help-open", "G") +
+    '<hr>' +
+    menuItem("Open Log", "", "log-open", "L") +
+    menuItem("Report a bug", "", "report-bug", "B") +
+    '<hr>' +
+    menuItem("Check for updates", "", "check-updates", "U") +
+    menuItem("About RTO Invoice Prep", "", "about-open", "A") +
+  '</div>';
+}
+
+const MODAL_TITLES = { log: "Log — this session", help: "User guide", about: "About RTO Invoice Prep" };
+
+
+function modalHtml() {
+  const logEmpty = !state.rows.length && !state.exportResult;
+  const body = state.modal === "log"
+    ? (logEmpty
+        ? '<div class="logempty"><p><b>Nothing logged yet.</b> Activity appears here as files are read, prepared, refused, or written.</p>' +
+          '<p>Across sessions, entries append to a monthly file \u2014 <span class="ver">rto-invoice-prep-2026-09.log</span> \u2014 which is never rotated away or deleted; you manage it by hand via Open Folder.</p></div>'
+        : '<pre>' + batchLogHtml() + '</pre>')
+    : state.modal === "help"
+      ? '<p><b>What this tool does.</b> It prepares dealership invoices for RTO registration: it removes the discount row from an OEM tax invoice and recalculates every downstream figure at the full, undiscounted price.</p>' +
+        '<p><b>How to use it.</b> Drop invoice PDFs onto the window (or use File → Upload Invoice), check each file\u2019s recalculated numbers on its preview card, then Export. Files that do not match the expected invoice template are refused with the reason named \u2014 they are never exported.</p>' +
+        '<p><b>Where files go.</b> Prepared PDFs are written to the output directory shown in the toolbar. Originals are never overwritten, and every batch is recorded in the log.</p>'
+      : '<div class="about-head">' +
+          '<span class="about-icon">R</span>' +
+          '<span>' +
+            '<div class="about-name">RTO Invoice Prep</div>' +
+            '<div class="about-sub"><span class="ver">v0.1</span><span class="dot">\u00b7</span>' +
+            '<button class="linklike small" data-act="check-updates">Check for updates</button></div>' +
+            '<div class="tagline">Prepare dealership invoices for RTO registration.</div>' +
+          '</span>' +
+        '</div>' +
+        '<p>Made for a single dealership desk. Stateless \u2014 nothing is stored between runs, originals are never overwritten, and every batch is recorded in the log.</p>' +
+        '<div class="runtime-line">Runs on Electron \u00b7 Chromium \u00b7 Node <span class="dim">\u2014 exact versions appear here in the real app</span></div>' +
+        '<div class="about-links">' +
+          '<button class="linklike" data-act="open-website">Website</button><span class="dot">\u00b7</span>' +
+          '<button class="linklike" data-act="open-repo">Source</button><span class="dot">\u00b7</span>' +
+          '<button class="linklike" data-act="report-bug">Report a bug</button><span class="dot">\u00b7</span>' +
+          '<button class="linklike" data-act="open-feature-request">Feature request</button>' +
+        '</div>';
+  const isAbout = state.modal === "about";
+  return '<div class="modal-backdrop" data-act="modal-close">' +
+    '<div class="modal' + (isAbout ? " plain" : "") + '">' +
+      (isAbout
+        ? '<button class="modal-close floating" data-act="modal-close" aria-label="Close">✕</button>'
+        : '<div class="modal-head"><h3>' + MODAL_TITLES[state.modal] + '</h3>' +
+          (state.modal === "log"
+            ? '<button class="log-btn" data-act="open-log-folder" title="Open the log folder (%APPDATA%\\rto-invoice-prep\\logs) in Explorer">' +
+              '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">' +
+                '<path fill="currentColor" d="M1.5 3.5A1.5 1.5 0 0 1 3 2h3l1.5 1.5H13A1.5 1.5 0 0 1 14.5 5v7a1.5 1.5 0 0 1-1.5 1.5H3A1.5 1.5 0 0 1 1.5 12V3.5z"/>' +
+              '</svg>Open Folder</button>' +
+              '<button class="log-btn" data-act="download-log" title="Save a copy of this session\u2019s log">' +
+              '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">' +
+                '<path fill="currentColor" d="M8 1a.75.75 0 0 1 .75.75v6.19l1.72-1.72a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06l1.72 1.72V1.75A.75.75 0 0 1 8 1z"/>' +
+                '<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M2.5 10.5v2A1.5 1.5 0 0 0 4 14h8a1.5 1.5 0 0 0 1.5-1.5v-2"/>' +
+              '</svg>Download</button>'
+            : "") +
+          (state.modal === "help"
+            ? '<button class="log-btn" data-act="open-docs" title="Opens the full documentation on the project website">' +
+              '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">' +
+                '<path fill="currentColor" d="M4 1.5A2.5 2.5 0 0 0 1.5 4v8A2.5 2.5 0 0 0 4 14.5h8a.75.75 0 0 0 0-1.5H4a1 1 0 0 1 0-2h8.25c.41 0 .75-.34.75-.75V2.25A.75.75 0 0 0 12.25 1.5H4z"/>' +
+              '</svg>View full documentation</button>'
+            : "") +
+          '<button class="modal-close" data-act="modal-close" aria-label="Close">✕</button></div>') +
+      '<div class="modal-body">' + body + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function variantD() {
+  const s = inspectorState();
+  const menuBtn = (key, label, builder) =>
+    '<span class="menuwrap">' +
+      '<button class="ghost" data-act="menu-toggle" data-menu="' + key + '">' + label + '</button>' +
+      (state.menuOpen === key ? builder() : "") +
+    '</span>';
+  return '<div class="vd' + (state.dragging ? " dragging" : "") + '">' +
+    '<header class="cmdbar">' +
+      '<span class="menugroup">' +
+        menuBtn("file", "File", fileMenu) +
+        menuBtn("view", "View", viewMenu) +
+        menuBtn("help", "Help", helpMenu) +
+      '</span>' +
+      inspectorExportControls(s.ok) +
+    '</header>' +
+    '<div class="desk">' +
+      '<aside class="rail">' + inspectorRailInner(s.poolKeys) + '</aside>' +
+      '<main class="view">' + inspectorMain(s.sel, s.d) + '</main>' +
+    '</div>' +
+    (state.modal ? modalHtml() : "") +
+  '</div>' +
+  (state.toast ? '<div class="toast">' + state.toast + '</div>' : "") +
+  scenarioPanel();
+}
+
+/* ============================================================
+   Ingest simulation + window-wide drag & drop
+   ============================================================ */
+function startIngest(count) {
+  if (state.ingest) return;
+  const pending = Array.from({ length: count }, (_, i) => "dropped-invoice-" + (i + 1) + ".pdf");
+  state.ingest = { total: pending.length, done: 0, pending };
+  render();
+  (function tick() {
+    if (!state.ingest) return;
+    state.ingest.pending.shift();
+    const k = Object.keys(POOL).find(key => !state.rows.some(r => r.key === key));
+    if (k) state.rows.push(mkRow(k));
+    state.ingest.done++;
+    if (state.ingest.done >= state.ingest.total) state.ingest = null;
+    render();
+    if (state.ingest) setTimeout(tick, 500);
+  })();
+}
+
+const hasFiles = e => e.dataTransfer && Array.from(e.dataTransfer.types || []).includes("Files");
+let dragDepth = 0;
+document.addEventListener("dragenter", e => {
+  if (!hasFiles(e) || state.modal) return;
+  dragDepth++;
+  if (!state.dragging) { state.dragging = true; render(); }
+});
+document.addEventListener("dragover", e => { if (hasFiles(e)) e.preventDefault(); });
+document.addEventListener("dragleave", e => {
+  if (!hasFiles(e)) return;
+  dragDepth = Math.max(0, dragDepth - 1);
+  if (!dragDepth && state.dragging) { state.dragging = false; render(); }
+});
+document.addEventListener("drop", e => {
+  if (!hasFiles(e) || state.modal) return;
+  e.preventDefault();
+  dragDepth = 0;
+  const wasDragging = state.dragging;
+  state.dragging = false;
+  const n = Math.max(1, Math.min(e.dataTransfer.files.length || 1, 3));
+  if (wasDragging) render();
+  startIngest(n);
+});
+
+/* ============================================================
+   Switcher + event wiring
+   ============================================================ */
+const VARIANTS = [
+  { key: "A", name: "The Register",  fn: variantA, blurb: "ledger paper · typed folios · rubber-stamp refusals" },
+  { key: "B", name: "The Counter",   fn: variantB, blurb: "receipt strips · sticky till · tear off to export" },
+  { key: "C", name: "The Inspector", fn: variantC, blurb: "document viewer · annotated totals block" },
+  { key: "D", name: "The Native Window", fn: variantD, blurb: "same layout as C · Microsoft Fluent (Win11) styling" },
+];
+
+function currentVariant() {
+  const p = new URLSearchParams(location.search).get("variant")
+    || (location.hash.match(/variant=([ABCD])/i) || [])[1] || "A";
+  return VARIANTS.find(v => v.key === p.toUpperCase()) || VARIANTS[0];
+}
+
+function render() {
+  const v = currentVariant();
+  document.getElementById("app").innerHTML = v.fn();
+  document.getElementById("vlabel").innerHTML =
+    v.key + " (" + v.name + ")<small>" + v.blurb + "</small>";
+  if (v.key !== "D") document.body.style.background =
+    v.key === "B" ? "#262321" : v.key === "C" ? "#EBEDF0" : "#E9EDE0";
+  else document.body.style.background = ""; // D follows the system theme
+}
+
+function cycle(dir) {
+  const i = VARIANTS.indexOf(currentVariant());
+  const next = VARIANTS[(i + dir + VARIANTS.length) % VARIANTS.length];
+  const url = new URL(location.href);
+  url.searchParams.set("variant", next.key);
+  history.pushState(null, "", url);
+  render();
+}
+
+document.getElementById("prev").addEventListener("click", () => cycle(-1));
+document.getElementById("next").addEventListener("click", () => cycle(1));
+window.addEventListener("popstate", render);
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    if (state.modal) { state.modal = null; render(); return; }
+    if (state.menuOpen || state.zipMenuOpen) { closeMenus(); render(); return; }
+  }
+  /* Menu accelerators, Alt menubar traversal and access keys are
+     Electron-native (Menu.setApplicationMenu) — not emulated here. */
+  if (e.target.closest("input, textarea, select, [contenteditable]")) return;
+  if (e.key === "ArrowLeft") cycle(-1);
+  if (e.key === "ArrowRight") cycle(1);
+});
+
+function closeMenus() { state.zipMenuOpen = false; state.menuOpen = null; }
+
+const MENU_TOASTS = {
+  "toast-newwin": "Would open a new window (prototype)",
+  "toast-zoom-in": "Would zoom in — Ctrl + (prototype)",
+  "toast-zoom-out": "Would zoom out — Ctrl − (prototype)",
+  "toast-zoom-reset": "Would reset zoom — Ctrl 0 (prototype)",
+  "toast-devtools": "Would open Developer Tools — F12 (prototype)",
+  "quit": "Would quit the app (prototype)",
+  "check-updates": "Would query GitHub Releases for a newer version (prototype)",
+  "download-log": "Would open a save dialog to save a copy of this session\u2019s log (nothing written \u2014 prototype)",
+  "open-log-folder": "Would open %APPDATA%\\rto-invoice-prep\\logs in Explorer (nothing opened \u2014 prototype)",
+};
+
+function runAction(act, id, extra) {
+  if (act === "remove") { removeRow(id); return; }
+  if (act === "select") { state.selected = id; render(); return; }
+  if (act === "carbon-toggle") { state.carbonOpen = !state.carbonOpen; render(); return; }
+  if (act === "carbon-close") { state.carbonOpen = false; render(); return; }
+  if (act === "add-direct") { addRow(extra.key); return; }
+  if (act === "upload-block") { closeMenus(); startIngest(1); return; }
+  if (act === "zipmenu-toggle") { state.zipMenuOpen = !state.zipMenuOpen; state.menuOpen = null; render(); return; }
+  if (act === "menu-toggle") {
+    state.menuOpen = state.menuOpen === extra.menu ? null : extra.menu;
+    state.zipMenuOpen = false;
+    render();
+    return;
+  }
+  if (act === "modal-close") { state.modal = null; render(); return; }
+  if (act === "log-open") { state.modal = "log"; closeMenus(); render(); return; }
+  if (act === "help-open") { state.modal = "help"; closeMenus(); render(); return; }
+  if (act === "about-open") { state.modal = "about"; closeMenus(); render(); return; }
+  if (act === "open-website") { openExternal(APP_LINKS.website); return; }
+  if (act === "open-docs") { openExternal(APP_LINKS.docs); return; }
+  if (act === "open-repo") { openExternal(APP_LINKS.repo); return; }
+  if (act === "report-bug") { openExternal(APP_LINKS.bugTemplate); return; }
+  if (act === "open-feature-request") { openExternal(APP_LINKS.featureTemplate); return; }
+  if (act === "pick-dir") {
+    if (state.dirBad) {
+      state.dirBad = false;
+      setToast("Would open the folder picker — a writable folder chosen here clears the warning (prototype)");
+    } else {
+      setToast("Would open the native folder picker (Electron: openDirectory). Nothing chosen in the prototype.");
+    }
+    render();
+    return;
+  }
+  if (act === "upload-invoice") { closeMenus(); startIngest(1); return; }
+  if (act === "export-all") { exportAll(); return; }
+  if (act === "toast-zip") { closeMenus(); setToast("Would open the save dialog with the zip name prefilled (nothing written — prototype)"); return; }
+  if (act === "save-one") {
+    const row = rowOf(id);
+    setToast("Would open the save dialog and write " + outName(row) + " (nothing written — prototype)");
+    return;
+  }
+  if (act === "scenario") { applyScenario(extra.key); return; }
+  if (act === "scenario-toggle") { state.scenOpen = !state.scenOpen; render(); return; }
+  if (act === "retry-export") {
+    if (state.exportResult && state.exportResult.failed.id === id) {
+      state.exportResult.ok.push(id);
+      state.exportResult.failed = null;
+      setToast("Retried — the file would now be written to " + state.outputDir + " (nothing written — prototype)");
+    }
+    render();
+    return;
+  }
+  if (MENU_TOASTS[act]) { closeMenus(); setToast(MENU_TOASTS[act]); }
+}
+
+document.getElementById("app").addEventListener("click", e => {
+  let closed = false;
+  if ((state.zipMenuOpen || state.menuOpen) &&
+      !e.target.closest(".combo, .menuwrap") && !e.target.closest("input")) {
+    closeMenus();
+    closed = true;
+  }
+  const el = e.target.closest("[data-act]");
+  if (!el) { if (closed) render(); return; }
+  if (el.dataset.act === "modal-close") {
+    if (e.target === el || e.target.closest(".modal-close")) runAction("modal-close", null);
+    return;
+  }
+  if (el.dataset.act === "menu-toggle") { runAction("menu-toggle", null, { menu: el.dataset.menu }); return; }
+  runAction(el.dataset.act, el.dataset.id ? Number(el.dataset.id) : null, { key: el.dataset.key });
+});
+
+document.getElementById("app").addEventListener("change", e => {
+  const el = e.target.closest("[data-act]");
+  if (el && el.dataset.act === "add") { addRow(el.value); render(); }
+});
+
+document.getElementById("app").addEventListener("input", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el) return;
+  if (el.dataset.act === "name") state.names[Number(el.dataset.id)] = el.value;
+  else if (el.dataset.act === "outdir") state.outputDir = el.value;
+  else if (el.dataset.act === "zipname") state.zipName = el.value;
+});
+
+render();
+</script>
+</body>
+</html>

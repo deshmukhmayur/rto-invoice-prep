@@ -1,0 +1,44 @@
+# Map: Build-ready spec for the RTO invoice fixer
+
+Label: `wayfinder:map`
+
+## Destination
+
+A build-ready spec at `.scratch/rto-invoice-fixer/spec.md` that pins: (a) the exact discount-removal transformation math, verified against real OEM sample PDFs; (b) the chosen app stack and PDF technique with rationale; (c) the batch upload → preview → download UX; (d) distribution as a standalone Windows app.
+
+## Notes
+
+- Domain: Indian two-wheeler dealership invoicing. The OEM portal's invoice carries a discount line item: subtotal − discount = taxable value; CGST + SGST on taxable value are added to get the ex-showroom price (net amount); round-off produces the grand total. RTO registration requires the invoice at the vehicle's full (undiscounted) price, for registration value / IDV.
+- Why RTO wants the pre-discount price: road tax is a fixed percentage of the manufacturer's official ex-showroom price, so taxing/registration uses the pre-discount baseline (revenue protection, anti-evasion, uniform tax slabs). Discounts legitimately apply to the customer's final on-road bill, not the baseline. Glossary lives in `CONTEXT.md`.
+- Baseline decision: the dealership has long manually edited these PDFs and RTO accepts them. The spec targets **reproducing the manual edit's output**, not matching the OEM portal's record.
+- Built by one unpaid dev for a single user (one dealership employee); polish matters, scope stays small.
+- Samples will live at `.scratch/samples/original.pdf` and `.scratch/samples/modified.pdf`.
+- HITL sessions: consult the `grilling` and `domain-modeling` skills.
+
+## Decisions so far
+
+- Destination is a spec, not the built app; implementation is a separate effort (user confirmed, charting session).
+- The manual edit is the accepted baseline: the tool reproduces what the manual edit produces (user confirmed via dealership's history with RTO).
+- [Choose the app stack](issues/03-choose-app-stack.md): Electron + pdf.js + pdf-lib, NSIS installer built from Linux; fallback is Python/PyMuPDF/PyInstaller if cover-and-redraw proves insufficient.
+- [Distribution approach](issues/06-distribution-approach.md): unsigned one-click NSIS installer from CI (tag push → draft GitHub Release), no code signing (unobtainable for an unpaid project; SmartScreen one-time "Run anyway"; Windows 11 Smart App Control is the one hard blocker to warn about), electron-updater + GitHub Releases pointed at a publicly-readable repo (public repo or a separate public releases-only repo).
+- [Provide sample invoices](issues/01-provide-sample-invoices.md): one real invoice pair delivered at `.scratch/samples/` (original PDF 1.6, modified PDF 1.4, both 2-page Oracle BI Publisher output); ground truth ready for the sample-diff analysis.
+- [Analyse the sample diff](issues/02-analyse-sample-diff.md): the edit is exactly "recompute as if the discount were zero" (taxable = subtotal, 9% CGST/SGST, verified to the paisa); it's an in-place text-layer rewrite — same fonts/coordinates/images, old numbers truly deleted — so pdf-lib-style surgery reproduces it; QR and identity fields untouched (QR later confirmed to be the Hero app-download promo, not invoice data — [ticket 09](issues/09-confirm-identity-content.md)); the manual edit itself contains typos the tool should not replicate. **Override (user, 2026-09-23): the tool removes the whole discount row by emptying the label and value text strings — no operator deletion, no layout shift, ruling lines untouched — and the rewritten amounts stay right-aligned with the untouched rows (x-position computed from the new string's width at the known non-embedded font metrics).**
+- [Choose the PDF technique](issues/04-choose-pdf-technique.md): in-place content-stream surgery on the original (empty discount label+value strings, rewrite amounts right-aligned via standard Helvetica metrics); validated against both samples — the manual edit's own placements match `x = rightEdge − width`; pdf-lib confirmed sufficient, PyMuPDF fallback documented; spec must pin an op-pattern validator that fails loudly on template drift.
+- [Name the tool](issues/10-name-the-tool.md): "RTO Invoice Prep" — a descriptive name on the glossary's canonical RTO-invoice term; one name everywhere (RTOInvoicePrep exe, rto-invoice-prep kebab-case); tagline "Prepare dealership invoices for RTO registration" on installer/about only.
+- [Pin edge-case handling](issues/08-pin-edge-case-handling.md): detect-and-refuse everywhere — refuse on no discount (message distinguishes missing row vs 0.00), extra line items in the totals block or broken `Sub − Discount = Taxable` identity, multiple discount rows, any template variation (strict match only, 2 pages like the sample), or unextractable amounts (message names the field); second sample pair skipped — spec locks on the single validated template.
+- [Confirm identity content](issues/09-confirm-identity-content.md): identity fields stay verbatim (invoice number, dates, chassis/engine/VIN, dealer/customer blocks, HSN, page 2, all images) — nothing else on the invoice references the amount, and the only QR is the Hero app-download promo (no invoice-data QR exists, so nothing machine-readable contradicts the raised totals); no objection to the tool emitting correct decimals/words where the hand edit had typos — acceptance, not typos, is the baseline.
+- [Spec the UX flow](issues/05-spec-ux-flow.md): drop PDFs → compact per-file rows (old→new numbers, thumbnail for identity, editable default name `<original>-RTO.pdf`) → one-click batch export; ✕ remove on any row (valid or refused); refused rows show named-field reasons and are logged; per-file download buttons + Export-all + zip (default `rto-invoices-YYYY-MM-DD.zip`), same per-file names across individual and zip; output dir field defaults to Downloads; provenance is invisible (metadata additions only, originals untouched) with a global append-only `rto-invoice-prep.log` viewed in an in-app panel/popout.
+- [Prototype the UI design language and layout](issues/11-prototype-ui-design.md): **Variant D — "The Native Window"** — Inspector layout in Fluent/Win11 (accent #005FB8, Segoe UI, system dark theme, no picker; default OS titlebar; native File/View/Help menu with Electron-native accelerators/mnemonics; toolbar = menus left, folder-picker output dir + export combo right; upload block + whole-window drop + ingest progress; preview card = details grid + totals facsimile with download icon, no filename input/chip/note; Log/Help/About as modals; session log + monthly never-deleted log files; Win10 floor, current Electron; GitHub Pages/issue-template URLs via one APP_LINKS constant). Prototype kept (uncommitted) at `prototype/ui-prototype.html` on the current branch; full decision trail in the ticket (14 rounds). Ticket 05's editable per-row name field is superseded — naming happens in the save dialog.
+- [Prototype the empty and error states](issues/12-prototype-empty-states.md): all empty/transitional/error states settled in the same Variant D artifact and accepted as-built (dev, 2026-09-24) — identical empty panel for first launch and back-to-empty (folder glyph + three entry routes + stateless line); frosted-glass drag-hover overlay; per-file "reading <filename>…" spinner placeholders under the determinate ingest bar; refused-only batch → "Nothing to export" (disabled) + red rail summary; unwritable output folder = red ⚠ picker + "Export blocked" + Pick-another-folder recovery banner; export failure = per-row Saved ✓ / Write failed tags with Retry-this-file (log `FAILED`); parser crash = gray error panel (below refusal-red) with Open Log / Report a bug, `ERROR` log line; empty-log state with the monthly-file reminder; every failure names the file/field and offers a concrete next action. Prototype scenario panel in `prototype/ui-prototype.html` (uncommitted).
+- [Assemble the build-ready spec](issues/07-assemble-spec.md): the spec is written and approved at `spec.md` — transformation math with the sample's worked example, pdf-lib surgery technique + op-pattern validator, detect-and-refuse rules, Electron stack on a Win10 floor, full Variant D UX incl. empty/error states, unsigned NSIS + electron-updater distribution, and 7 acceptance criteria. **Map complete.**
+
+## Not yet specified
+
+- _(none)_ Every decision the spec needed is made and recorded. The map is closed.
+
+## Out of scope
+
+- Building and shipping the app itself: a separate effort once the spec lands.
+- Web-based deployment; a standalone Windows app only.
+- Multi-user or server-side features; this is a single-desk, stateless tool.
+- Verifying the tool against additional invoice variants (second sample pair, other models/layouts): deferred until a real variant sample is obtainable; strict detect-and-refuse makes v1 safe without it ([ticket 08](issues/08-pin-edge-case-handling.md)).

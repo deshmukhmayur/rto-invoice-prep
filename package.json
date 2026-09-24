@@ -1,0 +1,18 @@
+{
+  "name": "rto-invoice-prep",
+  "productName": "RTO Invoice Prep",
+  "version": "0.1.0",
+  "description": "Prepare dealership invoices for RTO registration",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "bunx tsc && cp src/renderer/index.html src/renderer/styles.css dist/renderer/",
+    "start": "bun run build && electron .",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22",
+    "electron": "^33.0.0",
+    "typescript": "^5.6.0"
+  }
+}
