@@ -1,13 +1,34 @@
-import type { ExportResult, ParsedRow } from "../shared/ingest";
+import type {
+  BatchFileResult,
+  ExportResult,
+  ParsedRow,
+} from "../shared/ingest";
+import { emptyDetails } from "../shared/ingest";
 import { formatAmount, parseAmount, recomputeTotals, rupeesInWords } from "../shared/totals";
 import "./app-api";
 
-type RailRow = ParsedRow & { id: number; data: ArrayBuffer; export?: ExportResult };
+type RailRow = ParsedRow & {
+  id: number;
+  data: ArrayBuffer;
+  export?: ExportResult;
+  batch?: BatchFileResult;
+  retrying?: boolean;
+};
 
 let nextId = 1;
 let rows: RailRow[] = [];
 let selectedId: number | null = null;
 let ingest: { total: number; done: number; pending: string[] } | null = null;
+let outDir: string | null = null;
+let dirBlock: { reason: string } | null = null;
+let batchSummary: { kind: "ok" | "error"; text: string } | null = null;
+let zipMenuOpen = false;
+let exporting = false;
+
+void window.app.defaultFolder().then((dir) => {
+  outDir = dir;
+  render();
+});
 
 const main = document.querySelector("main")!;
 
@@ -17,6 +38,10 @@ function removeRow(id: number): void {
   if (selectedId === id) {
     selectedId = rows.length === 0 ? null : rows[Math.min(index, rows.length - 1)]!.id;
   }
+}
+
+function validRows(): RailRow[] {
+  return rows.filter((r) => r.status === "valid");
 }
 
 function render(): void {
@@ -34,8 +59,9 @@ function render(): void {
         </button>
         ${ingest ? ingestProgressHtml() : ""}
         ${rows.map(rowHtml).join("")}
-        ${!ingest && rows.length > 0 && rows.every((r) => r.status === "refused")
-          ? `<div class="refused-strip" role="alert">All ${rows.length} file${rows.length === 1 ? " was" : "s were"} refused or could not be read — nothing can be exported. Remove the files or upload different ones.</div>`
+        ${!ingest && rows.length > 0 ? exportBarHtml() : ""}
+        ${!ingest && rows.length > 0 && rows.every((r) => r.status !== "valid")
+          ? `<div class="refused-strip" role="alert">No file in this batch can be exported (refused or unreadable). Remove the files or upload different ones.</div>`
           : ""}
       </aside>
       <section class="cards" id="cards">
@@ -71,6 +97,27 @@ function render(): void {
   for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-export]")) {
     btn.addEventListener("click", () => void exportOne(Number(btn.dataset.export)));
   }
+  document.getElementById("folder-picker")?.addEventListener("click", () => void pickFolder());
+  for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-pick-folder]")) {
+    btn.addEventListener("click", () => void pickFolder());
+  }
+  document.getElementById("export-batch")?.addEventListener("click", () => void exportBatch());
+  document.getElementById("zip-caret")?.addEventListener("click", () => {
+    zipMenuOpen = !zipMenuOpen;
+    render();
+  });
+  for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-export-zip]")) {
+    btn.addEventListener("click", () => void exportZip());
+  }
+  for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-retry]")) {
+    btn.addEventListener("click", () => void retryOne(Number(btn.dataset.retry)));
+  }
+  for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-open-log]")) {
+    btn.addEventListener("click", () => void window.app.openLog());
+  }
+  for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-report-bug]")) {
+    btn.addEventListener("click", () => void window.app.reportBug());
+  }
 }
 
 function cardsEmptyHtml(): string {
@@ -90,6 +137,155 @@ async function exportOne(id: number): Promise<void> {
   if (btn) btn.disabled = true;
   const result = await window.app.exportOne({ fileName: row.fileName, data: row.data });
   row.export = result;
+  render();
+}
+
+function zipNameForToday(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `rto-invoices-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.zip`;
+}
+
+function exportBarHtml(): string {
+  const valid = validRows();
+  const n = valid.length;
+  const blocked = dirBlock !== null;
+  const folderLabel = outDir ?? "Choose output folder";
+  const primary =
+    n === 0
+      ? `<button class="export-primary" id="export-batch" type="button" disabled>Nothing to export</button>`
+      : `<button class="export-primary" id="export-batch" type="button" ${exporting ? "disabled" : ""}>${exporting ? "Exporting…" : `Export ${n} file${n === 1 ? "" : "s"}`}</button>`;
+  return `
+    <div class="export-bar">
+      <button class="folder-picker${blocked ? " blocked" : ""}" id="folder-picker" type="button" title="${escapeHtml(outDir ?? "Choose output folder")}">
+        ${blocked ? `<span class="warn" aria-hidden="true">⚠</span>` : folderIcon()}
+        <span class="folder-path">${escapeHtml(folderLabel)}</span>
+      </button>
+      <div class="export-combo">
+        ${primary}
+        <button class="zip-caret" id="zip-caret" type="button" ${n === 0 || exporting ? "disabled" : ""} title="More export options" aria-haspopup="menu" aria-expanded="${zipMenuOpen}">▾</button>
+        ${zipMenuOpen
+          ? `<div class="export-menu" role="menu"><button type="button" data-export-zip role="menuitem">Export as Zip</button></div>`
+          : ""}
+      </div>
+      ${dirBlock
+        ? `<div class="export-banner" role="alert"><span>Export blocked — ${escapeHtml(dirBlock.reason)}</span><button type="button" data-pick-folder>Pick another folder</button></div>`
+        : ""}
+      ${batchSummary ? `<div class="batch-summary ${batchSummary.kind}" role="status">${escapeHtml(batchSummary.text)}</div>` : ""}
+    </div>`;
+}
+
+function folderIcon(): string {
+  return `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M1.5 3A1.5 1.5 0 0 1 3 1.5h2.6c.4 0 .78.16 1.06.44l1.06 1.06c.1.1.23.15.35.15H13A1.5 1.5 0 0 1 14.5 4.5v8A1.5 1.5 0 0 1 13 14H3a1.5 1.5 0 0 1-1.5-1.5V3z"/></svg>`;
+}
+
+async function pickFolder(): Promise<void> {
+  const dir = await window.app.pickFolder();
+  if (dir) {
+    outDir = dir;
+    dirBlock = null;
+  }
+  render();
+}
+
+async function ensureFolder(): Promise<boolean> {
+  if (!outDir) {
+    dirBlock = { reason: "no output folder is set" };
+    render();
+    return false;
+  }
+  const check = await window.app.checkFolder(outDir);
+  if (!check.ok) {
+    dirBlock = { reason: check.reason ?? "the output folder is not writable" };
+    render();
+    return false;
+  }
+  return true;
+}
+
+function applyBatchResults(results: BatchFileResult[]): void {
+  // Results arrive in the order the files were sent.
+  const targets = validRows();
+  results.forEach((res, i) => {
+    const row = targets[i];
+    if (row) row.batch = res;
+  });
+}
+
+async function exportBatch(): Promise<void> {
+  if (exporting) return;
+  if (!(await ensureFolder())) return;
+  const targets = validRows();
+  if (targets.length === 0) return;
+  exporting = true;
+  batchSummary = null;
+  render();
+  const results = await window.app.exportBatch({
+    dir: outDir!,
+    files: targets.map((r) => ({ fileName: r.fileName, data: r.data })),
+  });
+  applyBatchResults(results);
+  const failed = results.filter((r) => r.status === "error");
+  batchSummary =
+    failed.length === 0
+      ? { kind: "ok", text: `Saved ${results.length} file${results.length === 1 ? "" : "s"} to ${outDir}` }
+      : {
+          kind: "error",
+          text: `${failed.length} of ${results.length} files failed to write — use Retry this file on the failed row${failed.length === 1 ? "" : "s"}.`,
+        };
+  exporting = false;
+  render();
+}
+
+async function exportZip(): Promise<void> {
+  if (exporting) return;
+  if (!(await ensureFolder())) return;
+  const targets = validRows();
+  if (targets.length === 0) return;
+  zipMenuOpen = false;
+  exporting = true;
+  batchSummary = null;
+  render();
+  const result = await window.app.exportZip({
+    dir: outDir!,
+    zipName: zipNameForToday(),
+    files: targets.map((r) => ({ fileName: r.fileName, data: r.data })),
+  });
+  batchSummary =
+    result.status === "saved"
+      ? { kind: "ok", text: `Saved ${result.path}` }
+      : {
+          kind: "error",
+          text:
+            result.status === "refused"
+              ? `Zip export refused — ${result.reason}`
+              : result.status === "error"
+                ? `Zip export failed — ${result.reason}`
+                : "Zip export canceled",
+        };
+  exporting = false;
+  render();
+}
+
+async function retryOne(id: number): Promise<void> {
+  const row = rows.find((r) => r.id === id);
+  if (!row || row.status !== "valid" || row.retrying) return;
+  if (!(await ensureFolder())) return;
+  row.retrying = true;
+  batchSummary = null;
+  render();
+  const [result] = await window.app.exportBatch({
+    dir: outDir!,
+    files: [{ fileName: row.fileName, data: row.data }],
+  });
+  if (result) {
+    row.batch = result;
+    batchSummary =
+      result.status === "saved"
+        ? { kind: "ok", text: `Saved ${row.fileName} to ${outDir}` }
+        : { kind: "error", text: `Retry failed for ${row.fileName} — ${result.reason}` };
+  }
+  row.retrying = false;
   render();
 }
 
@@ -125,13 +321,20 @@ function ingestProgressHtml(): string {
 }
 
 function rowHtml(row: RailRow): string {
-  const dot = row.status === "valid" ? "pass" : "fail";
+  const dot = row.status === "valid" ? "pass" : row.status === "error" ? "crash" : "fail";
+  const tag =
+    row.batch?.status === "saved"
+      ? `<span class="tag saved">Saved ✓</span>`
+      : row.batch?.status === "error"
+        ? `<span class="tag failed">Write failed</span>`
+        : "";
   const selected = row.id === selectedId;
   return `
     <div class="rail-row${selected ? " selected" : ""}" data-row="${row.id}" role="button" tabindex="0" aria-pressed="${selected}" aria-label="${escapeHtml(row.fileName)}">
       <div class="row-head">
         <span class="dot ${dot}" title="${row.status}"></span>
         <span class="row-name" title="${escapeHtml(row.fileName)}">${escapeHtml(row.fileName)}</span>
+        ${tag}
         <button class="remove" type="button" data-remove="${row.id}" title="Remove ${escapeHtml(row.fileName)}" aria-label="Remove ${escapeHtml(row.fileName)}">✕</button>
       </div>
     </div>`;
@@ -144,23 +347,52 @@ function cardHtml(row: RailRow): string {
     </button>` : "";
   const refused = row.status === "refused" ? `
     <div class="refusal-reason" role="alert">${escapeHtml(row.refusalReason ?? "Refused")}</div>` : "";
+  const crashed = row.status === "error" ? crashPanelHtml(row) : "";
+  const writeFail = row.batch?.status === "error" ? writeFailHtml(row) : "";
+  const details =
+    row.status === "error"
+      ? ""
+      : `<dl class="details-grid">
+          ${detailCell("Invoice no.", row.details.invoiceNo)}
+          ${detailCell("Customer", row.details.customer)}
+          ${detailCell("Invoice date", row.details.invoiceDate)}
+          ${detailCell("Model", row.details.model)}
+          ${detailCell("Chassis no.", row.details.chassisNo)}
+          ${detailCell("Engine no.", row.details.engineNo)}
+        </dl>`;
   return `
     <div class="card">
       <div class="card-head">
         <span class="card-name" title="${escapeHtml(row.fileName)}">${escapeHtml(row.fileName)}</span>
         ${download}
       </div>
-      <dl class="details-grid">
-        ${detailCell("Invoice no.", row.details.invoiceNo)}
-        ${detailCell("Customer", row.details.customer)}
-        ${detailCell("Invoice date", row.details.invoiceDate)}
-        ${detailCell("Model", row.details.model)}
-        ${detailCell("Chassis no.", row.details.chassisNo)}
-        ${detailCell("Engine no.", row.details.engineNo)}
-      </dl>
+      ${details}
       ${facsimileHtml(row)}
       ${refused}
+      ${crashed}
+      ${writeFail}
       ${exportNoteHtml(row)}
+    </div>`;
+}
+
+function crashPanelHtml(row: RailRow): string {
+  return `
+    <div class="crash-panel" role="alert">
+      <div class="crash-title">The parser crashed on this file</div>
+      <p class="crash-msg">${escapeHtml(row.errorReason ?? "Unexpected error")}</p>
+      <p class="crash-file">File: ${escapeHtml(row.fileName)}</p>
+      <div class="crash-actions">
+        <button type="button" data-open-log>Open Log</button>
+        <button type="button" data-report-bug>Report a bug</button>
+      </div>
+    </div>`;
+}
+
+function writeFailHtml(row: RailRow): string {
+  return `
+    <div class="write-fail" role="alert">
+      <div class="write-fail-msg">Write failed for <b>${escapeHtml(row.fileName)}</b>: ${escapeHtml(row.batch?.status === "error" ? row.batch.reason : "")}</div>
+      <button class="retry" type="button" data-retry="${row.id}" ${row.retrying ? "disabled" : ""}>${row.retrying ? "Retrying…" : "Retry this file"}</button>
     </div>`;
 }
 
@@ -232,13 +464,14 @@ async function ingestFiles(files: { fileName: string; data: ArrayBuffer }[]): Pr
     try {
       const parsed = await window.app.parse(file);
       rows.push({ ...parsed, id: nextId++, data: file.data });
-    } catch {
+    } catch (err) {
       rows.push({
         id: nextId++,
         fileName: file.fileName,
-        status: "refused",
-        refusalReason: "The file could not be read (unexpected error — see log).",
-        details: { invoiceNo: null, customer: null, invoiceDate: null, model: null, chassisNo: null, engineNo: null },
+        status: "error",
+        refusalReason: null,
+        errorReason: err instanceof Error ? err.message : String(err),
+        details: emptyDetails(),
         totals: null,
         data: file.data,
       });
@@ -296,8 +529,6 @@ window.addEventListener("drop", (e) => {
 // --- Menu ------------------------------------------------------------------
 
 window.app.onMenu("menu:upload-invoice", () => void pickAndIngest());
-window.app.onMenu("menu:open-log", () => console.log("menu:open-log"));
-window.app.onMenu("menu:report-bug", () => console.log("menu:report-bug"));
 window.app.onMenu("menu:about", () => console.log("menu:about"));
 
 render();

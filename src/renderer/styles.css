@@ -401,6 +401,260 @@ body {
 .download:hover { background: var(--border); color: var(--accent); }
 .download:disabled { opacity: 0.4; cursor: default; }
 
+/* --- Export toolbar --------------------------------------------------------- */
+
+.export-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.folder-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.folder-picker:hover { border-color: var(--accent); color: var(--text); }
+
+.folder-picker.blocked {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.folder-picker.blocked:hover { color: var(--error); }
+
+.folder-picker .warn { font-size: 13px; }
+
+.folder-path {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.export-combo {
+  position: relative;
+  display: flex;
+  gap: 0;
+}
+
+.export-primary {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--accent);
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.export-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+.export-primary:disabled {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-secondary);
+  cursor: default;
+  opacity: 0.7;
+}
+
+.zip-caret {
+  padding: 8px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.zip-caret:hover:not(:disabled) { filter: brightness(1.08); }
+
+.zip-caret:disabled {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-secondary);
+  cursor: default;
+  opacity: 0.7;
+}
+
+.export-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  min-width: 180px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  padding: 4px;
+}
+
+.export-menu button {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.export-menu button:hover { background: var(--border); }
+
+.export-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--error);
+  border-radius: 6px;
+  color: var(--error);
+  font-size: 12.5px;
+}
+
+.export-banner span { flex: 1; min-width: 0; }
+
+.export-banner button {
+  border: 1px solid var(--error);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--error);
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.export-banner button:hover { background: color-mix(in srgb, var(--error) 12%, transparent); }
+
+.batch-summary {
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.batch-summary.ok {
+  border: 1px solid color-mix(in srgb, var(--success) 50%, transparent);
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
+}
+
+.batch-summary.error {
+  border: 1px solid color-mix(in srgb, var(--error) 50%, transparent);
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  color: var(--error);
+}
+
+/* --- Row tags & crash dot ----------------------------------------------------- */
+
+.tag {
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tag.saved { color: var(--success); }
+.tag.failed { color: var(--error); }
+
+.dot.crash {
+  background: transparent;
+  border: 2px solid var(--error);
+}
+
+/* --- Crash & write-failure panels ---------------------------------------------- */
+
+.crash-panel {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text-secondary) 10%, transparent);
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+}
+
+.crash-title { font-weight: 600; color: var(--error); }
+
+.crash-msg {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-family: ui-monospace, monospace;
+  font-size: 11.5px;
+  word-break: break-word;
+}
+
+.crash-file { margin: 6px 0 0; color: var(--text-secondary); }
+
+.crash-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+.crash-actions button {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--card-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.crash-actions button:hover { border-color: var(--accent); color: var(--accent); }
+
+.write-fail {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--error);
+  background: color-mix(in srgb, var(--error) 8%, transparent);
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.write-fail-msg { flex: 1; min-width: 0; }
+
+.retry {
+  border: 1px solid var(--error);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--error);
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.retry:hover:not(:disabled) { background: color-mix(in srgb, var(--error) 12%, transparent); }
+
+.retry:disabled { opacity: 0.5; cursor: default; }
+
 /* --- Drag overlay ------------------------------------------------------------ */
 
 #drag-overlay {

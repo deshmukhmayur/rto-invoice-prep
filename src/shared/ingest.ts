@@ -9,8 +9,10 @@ export type InvoiceDetails = {
 
 export type ParsedRow = {
   fileName: string;
-  status: "valid" | "refused";
+  status: "valid" | "refused" | "error";
   refusalReason: string | null;
+  /** Set only when status is "error" — an unexpected parser crash, not a refusal. */
+  errorReason: string | null;
   details: InvoiceDetails;
   totals: {
     subTotal: string;
@@ -29,6 +31,10 @@ export type ParsedRow = {
 
 export type PickedFile = { fileName: string; data: ArrayBuffer };
 
+export function emptyDetails(): InvoiceDetails {
+  return { invoiceNo: null, customer: null, invoiceDate: null, model: null, chassisNo: null, engineNo: null };
+}
+
 export const INGEST_CHANNELS = [
   "ingest:parse",
   "ingest:pick-files",
@@ -44,4 +50,23 @@ export type ExportResult =
   | { status: "refused"; reason: string }
   | { status: "error"; reason: string };
 
-export const EXPORT_CHANNELS = ["export:save-one"] as const;
+export type BatchFileRequest = { fileName: string; data: ArrayBuffer };
+
+export type BatchFileResult =
+  | { fileName: string; status: "saved"; path: string }
+  | { fileName: string; status: "error"; reason: string };
+
+export type FolderCheck = { ok: boolean; reason: string | null };
+
+export type BatchExportRequest = { dir: string; files: BatchFileRequest[] };
+export type ZipExportRequest = { dir: string; zipName: string; files: BatchFileRequest[] };
+
+export const EXPORT_CHANNELS = [
+  "export:default-dir",
+  "export:pick-dir",
+  "export:check-dir",
+  "export:save-batch",
+  "export:save-zip",
+] as const;
+
+export const LOG_CHANNELS = ["log:open-log", "log:report-bug"] as const;

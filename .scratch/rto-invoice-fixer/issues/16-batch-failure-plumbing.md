@@ -4,8 +4,8 @@
 
 **Blocked by:** 15.
 
-**Status:** ready-for-agent**
+**Status:** done**
 
-- [ ] Batch of N files exports N PDFs, plus a zip named `rto-invoices-YYYY-MM-DD.zip` via the combo's dropdown
-- [ ] Each §6 failure state is demonstrated (unwritable folder, refused-only, simulated write failure with retry, simulated crash) and each message names the file/field with a next action
-- [ ] Retry re-writes only the failed file; completed rows keep their Saved ✓ tag
+- [x] Batch of N files exports N PDFs, plus a zip named `rto-invoices-YYYY-MM-DD.zip` via the combo's dropdown
+- [x] Each §6 failure state is demonstrated (unwritable folder, refused-only, simulated write failure with retry, simulated crash) and each message names the file/field with a next action
+- [x] Retry re-writes only the failed file; completed rows keep their Saved ✓ tag

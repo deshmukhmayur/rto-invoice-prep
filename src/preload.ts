@@ -1,6 +1,15 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { MENU_CHANNELS, type MenuChannel } from "./channels";
-import type { ExportRequest, ExportResult, ParsedRow, PickedFile } from "./shared/ingest";
+import type {
+  BatchExportRequest,
+  BatchFileResult,
+  ExportRequest,
+  ExportResult,
+  FolderCheck,
+  ParsedRow,
+  PickedFile,
+  ZipExportRequest,
+} from "./shared/ingest";
 
 contextBridge.exposeInMainWorld("app", {
   onMenu: (channel: MenuChannel, handler: () => void): void => {
@@ -12,4 +21,13 @@ contextBridge.exposeInMainWorld("app", {
     ipcRenderer.invoke("ingest:parse", file),
   exportOne: (req: ExportRequest): Promise<ExportResult> =>
     ipcRenderer.invoke("export:save-one", req),
+  defaultFolder: (): Promise<string> => ipcRenderer.invoke("export:default-dir"),
+  pickFolder: (): Promise<string | null> => ipcRenderer.invoke("export:pick-dir"),
+  checkFolder: (dir: string): Promise<FolderCheck> => ipcRenderer.invoke("export:check-dir", dir),
+  exportBatch: (req: BatchExportRequest): Promise<BatchFileResult[]> =>
+    ipcRenderer.invoke("export:save-batch", req),
+  exportZip: (req: ZipExportRequest): Promise<ExportResult> =>
+    ipcRenderer.invoke("export:save-zip", req),
+  openLog: (): Promise<void> => ipcRenderer.invoke("log:open-log"),
+  reportBug: (): Promise<void> => ipcRenderer.invoke("log:report-bug"),
 });

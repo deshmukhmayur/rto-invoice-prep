@@ -1,9 +1,20 @@
 // Dev-only browser mock of the preload API (see scripts/dev-server.ts).
 // Never loaded by the Electron app — index.html only references renderer.js.
-import type { ExportRequest, ExportResult, ParsedRow, PickedFile } from "../src/shared/ingest";
+import type {
+  BatchExportRequest,
+  BatchFileResult,
+  ExportRequest,
+  ExportResult,
+  FolderCheck,
+  ParsedRow,
+  PickedFile,
+  ZipExportRequest,
+} from "../src/shared/ingest";
 import type { MenuChannel } from "../src/channels";
 import { prepareInvoice } from "../src/main/invoice/transform";
 import { parseInvoice } from "../src/main/invoice/parse";
+import { createZip } from "../src/shared/zip";
+import { uniqueName } from "../src/shared/unique";
 
 declare global {
   interface Window {
@@ -12,6 +23,13 @@ declare global {
       pickFiles: () => Promise<PickedFile[]>;
       parse: (file: PickedFile) => Promise<ParsedRow>;
       exportOne: (req: ExportRequest) => Promise<ExportResult>;
+      defaultFolder: () => Promise<string>;
+      pickFolder: () => Promise<string | null>;
+      checkFolder: (dir: string) => Promise<FolderCheck>;
+      exportBatch: (req: BatchExportRequest) => Promise<BatchFileResult[]>;
+      exportZip: (req: ZipExportRequest) => Promise<ExportResult>;
+      openLog: () => Promise<void>;
+      reportBug: () => Promise<void>;
     };
   }
 }
@@ -77,6 +95,8 @@ window.app = {
     // Files named fake*.pdf get canned rows; everything else goes through the
     // real parser, so a prepared file re-uploaded here is refused like in the app.
     if (/^fake/i.test(file.fileName)) return fakeRow(file.fileName);
+    // crash*.pdf simulates an unexpected parser crash (status "error" row).
+    if (/crash/i.test(file.fileName)) throw new Error("Simulated parser crash (browser dev mock)");
     return parseInvoice(file.fileName, new Uint8Array(file.data));
   },
   exportOne: async (req) => {
@@ -101,4 +121,60 @@ window.app = {
     URL.revokeObjectURL(url);
     return { status: "saved", path: `${a.download} (browser download)` };
   },
+  defaultFolder: async () => "~/Downloads",
+  pickFolder: async () => {
+    const dir = window.prompt("Output folder (use a path containing 'unwritable' to demo a blocked export)", "~/Downloads");
+    return dir?.trim() || null;
+  },
+  checkFolder: async (dir) =>
+    /unwritable|denied/i.test(dir)
+      ? { ok: false, reason: `cannot write to "${dir}" (EACCES: permission denied)` }
+      : { ok: true, reason: null },
+  exportBatch: async (req) => {
+    const results: BatchFileResult[] = [];
+    for (const file of req.files) {
+      await new Promise((r) => setTimeout(r, 350));
+      // fail*.pdf simulates a mid-batch write failure (retryable in the UI).
+      if (/fail/i.test(file.fileName)) {
+        const reason = `EACCES: permission denied, write '${req.dir}/${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf'`;
+        console.error("[browser dev mock] simulated write failure for", file.fileName);
+        results.push({ fileName: file.fileName, status: "error", reason });
+      } else {
+        results.push({
+          fileName: file.fileName,
+          status: "saved",
+          path: `${req.dir}/${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf (simulated write)`,
+        });
+      }
+    }
+    return results;
+  },
+  exportZip: async (req) => {
+    const zipName = window.prompt("Save zip as", req.zipName);
+    if (!zipName?.trim()) return { status: "canceled" };
+    await new Promise((r) => setTimeout(r, 600));
+    const entries: { name: string; data: Uint8Array }[] = [];
+    const used = new Set<string>();
+    for (const file of req.files) {
+      try {
+        const data = await prepareInvoice(file.data, { version: "0.1" });
+        entries.push({ name: uniqueName(`${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`, used), data });
+      } catch (err) {
+        return {
+          status: "error",
+          reason: `${file.fileName}: ${err instanceof Error ? err.message : "Preparation failed"}`,
+        };
+      }
+    }
+    const blob = new Blob([createZip(entries)], { type: "application/zip" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = zipName.trim();
+    a.click();
+    URL.revokeObjectURL(url);
+    return { status: "saved", path: `${req.dir}/${zipName.trim()} (browser download)` };
+  },
+  openLog: async () => console.log("[browser dev mock] open log (file lives in app-data in the app)"),
+  reportBug: async () => console.log("[browser dev mock] report a bug"),
 };

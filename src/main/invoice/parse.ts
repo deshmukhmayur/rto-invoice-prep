@@ -1,4 +1,5 @@
 import type { InvoiceDetails, ParsedRow } from "../../shared/ingest";
+import { emptyDetails } from "../../shared/ingest";
 import type { PDFDocument } from "pdf-lib";
 import { parseAmount, formatAmount } from "../../shared/totals";
 import { checkContentStreamPattern, checkFonts, extractRuns, loadDocument, pageContentStream, pageCount, type TextRun } from "./pdf-ops";
@@ -114,7 +115,7 @@ function matchTotalsLabel(label: string): string | null {
 }
 
 function refusal(fileName: string, reason: string, details: InvoiceDetails): ParsedRow {
-  return { fileName, status: "refused", refusalReason: reason, details, totals: null };
+  return { fileName, status: "refused", refusalReason: reason, errorReason: null, details, totals: null };
 }
 
 export type TotalsLabel = (typeof TOTALS_LABELS)[number];
@@ -290,6 +291,7 @@ export async function parseInvoice(fileName: string, bytes: Uint8Array): Promise
     fileName,
     status: "valid",
     refusalReason: null,
+    errorReason: null,
     details: result.details,
     totals: {
       subTotal: value("Sub Total"),
@@ -305,10 +307,6 @@ export async function parseInvoice(fileName: string, bytes: Uint8Array): Promise
       words: result.oldWords,
     },
   };
-}
-
-function emptyDetails(): InvoiceDetails {
-  return { invoiceNo: null, customer: null, invoiceDate: null, model: null, chassisNo: null, engineNo: null };
 }
 
 /** Pull the identity fields (spec §6 details grid); missing fields render `~unreadable~` in the UI. */
