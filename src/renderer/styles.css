@@ -146,7 +146,21 @@ body {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rail-row:hover { border-color: var(--glyph); }
+
+.rail-row.selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--card-bg));
+}
+
+.rail-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
 }
 
 .rail-row.pending {
@@ -215,7 +229,48 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2px 16px;
-  margin: 8px 0 0 18px;
+  margin: 12px 0 0;
+}
+
+/* --- Inspector card ---------------------------------------------------------- */
+
+.cards { overflow-y: auto; }
+
+.cards-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.cards-empty svg { color: var(--glyph); }
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  max-width: 640px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .detail-cell dt {
@@ -239,7 +294,7 @@ body {
 }
 
 .refusal-reason {
-  margin: 8px 0 0 18px;
+  margin: 10px 0 0;
   padding: 6px 8px;
   border-radius: 4px;
   background: color-mix(in srgb, var(--error) 10%, transparent);
@@ -259,7 +314,7 @@ body {
 /* --- Totals facsimile -------------------------------------------------------- */
 
 .facsimile {
-  margin: 10px 0 0 18px;
+  margin: 12px 0 0;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 8px 10px;
@@ -321,7 +376,7 @@ body {
 .fac-row.words .fac-value { font-size: 11.5px; }
 
 .saved-note {
-  margin: 8px 0 0 18px;
+  margin: 10px 0 0;
   padding: 6px 8px;
   border-radius: 4px;
   background: color-mix(in srgb, var(--success) 10%, transparent);

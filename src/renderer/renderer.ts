@@ -6,15 +6,25 @@ type RailRow = ParsedRow & { id: number; data: ArrayBuffer; export?: ExportResul
 
 let nextId = 1;
 let rows: RailRow[] = [];
+let selectedId: number | null = null;
 let ingest: { total: number; done: number; pending: string[] } | null = null;
 
 const main = document.querySelector("main")!;
+
+function removeRow(id: number): void {
+  const index = rows.findIndex((r) => r.id === id);
+  rows = rows.filter((r) => r.id !== id);
+  if (selectedId === id) {
+    selectedId = rows.length === 0 ? null : rows[Math.min(index, rows.length - 1)]!.id;
+  }
+}
 
 function render(): void {
   if (rows.length === 0 && !ingest) {
     main.innerHTML = emptyStateHtml();
     return;
   }
+  const selected = rows.find((r) => r.id === selectedId) ?? null;
   main.innerHTML = `
     <div class="layout">
       <aside class="rail" id="rail">
@@ -28,7 +38,9 @@ function render(): void {
           ? `<div class="refused-strip" role="alert">All ${rows.length} file${rows.length === 1 ? " was" : "s were"} refused or could not be read — nothing can be exported. Remove the files or upload different ones.</div>`
           : ""}
       </aside>
-      <section class="cards" id="cards"></section>
+      <section class="cards" id="cards">
+        ${selected ? cardHtml(selected) : cardsEmptyHtml()}
+      </section>
     </div>`;
 
   document.getElementById("upload-block")?.addEventListener("click", pickAndIngest);
@@ -36,14 +48,39 @@ function render(): void {
   if (fill && ingest) fill.style.width = `${Math.round((ingest.done / ingest.total) * 100)}%`;
   for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-remove]")) {
     btn.addEventListener("click", () => {
-      const id = Number(btn.dataset.remove);
-      rows = rows.filter((r) => r.id !== id);
+      removeRow(Number(btn.dataset.remove));
       render();
+    });
+  }
+  const selectRow = (id: number): void => {
+    if (selectedId === id) return;
+    selectedId = id;
+    render();
+  };
+  for (const rowEl of main.querySelectorAll<HTMLElement>("[data-row]")) {
+    rowEl.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest("[data-remove]")) return;
+      selectRow(Number(rowEl.dataset.row));
+    });
+    rowEl.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      selectRow(Number(rowEl.dataset.row));
     });
   }
   for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-export]")) {
     btn.addEventListener("click", () => void exportOne(Number(btn.dataset.export)));
   }
+}
+
+function cardsEmptyHtml(): string {
+  return `
+    <div class="cards-empty">
+      <svg width="32" height="32" viewBox="0 0 16 16" aria-hidden="true">
+        <path fill="currentColor" d="M3 1.5A1.5 1.5 0 0 0 1.5 3v10A1.5 1.5 0 0 0 3 14.5h10A1.5 1.5 0 0 0 14.5 13V5.5a1.5 1.5 0 0 0-1.5-1.5H8.2L6.6 2.3A1.5 1.5 0 0 0 5.6 1.5H3z"/>
+      </svg>
+      <p>Select a file on the left to see its details</p>
+    </div>`;
 }
 
 async function exportOne(id: number): Promise<void> {
@@ -89,20 +126,29 @@ function ingestProgressHtml(): string {
 
 function rowHtml(row: RailRow): string {
   const dot = row.status === "valid" ? "pass" : "fail";
-  const refused = row.status === "refused" ? `
-    <div class="refusal-reason" role="alert">${escapeHtml(row.refusalReason ?? "Refused")}</div>` : "";
+  const selected = row.id === selectedId;
+  return `
+    <div class="rail-row${selected ? " selected" : ""}" data-row="${row.id}" role="button" tabindex="0" aria-pressed="${selected}" aria-label="${escapeHtml(row.fileName)}">
+      <div class="row-head">
+        <span class="dot ${dot}" title="${row.status}"></span>
+        <span class="row-name" title="${escapeHtml(row.fileName)}">${escapeHtml(row.fileName)}</span>
+        <button class="remove" type="button" data-remove="${row.id}" title="Remove ${escapeHtml(row.fileName)}" aria-label="Remove ${escapeHtml(row.fileName)}">✕</button>
+      </div>
+    </div>`;
+}
+
+function cardHtml(row: RailRow): string {
   const download = row.status === "valid" ? `
     <button class="download" type="button" data-export="${row.id}" title="Download prepared invoice" aria-label="Download prepared invoice">
       <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.6.6 0 0 1 .6.6v7.44l2.72-2.72a.6.6 0 1 1 .85.85l-3.75 3.75a.6.6 0 0 1-.85 0L3.82 7.67a.6.6 0 1 1 .85-.85l2.72 2.72V2.1A.6.6 0 0 1 8 1.5zM2.5 13.4a.6.6 0 0 1 .6-.6h9.8a.6.6 0 1 1 0 1.2H3.1a.6.6 0 0 1-.6-.6z"/></svg>
     </button>` : "";
-  const exportNote = exportNoteHtml(row);
+  const refused = row.status === "refused" ? `
+    <div class="refusal-reason" role="alert">${escapeHtml(row.refusalReason ?? "Refused")}</div>` : "";
   return `
-    <div class="rail-row" data-id="${row.id}">
-      <div class="row-head">
-        <span class="dot ${dot}" title="${row.status}"></span>
-        <span class="row-name" title="${escapeHtml(row.fileName)}">${escapeHtml(row.fileName)}</span>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name" title="${escapeHtml(row.fileName)}">${escapeHtml(row.fileName)}</span>
         ${download}
-        <button class="remove" type="button" data-remove="${row.id}" title="Remove ${escapeHtml(row.fileName)}" aria-label="Remove ${escapeHtml(row.fileName)}">✕</button>
       </div>
       <dl class="details-grid">
         ${detailCell("Invoice no.", row.details.invoiceNo)}
@@ -114,7 +160,7 @@ function rowHtml(row: RailRow): string {
       </dl>
       ${facsimileHtml(row)}
       ${refused}
-      ${exportNote}
+      ${exportNoteHtml(row)}
     </div>`;
 }
 
@@ -202,6 +248,7 @@ async function ingestFiles(files: { fileName: string; data: ArrayBuffer }[]): Pr
     render();
   }
   ingest = null;
+  if (selectedId === null && rows.length > 0) selectedId = rows[0]!.id;
   render();
 }
 
