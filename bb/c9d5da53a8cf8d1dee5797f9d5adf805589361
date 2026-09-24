@@ -1,0 +1,19 @@
+.scratch/rto-invoice-fixer/issues/20-rail-card-split.md
+  s_9dd6d288ec231d::t_e84366112e6c2b 7,9-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bbc9d5da53a8cf8d1dee5797f9d5adf805589361",
+  "prompts": {},
+  "sessions": {
+    "s_9dd6d288ec231d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f2c1d3bc5ffe6hU1byKoWiDeQI",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
