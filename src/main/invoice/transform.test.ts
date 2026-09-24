@@ -2,13 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { PDFDict, PDFDocument, PDFName, StandardFonts } from "pdf-lib";
-import { rupeesInWords, recomputeTotals, formatAmount, parseAmount } from "../../shared/totals";
-import { RIGHT_EDGE, findTotalsRows, groupLines, joinRuns, parseAmount as _pa } from "./parse";
+import { parseAmount, recomputeTotals, formatAmount, rupeesInWords } from "../../shared/totals";
+import { RIGHT_EDGE, findTotalsRows, groupLines, joinRuns } from "./parse";
 import { extractRuns, loadDocument, pageContentStream, pageCount } from "./pdf-ops";
 import { PrepareRefusal, prepareInvoice, scanOps, transformStream, type NewValues } from "./transform";
 import { parseInvoice } from "./parse";
-
-void _pa;
 
 const SAMPLE_PATH = join(__dirname, "../../../.scratch/samples/original.pdf");
 const hasSample = (() => {
@@ -53,7 +51,7 @@ describe("recomputeTotals (spec §2 worked example, to the paisa)", () => {
 function buildStream(opts: {
   taxable: string;
   cgstBase: string;
-  amounts: string[]; // the 9 value strings, discount first
+  amounts: string[]; // the 8 value strings, discount first
   words: string;
 }): string {
   const rows: [string, string | null][] = [

@@ -128,7 +128,8 @@ export function checkFonts(doc: PDFDocument, pageIndex: number): string | null {
   return null;
 }
 
-export async function loadDocument(bytes: ArrayBuffer | Uint8Array): Promise<PDFDocument> {  return PDFDocument.load(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes), {
+export async function loadDocument(bytes: ArrayBuffer | Uint8Array): Promise<PDFDocument> {
+  return PDFDocument.load(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes), {
     ignoreEncryption: false,
     throwOnInvalidObject: false,
   });

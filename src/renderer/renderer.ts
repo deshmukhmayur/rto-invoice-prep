@@ -136,7 +136,7 @@ function facsimileHtml(row: RailRow): string {
     <div class="facsimile">
       <div class="facsimile-title">Totals after preparation</div>
       ${facRow("Sub Total", escapeHtml(t.subTotal))}
-      ${facRow("Discount", `<s class="old">${escapeHtml(t.discount)}</s>`, "removed-row")}
+      ${facRow("Discount", `<s class="old">${escapeHtml(t.discount)}</s> <span class="removed-note">✕ removed</span>`, "removed-row")}
       ${facRow("Taxable Value", changed(t.taxableValue, newTaxable))}
       ${facRow(`CGST on ${escapeHtml(newTaxable)}`, changed(t.cgst, formatAmount(n.cgst)))}
       ${facRow(`SGST on ${escapeHtml(newTaxable)}`, changed(t.sgst, formatAmount(n.sgst)))}

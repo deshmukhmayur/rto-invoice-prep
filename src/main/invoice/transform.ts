@@ -196,6 +196,11 @@ export function transformStream(
       throw new PrepareRefusal(`${label} label base "${oldTaxable}" not found as a single string`);
     }
     const run = baseRuns[0]!;
+    // Offsets are computed on unescaped text; a raw literal with escapes would
+    // shift them — refuse rather than corrupt the stream.
+    if (stream.slice(run.op.strStart, run.op.strEnd).includes("\\")) {
+      throw new PrepareRefusal(`${label} label string contains escape sequences — refusing`);
+    }
     const start = run.op.strStart + run.text.indexOf(oldTaxable);
     edits.push({
       start,
