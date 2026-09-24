@@ -4,9 +4,9 @@
 
 **Blocked by:** 14, 15 (both done).
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Rail rows are compact (dot, name, ✕); no details grid or facsimile in the rail
-- [ ] Right pane shows exactly one card — the selected file's — with header (filename + download icon), details grid, facsimile/refusal, export note
-- [ ] Click a rail row to select; selected row is visually distinct; selection survives re-render/ingest/export state changes
-- [ ] Removing the selected file selects the neighbour; last removal returns to the identical empty state
+- [x] Rail rows are compact (dot, name, ✕); no details grid or facsimile in the rail
+- [x] Right pane shows exactly one card — the selected file's — with header (filename + download icon), details grid, facsimile/refusal, export note
+- [x] Click a rail row to select; selected row is visually distinct; selection survives re-render/ingest/export state changes
+- [x] Removing the selected file selects the neighbour; last removal returns to the identical empty state
