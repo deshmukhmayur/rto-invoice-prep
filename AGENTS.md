@@ -1,5 +1,14 @@
 # AGENTS.md
 
+## Tooling
+
+Bun, not npm — always. Install deps with `bun install`, add them with `bun add`, and run scripts with `bun run <script>` (never `npm run`, `npm install`, or `npx`; inside scripts use `bunx`, not `npx`). Key commands:
+
+- `bun install` — install dependencies
+- `bun run typecheck` — TypeScript check (`tsc --noEmit`)
+- `bun run build` — compile to `dist/` (tsc + copy renderer assets)
+- `bun start` — build and launch the Electron app
+
 ## Agent skills
 
 ### Issue tracker
