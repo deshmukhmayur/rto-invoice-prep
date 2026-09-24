@@ -1,0 +1,29 @@
+src/renderer/renderer.ts
+  s_9dd6d288ec231d::t_b7dfd0a52e8298 9,15-16,20-21,27,41-43,60-62,64,69,76-83
+  s_9dd6d288ec231d::t_329c09fa492e5d 51,55-59,63,68
+  s_9dd6d288ec231d::t_fe4d750957fdf9 251
+  s_9dd6d288ec231d::t_14cced146db5cf 84,129-140,145-146,148-150,163
+  s_9dd6d288ec231d::t_9d47f7c56da315 14,17-19,70
+  s_9dd6d288ec231d::t_423872354b1a63 65-67
+  s_9dd6d288ec231d::t_8ac43febf14387 85
+src/renderer/styles.css
+  s_9dd6d288ec231d::t_05e8cf12c2ff99 149-163
+  s_9dd6d288ec231d::t_3df506c8fedb79 232-273
+  s_9dd6d288ec231d::t_1a65792ca4d604 297,317,379
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3bfa7a92f5def2f5ef835011b7aebbed9075cd26",
+  "prompts": {},
+  "sessions": {
+    "s_9dd6d288ec231d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f2c1d3bc5ffe6hU1byKoWiDeQI",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
