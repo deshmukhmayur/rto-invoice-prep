@@ -1,0 +1,407 @@
+.scratch/rto-invoice-fixer/issues/07-assemble-spec.md
+  s_6a0e84ff45867d::t_3c5e52e3b8007d 13,15-25,29-30
+  s_d3ca1e8fd369aa::t_0f9edc686a796c 32
+  s_6a0e84ff45867d::t_b310df55b65b2c 4
+  s_6a0e84ff45867d::t_7230c414dfdeed 14,26-28
+  s_d3ca1e8fd369aa::t_315fd00dc0b07a 1-3,6-8,10-12
+  s_d3ca1e8fd369aa::t_47232a92d3cb07 31
+  s_6a0e84ff45867d::t_7a4b7b253e217a 5
+  s_179d28a71cc1f9::t_b7006e319e6836 9
+.scratch/rto-invoice-fixer/research/03-choose-app-stack.md
+  s_d7ceb30316500a::t_dd161073823242 1-77
+docs/agents/triage-labels.md
+  s_346f0b909aac9b::t_d0ea61e1addef6 1-15
+.scratch/rto-invoice-fixer/issues/02-analyse-sample-diff.md
+  s_18e724b6a09b17::t_e56f0479a2dc35 5
+  s_d3ca1e8fd369aa::t_060dcfd605010b 1-4,6-17,20-21
+  s_18e724b6a09b17::t_656ce9b6e29d12 27
+  s_18e724b6a09b17::t_0ec8ee9b064c03 22-26
+  s_18e724b6a09b17::t_f66504765c5097 18-19
+  s_18e724b6a09b17::t_90352cb67f0870 28
+.scratch/rto-invoice-fixer/issues/01-provide-sample-invoices.md
+  s_ecdde08c4ca94b::t_bd01ebac6676f8 17-22
+  s_ecdde08c4ca94b::t_574a717d2fed72 4
+  s_d3ca1e8fd369aa::t_84bd109344bc2b 1-3,5-16
+.scratch/rto-invoice-fixer/issues/15-prepare-export-one.md
+  s_6a0e84ff45867d::t_1be24e832405d5 1-12
+.scratch/rto-invoice-fixer/issues/03-choose-app-stack.md
+  s_d3ca1e8fd369aa::t_26d7b938949bc1 22-31
+  s_d7ceb30316500a::t_86398fc9beb604 6-7
+  s_d3ca1e8fd369aa::t_71d6c8c8e6ba9d 1-3,5,8-21
+  s_b7d0e1028e582e::t_d44f2e1c79faf8 4
+src/renderer/styles.css
+  s_547a6281412928::t_86f57a01bf6d7a 1-60
+.scratch/rto-invoice-fixer/issues/12-prototype-empty-states.md
+  s_50550c16d9d61b::t_00fe792142fcdf 28-54
+  s_d3ca1e8fd369aa::t_f2abd1247c2c26 1,9,11-12,20-26
+  s_d3ca1e8fd369aa::t_7fe810d39619ba 2-4,6-8,10,13-19,27
+  s_50550c16d9d61b::t_03e0b08f6b5c12 55-84
+  s_50550c16d9d61b::t_92ebfcc24e66d9 5
+package.json
+  s_547a6281412928::t_1b8de900143fef 1-5,7,11-13,17-18
+  s_547a6281412928::t_beee1cfd194886 6,9-10,14-16
+  s_547a6281412928::t_7ccb73713ed4bd 8
+.scratch/rto-invoice-fixer/spec.md
+  s_6a0e84ff45867d::t_a08da6af8a75c5 7
+  s_6a0e84ff45867d::t_eaee390d0875d6 84
+  s_6a0e84ff45867d::t_3f7aad8d1ec6e3 132
+  s_6a0e84ff45867d::t_646dff72aa6db7 80
+  s_6a0e84ff45867d::t_54367c63c03ec1 1-6,8-79,81-83,85-104,121-131,133-152,154-168
+  s_d3ca1e8fd369aa::t_b1598e90098e78 153
+  s_6a0e84ff45867d::t_4a4ee1dd5fd2f1 169-170
+  s_6a0e84ff45867d::t_ba00d83331b26b 105-120
+src/renderer/renderer.ts
+  s_547a6281412928::t_a74b40375649fe 1
+  s_547a6281412928::t_d3e176c84dbd08 2-17
+AGENTS.md
+  s_346f0b909aac9b::t_c3b06b0ca95126 1-15
+docs/agents/domain.md
+  s_346f0b909aac9b::t_0afbb797ac01f4 1-53
+.scratch/rto-invoice-fixer/research/06-distribution-approach.md
+  s_d6b0250df9eacd::t_5382391d6ef11e 1-54,56-169
+  s_d6b0250df9eacd::t_533863819e2428 55
+.scratch/rto-invoice-fixer/map.md
+  s_d3ca1e8fd369aa::t_7e57610e013354 23
+  s_ab56d763a0756d::t_c62a2577aa1183 25
+  s_c4db2ab9a32eb4::t_fee0cbdda8401c 27
+  s_179d28a71cc1f9::t_64f1fbf4a40f68 31
+  s_ecdde08c4ca94b::t_23d49721d227b8 24
+  s_6a0e84ff45867d::t_3da6d9bac6836b 32-33,37
+  s_d3ca1e8fd369aa::t_c1d0ba13f0cb7f 1-11,13-21,34-36,38-43
+  s_d3ca1e8fd369aa::t_4310142dffb482 12
+  s_a613216b46d389::t_704b11700ef162 28
+  s_ab56d763a0756d::t_6fa55716575e5c 29
+  s_a613216b46d389::t_f291a436e6ca41 44
+  s_1363f4695028df::t_261748fe53af77 30
+  s_83a2e6eff77f01::t_e483e2b86c6f48 26
+  s_d3ca1e8fd369aa::t_8ec9ad20f371d7 22
+.scratch/rto-invoice-fixer/issues/08-pin-edge-case-handling.md
+  s_a613216b46d389::t_1d15a1e80c9788 4
+  s_a613216b46d389::t_40e0665f3b286d 17-32
+  s_18e724b6a09b17::t_0532821b5e088e 1-3,5-16
+.scratch/rto-invoice-fixer/issues/10-name-the-tool.md
+  s_c4db2ab9a32eb4::t_79aa34381ecbf4 4
+  s_c4db2ab9a32eb4::t_cd46231217cc31 12-17
+  s_d3ca1e8fd369aa::t_8e7b9ee2863755 1
+  s_c4db2ab9a32eb4::t_b05b78defd9e11 5-7,9-11
+tsconfig.json
+  s_547a6281412928::t_6e50523742a35c 1-16
+.scratch/rto-invoice-fixer/issues/17-logging.md
+  s_6a0e84ff45867d::t_8afa03d040c53c 1-11
+.scratch/rto-invoice-fixer/issues/14-ingest-validate.md
+  s_6a0e84ff45867d::t_e1ca7a2fb59c26 1-12
+.gitignore
+  s_547a6281412928::t_b6a13184ef1764 1-3
+docs/agents/issue-tracker.md
+  s_346f0b909aac9b::t_2a07bd418e6ce2 1-30
+.scratch/rto-invoice-fixer/issues/19-repo-public-distribution.md
+  s_6a0e84ff45867d::t_a180dbf18e5199 3
+  s_6a0e84ff45867d::t_6589e4174d952f 1-2,4-12
+CONTEXT.md
+  s_a613216b46d389::t_8d4090d06fa52d 14
+  s_d3ca1e8fd369aa::t_aa9504bebcf441 1-13
+.scratch/rto-invoice-fixer/issues/04-choose-pdf-technique.md
+  s_d3ca1e8fd369aa::t_2cf9e7bea6c5e9 1-4,6-14
+  s_83a2e6eff77f01::t_77a54b20e09a86 15-20
+  s_83a2e6eff77f01::t_ba633c2f388af1 5
+.scratch/rto-invoice-fixer/prototype/ui-prototype.html
+  s_179d28a71cc1f9::t_7f2e3742213b4d 1681
+  s_50550c16d9d61b::t_755b433275ab7c 834-835
+  s_50550c16d9d61b::t_b3968501ea8391 1499-1506,1513
+  s_179d28a71cc1f9::t_87c3c4e6894a46 520
+  s_179d28a71cc1f9::t_df60087a401cc8 673-675,677-678,680-684,686
+  s_179d28a71cc1f9::t_bf8ba880180042 1707-1708
+  s_50550c16d9d61b::t_639cea84f445cb 1886-1895
+  s_179d28a71cc1f9::t_e844e1615fe74b 1919,1923,1926
+  s_50550c16d9d61b::t_3755c68d22377e 1672,1674-1677
+  s_179d28a71cc1f9::t_d315c82f024b3b 1059
+  s_179d28a71cc1f9::t_ae763e997705f9 1030
+  s_50550c16d9d61b::t_d08bf2d650ca3c 1742,1749-1751
+  s_179d28a71cc1f9::t_abd2fb3633cc39 1685-1687,1696
+  s_179d28a71cc1f9::t_4349b8e0cb588e 1626-1632,1670,1838-1841
+  s_50550c16d9d61b::t_8a66f7761b6f71 1164,1167-1173
+  s_179d28a71cc1f9::t_efcf029c275ea9 1857
+  s_50550c16d9d61b::t_0bf1e0c3c54c55 1042,1044-1046
+  s_179d28a71cc1f9::t_bc7c596c00f234 1622-1624,1633-1635,1646-1647,1665-1667,1669,1726-1727,1736-1737
+  s_179d28a71cc1f9::t_95d2eec079a81c 337-338
+  s_179d28a71cc1f9::t_93666edf8fdc58 1698-1699,1701-1703,1722
+  s_179d28a71cc1f9::t_1cb5fa3c03cd8a 1660,1663,1704
+  s_50550c16d9d61b::t_9b52637ef86b1f 1198,1201-1203,1207-1213
+  s_179d28a71cc1f9::t_e0eabc9e98b360 339-345
+  s_50550c16d9d61b::t_9d20425c65533c 1062,1065-1066,1068-1069
+  s_179d28a71cc1f9::t_92195380bbb452 1574-1577
+  s_179d28a71cc1f9::t_4202d9711608da 422
+  s_179d28a71cc1f9::t_07e0680583b245 458-466,468,471,489-491,496-497,499,502-514,610-612,635-672,676,685,687-700,705-720
+  s_179d28a71cc1f9::t_353d86029ea116 570-577,587
+  s_179d28a71cc1f9::t_ef7d3159ef3889 581-582,589
+  s_179d28a71cc1f9::t_b1f9d4c63a3d04 608-609
+  s_179d28a71cc1f9::t_c32ba1e498a278 1197,1199-1200,1204-1206,1214-1221
+  s_50550c16d9d61b::t_6217da6284aef5 1611
+  s_179d28a71cc1f9::t_8202b5fa612b3e 1668
+  s_179d28a71cc1f9::t_887f1920e87322 521-525,535-550,561-569,603-607
+  s_179d28a71cc1f9::t_9e54fd0ef393a6 900
+  s_179d28a71cc1f9::t_48d9ba4e44b56c 553,557
+  s_179d28a71cc1f9::t_596534f3b93dc7 1680,1682-1684,1688-1691
+  s_179d28a71cc1f9::t_a450b62798e4ba 1805
+  s_179d28a71cc1f9::t_8a229929333b09 1705,1715
+  s_179d28a71cc1f9::t_7a78c1e95384d3 1730-1734,1738-1740
+  s_50550c16d9d61b::t_1a55450d3ce41a 731-737,740
+  s_179d28a71cc1f9::t_f6db5d0242c300 1842-1843
+  s_179d28a71cc1f9::t_acda8b8e2bf24d 1859-1860
+  s_179d28a71cc1f9::t_3d9902aabe6b46 1638,1640-1642,1648-1652,1658,1664
+  s_179d28a71cc1f9::t_24daa100ac53b4 1379,1381,1430,1448,1451-1452,1454-1458,1489,1527,1530-1532,1535-1546,1551,1555,1558-1560,1563,1565-1573,1578,1586-1594,1596-1599,1601-1603,1605-1606,1612-1621,1625,1728-1729,1741,1745-1746
+  s_179d28a71cc1f9::t_fd2b76f1b5d8a1 1711-1713
+  s_50550c16d9d61b::t_6f8fa59f1bcd58 1490-1498,1507-1512,1514-1526,1528-1529,1547-1550,1552-1554,1556-1557,1561,1579-1585
+  s_179d28a71cc1f9::t_913c456578bc5c 1850-1856,1861-1862,1921-1922
+  s_50550c16d9d61b::t_0ae9c4a156aa46 1095-1112,1114-1163,1165-1166,1174
+  s_179d28a71cc1f9::t_575f26dd7a895f 1671,1673,1678-1679,1700,1723-1725
+  s_179d28a71cc1f9::t_d13ba1a73b4d19 3,8-9,17,19,22-26,48,52-57,65-66,68,70,72,74-77,79-82,85-87,89-95,100-101,105,110,113,116,118,120,124-126,132-135,137-139,141-144,146,149,153-163,165,169-170,173-175,177-182,186,189-192,197,200-209,211-212,218,223-224,226-228,230,233,235-243,245,248,250,253-255,262-266,268,270,273,276-278,281-286,288,290,292-299,301-302,305-321,327,332-333,336,347,366-367,370,382-383,388-397,399-415,430,432-439,442-446,448-449,452-457,954,968,970-971,988,994-995,999,1005-1006,1010,1013-1014,1019,1024,1029,1056-1058,1079,1083,1113,1180,1182-1188,1190,1193-1194,1227-1232,1234-1255,1257-1302,1310,1312-1334,1336-1375,1533,1595,1604,1607-1610,1743-1744,1747,1799,1802-1803,1818,1829-1830,1833-1835,1844,1847-1848,1918,1925,1930,1933-1945
+  s_179d28a71cc1f9::t_dbb6e25e79a02d 1459,1464-1472,1474-1488,1534,1562,1564
+  s_50550c16d9d61b::t_3ff26b9691b762 940
+  s_179d28a71cc1f9::t_8d26e1f8a31fcd 578-580,583-586,588,590-591
+  s_179d28a71cc1f9::t_e7c978001884dc 1453
+  s_179d28a71cc1f9::t_4e9e7484627087 1706
+  s_179d28a71cc1f9::t_3918a89268b284 498
+  s_179d28a71cc1f9::t_8542577285dba5 1189
+  s_179d28a71cc1f9::t_c93e3554479825 989,1000,1011,1020
+  s_50550c16d9d61b::t_3c4da2f10207b4 1067
+  s_179d28a71cc1f9::t_8fb7e3d13000bd 1659
+  s_179d28a71cc1f9::t_731848ca68c82c 1473
+  s_179d28a71cc1f9::t_c54aa51b5fceab 1924
+  s_50550c16d9d61b::t_0dac3a48a7271c 4-7
+  s_179d28a71cc1f9::t_3854c8adbe2657 119,123,127-130
+  s_179d28a71cc1f9::t_4b916d96c141b7 346,348-350,352-365
+  s_179d28a71cc1f9::t_9dd237af3bb554 515-519,526-534
+  s_179d28a71cc1f9::t_d50bcdb716a5a2 679
+  s_179d28a71cc1f9::t_b3f7c496d47a24 1060-1061
+  s_179d28a71cc1f9::t_7349dbb377fce1 1920
+  s_179d28a71cc1f9::t_8b582246a8bc40 1440,1444,1446-1447
+  s_50550c16d9d61b::t_798210687a1432 1382-1384,1391-1429
+  s_50550c16d9d61b::t_b371eeee8f89d4 751,756-758
+  s_179d28a71cc1f9::t_9e632f1c4ae4f7 256-261
+  s_179d28a71cc1f9::t_0b777add93d5a7 467,470,487-488,492-495,500-501
+  s_179d28a71cc1f9::t_83e62b60437ca1 1716-1721
+  s_179d28a71cc1f9::t_10c73d694b2a19 1858
+  s_179d28a71cc1f9::t_1f0ec64fd8a6f1 1697
+  s_179d28a71cc1f9::t_9a43ece30dcd26 1460-1463
+  s_179d28a71cc1f9::t_06bf151778eb8b 1636-1637,1639,1643-1645,1653-1657,1662
+  s_179d28a71cc1f9::t_4ff5ca838e4b4c 866-899,901-939,941,955-967,1819-1821
+  s_50550c16d9d61b::t_57f12c8feed907 1759-1760,1764
+  s_50550c16d9d61b::t_7cf3d9d78d3874 1904,1906-1914
+  s_50550c16d9d61b::t_33feaa95119853 1905
+  s_179d28a71cc1f9::t_a85b77101d2fc1 351
+  s_179d28a71cc1f9::t_f9a4248678ddf8 1-2,10-16,18,20-21,27-28,30-47,49-51,58-64,67,69,71,73,78,83-84,88,96-99,102-104,106-109,111-112,114-115,117,121-122,131,136,140,145,147-148,150-152,164,166-168,171-172,176,183-185,187-188,193-196,198-199,210,213-217,219-222,225,229,231-232,234,244,246-247,249,251-252,267,269,271-272,274-275,279-280,287,289,291,300,303-304,322-326,328-331,334-335,368-369,384-387,398,431,440-441,447,450-451,942-953,969,972-987,990-993,996-998,1001-1004,1007-1009,1012,1015-1018,1021-1023,1025-1028,1031-1041,1047-1055,1064,1070-1078,1080-1082,1084-1094,1175-1179,1181,1191-1192,1195-1196,1222-1226,1256,1303-1309,1311,1335,1376-1378,1380,1431,1772,1797-1798,1800-1801,1804,1806-1809,1811-1817,1822-1828,1831-1832,1836-1837,1845-1846,1946-1951
+  s_179d28a71cc1f9::t_00d140738dd31c 469,472-486
+  s_179d28a71cc1f9::t_4b26ca67f8f4fd 592-602
+  s_50550c16d9d61b::t_5e1afb814749c9 628,630-631
+  s_50550c16d9d61b::t_b5cca5ef141d91 1043
+  s_179d28a71cc1f9::t_9ff4e77b9579fb 1233
+  s_179d28a71cc1f9::t_0bab11ec0c333f 1810
+  s_179d28a71cc1f9::t_43a4cafadac961 416-421,423-429
+  s_179d28a71cc1f9::t_b3365306b50b78 701-704
+  s_50550c16d9d61b::t_09d67988a47a95 1600
+  s_179d28a71cc1f9::t_36996b8e465845 1748
+  s_179d28a71cc1f9::t_2e5ab4dad1970c 29
+  s_179d28a71cc1f9::t_c5f71a5c69bc45 1692-1695
+  s_179d28a71cc1f9::t_97a5e45b997ecc 1863-1885,1896-1903,1915-1917,1927-1929,1931-1932
+  s_50550c16d9d61b::t_7c4b9c0135ff5d 1432-1439,1441-1443,1445,1449-1450
+  s_179d28a71cc1f9::t_4c911cde730e75 371-381,551-552,554-556,558-560,613-627,629,632-634,1063,1385-1390,1735,1752-1758,1761-1763,1765-1771,1773-1796
+  s_50550c16d9d61b::t_3973a4c8a5d2ee 721-730,738-739,741-750,752-755,759-833,836-865
+  s_179d28a71cc1f9::t_a2558170d398f9 1661,1709-1710,1714,1849
+src/main.ts
+  s_547a6281412928::t_1984dc66d3326e 1-135
+.scratch/rto-invoice-fixer/issues/11-prototype-ui-design.md
+  s_179d28a71cc1f9::t_44e4883e6a8640 5
+  s_d3ca1e8fd369aa::t_7ea0330079c0b8 1-4,6-15
+  s_179d28a71cc1f9::t_95a6e0f1056899 96-103
+  s_179d28a71cc1f9::t_9e1743a0a43da3 124-125
+  s_179d28a71cc1f9::t_89ca2d150a6e64 35-42
+  s_179d28a71cc1f9::t_97841d76fdbc63 118-123
+  s_179d28a71cc1f9::t_0bdf33bfbfb6d2 110-117
+  s_179d28a71cc1f9::t_5c0d646278eb8d 58-62
+  s_179d28a71cc1f9::t_0c567aa4bd3dde 90-95
+  s_179d28a71cc1f9::t_4310efd8cc75d4 104-109
+  s_179d28a71cc1f9::t_d12e0c78034250 162
+  s_179d28a71cc1f9::t_70b9536451b8e7 127-128
+  s_179d28a71cc1f9::t_7a091c50752ad1 51-57
+  s_179d28a71cc1f9::t_06fe191afef2bb 43-50
+  s_179d28a71cc1f9::t_cb60798593016e 129
+  s_179d28a71cc1f9::t_648cb193e0c145 32-34
+  s_179d28a71cc1f9::t_b499431901df1d 81-89
+  s_179d28a71cc1f9::t_9f23169baa8a7b 16-31
+  s_179d28a71cc1f9::t_cb0aa3ddbfadaf 130-161
+  s_179d28a71cc1f9::t_4d60f58eb6f2b2 63-72
+  s_179d28a71cc1f9::t_4371b257dff753 126
+  s_179d28a71cc1f9::t_74e328e44b0987 73-80
+src/preload.ts
+  s_547a6281412928::t_e70fb7a4142ed0 1,3-5,7-9
+  s_547a6281412928::t_13474f11b76ad5 2,6
+.scratch/rto-invoice-fixer/research/04-choose-pdf-technique.md
+  s_83a2e6eff77f01::t_3b128a8d16d592 1-43
+.scratch/rto-invoice-fixer/research/02-analyse-sample-diff.md
+  s_18e724b6a09b17::t_7d1890d2c47102 1-59
+.scratch/rto-invoice-fixer/issues/16-batch-failure-plumbing.md
+  s_6a0e84ff45867d::t_9aa97a8b1b5d2f 1-11
+src/renderer/index.html
+  s_547a6281412928::t_2fe8820128fc20 1-24
+.scratch/rto-invoice-fixer/issues/06-distribution-approach.md
+  s_d6b0250df9eacd::t_61b02c7cdbb79b 6-7
+  s_d3ca1e8fd369aa::t_e026963ada4714 5
+  s_d3ca1e8fd369aa::t_955c66cd165d93 1-4,8-16
+  s_d6b0250df9eacd::t_e9e241d13adfba 17-26
+src/channels.ts
+  s_547a6281412928::t_e467ce4ee8fda7 1-8
+.scratch/rto-invoice-fixer/issues/05-spec-ux-flow.md
+  s_d3ca1e8fd369aa::t_587ff8c1733afb 1-3,5-11
+  s_1363f4695028df::t_5c0d94e3527a1f 4
+  s_1363f4695028df::t_449b5a602d1e31 12-34
+  s_d3ca1e8fd369aa::t_cf939843f9a274 35-45
+.scratch/rto-invoice-fixer/issues/13-app-shell.md
+  s_6a0e84ff45867d::t_88e00ca267aec7 12
+  s_6a0e84ff45867d::t_1ae6caca874aae 1-11,13
+.scratch/rto-invoice-fixer/issues/09-confirm-identity-content.md
+  s_ab56d763a0756d::t_4b9415aeb40fcd 23-26
+  s_18e724b6a09b17::t_cdb0cb5651ec39 1-3,5-14
+  s_ab56d763a0756d::t_2c6b77793ce51b 4
+  s_ab56d763a0756d::t_cdbfa02c7fcc8e 15-22
+.scratch/rto-invoice-fixer/issues/18-help-about-modals.md
+  s_6a0e84ff45867d::t_6f178e9e2cf9d6 1-11
+bun.lock
+  s_547a6281412928::t_052ea4b003434c 1-175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "83ad4d886d77f244cec64495b9a88122479717b0",
+  "prompts": {},
+  "sessions": {
+    "s_1363f4695028df": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f31186177ffe22oadXnb0wUvJ0",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_179d28a71cc1f9": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f30eaf118ffe3YjPNQC4nVUSXc",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_18e724b6a09b17": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f31de7adcffetz5fRCukqkuybU",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_346f0b909aac9b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f3593a83fffenuUWUVPSNYn7rd",
+        "model": "~z-ai/glm-flash-latest"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_50550c16d9d61b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f2ece929bffe3W0Gfa3KheKAOI",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_547a6281412928": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f2c8398d7ffejgvKXcAzqQqtzs",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_6a0e84ff45867d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f3011cadbffe3UK8MXIXxKEZnD",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_83a2e6eff77f01": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f31c0fc45ffeVjirdC44qY1xVb",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_a613216b46d389": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f316bfc50ffe5icrLu9x3Dg5qd",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_ab56d763a0756d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f311e4030ffe7Z31DXz1xEU3Tu",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_b7d0e1028e582e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f31c8116dffeYOGYy769T1277U",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_c4db2ab9a32eb4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f31a591bbffeZoyd0lihZDr4HQ",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_d3ca1e8fd369aa": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f3585fe22ffeUv2T1NGeBxY3w4",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_d6b0250df9eacd": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f356a7ab5ffexIZiotcz5O8Il3",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_d7ceb30316500a": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f3570b03bfferKjhhze73MujOe",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_ecdde08c4ca94b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f31e75c26ffeBbopTex2CuSkCi",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
