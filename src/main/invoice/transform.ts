@@ -1,4 +1,3 @@
-import { deflateSync } from "zlib";
 import {
   PDFDict,
   PDFDocument,
@@ -295,7 +294,9 @@ export async function prepareInvoice(bytes: Uint8Array, meta: PreparedMetadata):
   const newStream = transformStream(stream, fontMap, widthOf, oldTaxable, newValues);
 
   // Replace page 1's content stream with the re-compressed surgery result.
-  const compressed = deflateSync(Buffer.from(newStream, "latin1"));
+  const compressed = await deflateBytes(
+    Uint8Array.from(newStream, (c) => c.charCodeAt(0) & 0xff),
+  );
   const page = doc.getPage(0);
   const contents = doc.context.register(
     PDFRawStream.of(
@@ -308,6 +309,12 @@ export async function prepareInvoice(bytes: Uint8Array, meta: PreparedMetadata):
   setCustomMetadata(doc, meta);
 
   return (await doc.save({ useObjectStreams: false })) as Uint8Array;
+}
+
+/** zlib-format deflate (RFC 1950), same output as node's deflateSync. */
+async function deflateBytes(bytes: Uint8Array): Promise<Uint8Array> {
+  const stream = new Blob([bytes as unknown as BlobPart]).stream().pipeThrough(new CompressionStream("deflate"));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
 function setCustomMetadata(doc: PDFDocument, meta: PreparedMetadata): void {

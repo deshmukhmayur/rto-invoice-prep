@@ -347,7 +347,7 @@ body {
   white-space: nowrap;
 }
 
-.fac-value { flex: 1; min-width: 0; }
+.fac-value { flex: 1; min-width: 0; text-align: right; }
 
 .fac-row.removed-row .fac-label,
 .fac-row.removed-row .fac-value { text-decoration: line-through; opacity: 0.65; }

@@ -2,6 +2,8 @@
 // Never loaded by the Electron app — index.html only references renderer.js.
 import type { ExportRequest, ExportResult, ParsedRow, PickedFile } from "../src/shared/ingest";
 import type { MenuChannel } from "../src/channels";
+import { prepareInvoice } from "../src/main/invoice/transform";
+import { parseInvoice } from "../src/main/invoice/parse";
 
 declare global {
   interface Window {
@@ -72,14 +74,25 @@ window.app = {
   parse: async (file) => {
     // Simulate read latency so the ingest progress UI is visible in the browser.
     await new Promise((r) => setTimeout(r, 700));
-    return fakeRow(file.fileName);
+    // Files named fake*.pdf get canned rows; everything else goes through the
+    // real parser, so a prepared file re-uploaded here is refused like in the app.
+    if (/^fake/i.test(file.fileName)) return fakeRow(file.fileName);
+    return parseInvoice(file.fileName, new Uint8Array(file.data));
   },
   exportOne: async (req) => {
     if (req.fileName.toLowerCase().includes("bad")) {
       return { status: "refused", reason: "Discount is 0.00 — nothing to remove" };
     }
-    // Simulate a save dialog → real download of the (untransformed) original bytes.
-    const blob = new Blob([req.data], { type: "application/pdf" });
+    // Simulate a save dialog → download of the real prepared bytes, so a
+    // prepared file re-uploaded in dev:browser behaves like in the app.
+    let data = req.data;
+    try {
+      data = await prepareInvoice(req.data, { version: "0.1" });
+    } catch (err) {
+      console.error("[browser dev mock] prepareInvoice failed:", err);
+      return { status: "error", reason: err instanceof Error ? err.message : "Preparation failed" };
+    }
+    const blob = new Blob([data], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
