@@ -1,0 +1,27 @@
+AGENTS.md
+  s_547a6281412928::t_2e245e45961258 11
+scripts/browser-mock.ts
+  s_547a6281412928::t_75c31efadb5031 1-17
+scripts/dev-server.ts
+  s_547a6281412928::t_7b493626dd9f30 1-4,6-23,25-39
+  s_547a6281412928::t_b0bed56c6b15e2 5
+  s_547a6281412928::t_c74f303b08f323 24
+package.json
+  s_547a6281412928::t_8e7aac2c00355f 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8381494db44f571700e7e3326d899f5ddf54fcfc",
+  "prompts": {},
+  "sessions": {
+    "s_547a6281412928": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f2c8398d7ffejgvKXcAzqQqtzs",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
