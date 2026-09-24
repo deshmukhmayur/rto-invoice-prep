@@ -1,0 +1,19 @@
+AGENTS.md
+  s_547a6281412928::t_a4b85dd78d4ddd 3-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "90d505f832ac7dbfc3086b7f54a44030286b671d",
+  "prompts": {},
+  "sessions": {
+    "s_547a6281412928": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f2c8398d7ffejgvKXcAzqQqtzs",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
