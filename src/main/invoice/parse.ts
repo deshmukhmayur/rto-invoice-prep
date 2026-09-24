@@ -1,5 +1,9 @@
 import type { InvoiceDetails, ParsedRow } from "../../shared/ingest";
+import type { PDFDocument } from "pdf-lib";
+import { parseAmount, formatAmount } from "../../shared/totals";
 import { checkContentStreamPattern, checkFonts, extractRuns, loadDocument, pageContentStream, pageCount, type TextRun } from "./pdf-ops";
+
+export { parseAmount, formatAmount };
 
 const TOTALS_LABELS = [
   "Sub Total",
@@ -17,9 +21,9 @@ const TOTALS_LABELS = [
 /** Right edge of the totals amount column, from the sample (spec §3). */
 export const RIGHT_EDGE = 586.3;
 
-type Line = { y: number; runs: TextRun[] };
+export type Line = { y: number; runs: TextRun[] };
 
-function groupLines(runs: TextRun[]): Line[] {
+export function groupLines(runs: TextRun[]): Line[] {
   const sorted = [...runs].sort((a, b) => b.y - a.y || a.x - b.x);
   const lines: Line[] = [];
   for (const run of sorted) {
@@ -31,12 +35,12 @@ function groupLines(runs: TextRun[]): Line[] {
   return lines;
 }
 
-function labelText(line: Line): string {
+export function labelText(line: Line): string {
   const labelRuns = line.runs.filter((r) => r.x < 500);
   return joinRuns(labelRuns).trim();
 }
 
-function joinRuns(runs: TextRun[]): string {
+export function joinRuns(runs: TextRun[]): string {
   let out = "";
   let prevEnd: { x: number; text: string } | null = null;
   for (const r of runs) {
@@ -51,29 +55,14 @@ function joinRuns(runs: TextRun[]): string {
 }
 
 /** Rough Helvetica advance width (0.5 em average) — only used for run-gap joining. */
-function approxWidth(text: string): number {
+export function approxWidth(text: string): number {
   return text.length * 4;
 }
 
-function valueText(line: Line): string | null {
+export function valueText(line: Line): string | null {
   const valueRuns = line.runs.filter((r) => r.x >= 500);
   if (valueRuns.length === 0) return null;
   return joinRuns(valueRuns).trim();
-}
-
-/** Parse an Indian-grouped amount `55,872.88` into paisa. */
-export function parseAmount(s: string): number | null {
-  const m = s.trim().match(/^-?\d{1,3}(?:,\d{2,3})*\.\d{2}$|^-?\d+\.\d{2}$/);
-  if (!m) return null;
-  return Math.round(Number(s.replace(/,/g, "")) * 100);
-}
-
-export function formatAmount(paisa: number): string {
-  const sign = paisa < 0 ? "-" : "";
-  const abs = Math.abs(paisa);
-  const rupees = Math.floor(abs / 100);
-  const group = rupees.toLocaleString("en-IN");
-  return `${sign}${group}.${String(abs % 100).padStart(2, "0")}`;
 }
 
 export type TotalsRow = { label: string; labelFull: string; value: string | null; y: number };
@@ -128,26 +117,34 @@ function refusal(fileName: string, reason: string, details: InvoiceDetails): Par
   return { fileName, status: "refused", refusalReason: reason, details, totals: null };
 }
 
-const UNREADABLE = "~unreadable~";
+export type TotalsLabel = (typeof TOTALS_LABELS)[number];
 
-export async function parseInvoice(fileName: string, bytes: Uint8Array): Promise<ParsedRow> {
-  let doc;
-  try {
-    doc = await loadDocument(bytes);
-  } catch {
-    return refusal(fileName, "Not a readable PDF document", emptyDetails());
-  }
+export type Analysis =
+  | { ok: false; reason: string; details: InvoiceDetails }
+  | {
+      ok: true;
+      details: InvoiceDetails;
+      lines: Line[];
+      rows: TotalsRow[];
+      byLabel: Map<TotalsLabel, TotalsRow>;
+      amounts: Map<TotalsLabel, number>;
+      oldWords: string | null;
+    };
+
+/** Validate the loaded document against the template and extract everything the transformation needs. */
+export function analyze(doc: PDFDocument, fileName: string): Analysis {
+  const empty = emptyDetails();
 
   if (pageCount(doc) !== 2) {
-    return refusal(fileName, `Template validation failed: expected 2 pages, found ${pageCount(doc)}`, emptyDetails());
+    return { ok: false, reason: `Template validation failed: expected 2 pages, found ${pageCount(doc)}`, details: empty };
   }
 
   const fontDrift = checkFonts(doc, 0) ?? checkFonts(doc, 1);
-  if (fontDrift) return refusal(fileName, `Template validation failed: ${fontDrift}`, emptyDetails());
+  if (fontDrift) return { ok: false, reason: `Template validation failed: ${fontDrift}`, details: empty };
 
   const stream = pageContentStream(doc, 0);
   const drift = checkContentStreamPattern(stream);
-  if (drift) return refusal(fileName, `Template validation failed: ${drift}`, emptyDetails());
+  if (drift) return { ok: false, reason: `Template validation failed: ${drift}`, details: empty };
 
   const runs = extractRuns(stream);
   const lines = groupLines(runs);
@@ -157,18 +154,18 @@ export async function parseInvoice(fileName: string, bytes: Uint8Array): Promise
   const details = extractDetails(lines);
 
   if (rows.length === 0) {
-    return refusal(fileName, "No Discount row found — totals block not recognised", details);
+    return { ok: false, reason: "No Discount row found — totals block not recognised", details };
   }
   const discountRows = rows.filter((r) => r.label === "Discount");
   if (discountRows.length === 0) {
-    return refusal(fileName, "No Discount row found", details);
+    return { ok: false, reason: "No Discount row found", details };
   }
   if (discountRows.length > 1) {
-    return refusal(fileName, `Multiple Discount rows found (${discountRows.length})`, details);
+    return { ok: false, reason: `Multiple Discount rows found (${discountRows.length})`, details };
   }
   if (extraLines.length > 0) {
     const observed = extraLines.map((l) => `"${labelText(l)}"`).join(", ");
-    return refusal(fileName, `Unexpected extra row(s) in the totals block: ${observed}`, details);
+    return { ok: false, reason: `Unexpected extra row(s) in the totals block: ${observed}`, details };
   }
 
   // Row set must match exactly; a missing expected row is named.
@@ -177,19 +174,23 @@ export async function parseInvoice(fileName: string, bytes: Uint8Array): Promise
   if (missingLabels.length > 0) {
     const found = rows.map((r) => r.label).join(" → ") || "(none)";
     if (missingLabels.length === TOTALS_LABELS.length) {
-      return refusal(fileName, "No Discount row found — totals block not recognised", details);
+      return { ok: false, reason: "No Discount row found — totals block not recognised", details };
     }
-    return refusal(
-      fileName,
-      `Template validation failed: ${missingLabels[0]} row not found (totals block: ${found})`,
+    return {
+      ok: false,
+      reason: `Template validation failed: ${missingLabels[0]} row not found (totals block: ${found})`,
       details,
-    );
+    };
   }
   for (let i = 0; i < TOTALS_LABELS.length; i++) {
     const row = rows[i]!;
     const expected = TOTALS_LABELS[i]!;
     if (row.label !== expected) {
-      return refusal(fileName, `Template validation failed: totals row ${i + 1} is "${row.labelFull}", expected "${expected}"`, details);
+      return {
+        ok: false,
+        reason: `Template validation failed: totals row ${i + 1} is "${row.labelFull}", expected "${expected}"`,
+        details,
+      };
     }
   }
 
@@ -198,33 +199,44 @@ export async function parseInvoice(fileName: string, bytes: Uint8Array): Promise
     const line = lines.find((l) => l.y === row.y);
     const labelX = line ? Math.min(...line.runs.filter((r) => r.x < 500).map((r) => r.x)) : 0;
     if (labelX < 10 || labelX > 120) {
-      return refusal(fileName, `Template validation failed: "${row.labelFull}" label at unexpected x=${labelX.toFixed(1)}`, details);
+      return {
+        ok: false,
+        reason: `Template validation failed: "${row.labelFull}" label at unexpected x=${labelX.toFixed(1)}`,
+        details,
+      };
     }
   }
   for (let i = 1; i < rows.length; i++) {
     const prev = rows[i - 1]!;
     const row = rows[i]!;
     if (row.y >= prev.y) {
-      return refusal(fileName, `Template validation failed: totals rows out of vertical order at "${row.labelFull}"`, details);
+      return {
+        ok: false,
+        reason: `Template validation failed: totals rows out of vertical order at "${row.labelFull}"`,
+        details,
+      };
     }
   }
 
-  const byLabel = new Map(rows.map((r) => [r.label, r]));
+  const byLabel = new Map(rows.map((r) => [r.label as TotalsLabel, r]));
   const missing = TOTALS_LABELS.filter((l) => {
     const v = byLabel.get(l)?.value;
     return v === null || v === undefined || v.trim() === "";
   });
   if (missing.length > 0) {
-    return refusal(fileName, `Template validation failed: ${missing[0]} amount not found`, details);
+    return { ok: false, reason: `Template validation failed: ${missing[0]} amount not found`, details };
   }
 
-  type TotalsLabel = (typeof TOTALS_LABELS)[number];
   const amounts = new Map<TotalsLabel, number>();
   for (const label of TOTALS_LABELS) {
     const raw = byLabel.get(label)!.value!;
     const paisa = parseAmount(raw);
     if (paisa === null) {
-      return refusal(fileName, `${label} amount not found (value "${raw.trim()}" is not a valid amount)`, details);
+      return {
+        ok: false,
+        reason: `${label} amount not found (value "${raw.trim()}" is not a valid amount)`,
+        details,
+      };
     }
     amounts.set(label, paisa);
   }
@@ -234,34 +246,63 @@ export async function parseInvoice(fileName: string, bytes: Uint8Array): Promise
   const taxable = amounts.get("Taxable Value")!;
 
   if (discount === 0) {
-    return refusal(fileName, "Discount is 0.00 — nothing to remove", details);
+    return { ok: false, reason: "Discount is 0.00 — nothing to remove", details };
   }
 
   const expectedTaxable = subTotal - discount;
   if (expectedTaxable !== taxable) {
-    return refusal(
-      fileName,
-      `Amounts do not add up: ${formatAmount(subTotal)} − ${formatAmount(discount)} = ${formatAmount(expectedTaxable)}, but Taxable Value is ${formatAmount(taxable)}`,
+    return {
+      ok: false,
+      reason: `Amounts do not add up: ${formatAmount(subTotal)} − ${formatAmount(discount)} = ${formatAmount(expectedTaxable)}, but Taxable Value is ${formatAmount(taxable)}`,
       details,
-    );
+    };
   }
 
+  const wordsLine = lines.find((l) => /^Rupees\b.*\bOnly$/.test(joinRuns(l.runs).trim()));
+  const oldWords = wordsLine ? joinRuns(wordsLine.runs).trim() : null;
+  if (!oldWords) {
+    return { ok: false, reason: "Rupees-in-words line not found", details };
+  }
+
+  return {
+    ok: true,
+    details,
+    lines,
+    rows,
+    byLabel,
+    amounts,
+    oldWords,
+  };
+}
+
+export async function parseInvoice(fileName: string, bytes: Uint8Array): Promise<ParsedRow> {
+  let doc;
+  try {
+    doc = await loadDocument(bytes);
+  } catch {
+    return refusal(fileName, "Not a readable PDF document", emptyDetails());
+  }
+  const result = analyze(doc, fileName);
+  if (!result.ok) return refusal(fileName, result.reason, result.details);
+
+  const value = (label: TotalsLabel) => result.byLabel.get(label)!.value!.trim();
   return {
     fileName,
     status: "valid",
     refusalReason: null,
-    details,
+    details: result.details,
     totals: {
-      subTotal: byLabel.get("Sub Total")!.value!.trim(),
-      discount: byLabel.get("Discount")!.value!.trim(),
-      taxableValue: byLabel.get("Taxable Value")!.value!.trim(),
-      cgst: byLabel.get("CGST")!.value!.trim(),
-      sgst: byLabel.get("SGST")!.value!.trim(),
-      exShowroomPrice: byLabel.get("Ex Showroom Price")!.value!.trim(),
-      netAmount: byLabel.get("Net Amount")!.value!.trim(),
-      grandTotal: byLabel.get("Grand Total")!.value!.trim(),
-      roundOff: byLabel.get("Round Off")!.value!.trim(),
-      grandTotalAfterRoundOff: byLabel.get("Grand Total (after Round Off)")!.value!.trim(),
+      subTotal: value("Sub Total"),
+      discount: value("Discount"),
+      taxableValue: value("Taxable Value"),
+      cgst: value("CGST"),
+      sgst: value("SGST"),
+      exShowroomPrice: value("Ex Showroom Price"),
+      netAmount: value("Net Amount"),
+      grandTotal: value("Grand Total"),
+      roundOff: value("Round Off"),
+      grandTotalAfterRoundOff: value("Grand Total (after Round Off)"),
+      words: result.oldWords,
     },
   };
 }
@@ -317,3 +358,5 @@ function extractDetails(lines: Line[]): InvoiceDetails {
 }
 
 export { UNREADABLE };
+
+const UNREADABLE = "~unreadable~";

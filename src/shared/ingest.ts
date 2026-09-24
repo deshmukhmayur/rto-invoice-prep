@@ -23,6 +23,7 @@ export type ParsedRow = {
     grandTotal: string;
     roundOff: string;
     grandTotalAfterRoundOff: string;
+    words: string | null;
   } | null;
 };
 
@@ -34,3 +35,13 @@ export const INGEST_CHANNELS = [
 ] as const;
 
 export type IngestChannel = (typeof INGEST_CHANNELS)[number];
+
+export type ExportRequest = { fileName: string; data: ArrayBuffer };
+
+export type ExportResult =
+  | { status: "saved"; path: string }
+  | { status: "canceled" }
+  | { status: "refused"; reason: string }
+  | { status: "error"; reason: string };
+
+export const EXPORT_CHANNELS = ["export:save-one"] as const;

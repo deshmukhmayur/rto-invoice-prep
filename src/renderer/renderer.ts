@@ -1,7 +1,8 @@
-import type { ParsedRow } from "../shared/ingest";
+import type { ExportResult, ParsedRow } from "../shared/ingest";
+import { formatAmount, parseAmount, recomputeTotals, rupeesInWords } from "../shared/totals";
 import "./app-api";
 
-type RailRow = ParsedRow & { id: number };
+type RailRow = ParsedRow & { id: number; data: ArrayBuffer; export?: ExportResult };
 
 let nextId = 1;
 let rows: RailRow[] = [];
@@ -40,6 +41,19 @@ function render(): void {
       render();
     });
   }
+  for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-export]")) {
+    btn.addEventListener("click", () => void exportOne(Number(btn.dataset.export)));
+  }
+}
+
+async function exportOne(id: number): Promise<void> {
+  const row = rows.find((r) => r.id === id);
+  if (!row || row.status !== "valid") return;
+  const btn = main.querySelector<HTMLButtonElement>(`[data-export="${id}"]`);
+  if (btn) btn.disabled = true;
+  const result = await window.app.exportOne({ fileName: row.fileName, data: row.data });
+  row.export = result;
+  render();
 }
 
 function emptyStateHtml(): string {
@@ -77,11 +91,17 @@ function rowHtml(row: RailRow): string {
   const dot = row.status === "valid" ? "pass" : "fail";
   const refused = row.status === "refused" ? `
     <div class="refusal-reason" role="alert">${escapeHtml(row.refusalReason ?? "Refused")}</div>` : "";
+  const download = row.status === "valid" ? `
+    <button class="download" type="button" data-export="${row.id}" title="Download prepared invoice" aria-label="Download prepared invoice">
+      <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.6.6 0 0 1 .6.6v7.44l2.72-2.72a.6.6 0 1 1 .85.85l-3.75 3.75a.6.6 0 0 1-.85 0L3.82 7.67a.6.6 0 1 1 .85-.85l2.72 2.72V2.1A.6.6 0 0 1 8 1.5zM2.5 13.4a.6.6 0 0 1 .6-.6h9.8a.6.6 0 1 1 0 1.2H3.1a.6.6 0 0 1-.6-.6z"/></svg>
+    </button>` : "";
+  const exportNote = exportNoteHtml(row);
   return `
     <div class="rail-row" data-id="${row.id}">
       <div class="row-head">
         <span class="dot ${dot}" title="${row.status}"></span>
         <span class="row-name" title="${escapeHtml(row.fileName)}">${escapeHtml(row.fileName)}</span>
+        ${download}
         <button class="remove" type="button" data-remove="${row.id}" title="Remove ${escapeHtml(row.fileName)}" aria-label="Remove ${escapeHtml(row.fileName)}">✕</button>
       </div>
       <dl class="details-grid">
@@ -92,8 +112,53 @@ function rowHtml(row: RailRow): string {
         ${detailCell("Chassis no.", row.details.chassisNo)}
         ${detailCell("Engine no.", row.details.engineNo)}
       </dl>
+      ${facsimileHtml(row)}
       ${refused}
+      ${exportNote}
     </div>`;
+}
+
+function facsimileHtml(row: RailRow): string {
+  const t = row.totals;
+  if (row.status !== "valid" || !t) return "";
+  const sub = parseAmount(t.subTotal);
+  if (sub === null) return "";
+  const n = recomputeTotals(sub);
+  const newTaxable = formatAmount(n.taxable);
+  const grand = formatAmount(n.grandTotal);
+  const oldWords = t.words ?? "";
+  const newWords = rupeesInWords(n.grandTotalAfterRoundOff);
+  const changed = (old: string, nw: string) =>
+    `<s class="old">${escapeHtml(old)}</s> <mark class="new">${escapeHtml(nw)}</mark>`;
+  const facRow = (label: string, value: string, cls = "") =>
+    `<div class="fac-row ${cls}"><span class="fac-label">${label}</span><span class="fac-value">${value}</span></div>`;
+  return `
+    <div class="facsimile">
+      <div class="facsimile-title">Totals after preparation</div>
+      ${facRow("Sub Total", escapeHtml(t.subTotal))}
+      ${facRow("Discount", `<s class="old">${escapeHtml(t.discount)}</s>`, "removed-row")}
+      ${facRow("Taxable Value", changed(t.taxableValue, newTaxable))}
+      ${facRow(`CGST on ${escapeHtml(newTaxable)}`, changed(t.cgst, formatAmount(n.cgst)))}
+      ${facRow(`SGST on ${escapeHtml(newTaxable)}`, changed(t.sgst, formatAmount(n.sgst)))}
+      ${facRow("Ex Showroom Price", changed(t.exShowroomPrice, grand))}
+      ${facRow("Net Amount", changed(t.netAmount, grand))}
+      ${facRow("Grand Total", changed(t.grandTotal, grand))}
+      ${facRow("Round Off", changed(t.roundOff, formatAmount(n.roundOff)))}
+      ${facRow("Grand Total (after Round Off)", changed(t.grandTotalAfterRoundOff, formatAmount(n.grandTotalAfterRoundOff)))}
+      ${facRow("Amount in words", changed(oldWords, newWords), "words")}
+    </div>`;
+}
+
+function exportNoteHtml(row: RailRow): string {
+  const e = row.export;
+  if (!e) return "";
+  if (e.status === "saved") {
+    return `<div class="saved-note" role="status">Saved ✓ to ${escapeHtml(e.path)}</div>`;
+  }
+  if (e.status === "refused" || e.status === "error") {
+    return `<div class="refusal-reason" role="alert">${escapeHtml(e.reason)}</div>`;
+  }
+  return "";
 }
 
 function detailCell(label: string, value: string | null): string {
@@ -120,7 +185,7 @@ async function ingestFiles(files: { fileName: string; data: ArrayBuffer }[]): Pr
   for (const file of files) {
     try {
       const parsed = await window.app.parse(file);
-      rows.push({ ...parsed, id: nextId++ });
+      rows.push({ ...parsed, id: nextId++, data: file.data });
     } catch {
       rows.push({
         id: nextId++,
@@ -129,6 +194,7 @@ async function ingestFiles(files: { fileName: string; data: ArrayBuffer }[]): Pr
         refusalReason: "The file could not be read (unexpected error — see log).",
         details: { invoiceNo: null, customer: null, invoiceDate: null, model: null, chassisNo: null, engineNo: null },
         totals: null,
+        data: file.data,
       });
     }
     ingest.done++;

@@ -1,8 +1,9 @@
 import { app, BrowserWindow, Menu, nativeTheme, dialog, ipcMain } from "electron";
 import { join } from "path";
-import { readFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { parseInvoice } from "./main/invoice/parse";
-import type { PickedFile } from "./shared/ingest";
+import { PrepareRefusal, prepareInvoice } from "./main/invoice/transform";
+import type { ExportRequest, ExportResult, PickedFile } from "./shared/ingest";
 
 const APP_TITLE = "RTO Invoice Prep v0.1";
 
@@ -30,6 +31,32 @@ function registerIpc(): void {
 
   ipcMain.handle("ingest:parse", async (_event, file: { fileName: string; data: ArrayBuffer }) => {
     return parseInvoice(file.fileName, new Uint8Array(file.data));
+  });
+
+  ipcMain.handle("export:save-one", async (event, req: ExportRequest): Promise<ExportResult> => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    let prepared: Uint8Array;
+    try {
+      prepared = await prepareInvoice(new Uint8Array(req.data), { version: app.getVersion() });
+    } catch (err) {
+      if (err instanceof PrepareRefusal) return { status: "refused", reason: err.message };
+      const reason = err instanceof Error ? err.message : String(err);
+      return { status: "error", reason };
+    }
+    const defaultName = `${req.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`;
+    const result = await dialog.showSaveDialog(win!, {
+      title: "Save prepared invoice",
+      defaultPath: defaultName,
+      filters: [{ name: "PDF", extensions: ["pdf"] }],
+    });
+    if (result.canceled || !result.filePath) return { status: "canceled" };
+    try {
+      await writeFile(result.filePath, prepared);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      return { status: "error", reason };
+    }
+    return { status: "saved", path: result.filePath };
   });
 }
 

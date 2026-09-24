@@ -1,4 +1,4 @@
-import type { ParsedRow, PickedFile } from "../shared/ingest";
+import type { ExportRequest, ExportResult, ParsedRow, PickedFile } from "../shared/ingest";
 import type { MenuChannel } from "../channels";
 
 declare global {
@@ -7,6 +7,7 @@ declare global {
       onMenu: (channel: MenuChannel, handler: () => void) => void;
       pickFiles: () => Promise<PickedFile[]>;
       parse: (file: PickedFile) => Promise<ParsedRow>;
+      exportOne: (req: ExportRequest) => Promise<ExportResult>;
     };
   }
 }

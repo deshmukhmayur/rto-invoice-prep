@@ -1,6 +1,6 @@
 // Dev-only browser mock of the preload API (see scripts/dev-server.ts).
 // Never loaded by the Electron app — index.html only references renderer.js.
-import type { ParsedRow, PickedFile } from "../src/shared/ingest";
+import type { ExportRequest, ExportResult, ParsedRow, PickedFile } from "../src/shared/ingest";
 import type { MenuChannel } from "../src/channels";
 
 declare global {
@@ -9,6 +9,7 @@ declare global {
       onMenu: (channel: MenuChannel, handler: () => void) => void;
       pickFiles: () => Promise<PickedFile[]>;
       parse: (file: PickedFile) => Promise<ParsedRow>;
+      exportOne: (req: ExportRequest) => Promise<ExportResult>;
     };
   }
 }
@@ -33,7 +34,21 @@ function fakeRow(fileName: string): ParsedRow {
           chassisNo: "MBLHAW502T5H00001",
           engineNo: "HA11F4T5H00001",
         },
-    totals: null,
+    totals: refused
+      ? null
+      : {
+          subTotal: "55,872.88",
+          discount: "1,780.00",
+          taxableValue: "54,092.88",
+          cgst: "4,868.36",
+          sgst: "4,868.36",
+          exShowroomPrice: "63,829.60",
+          netAmount: "63,829.60",
+          grandTotal: "63,829.60",
+          roundOff: "0.40",
+          grandTotalAfterRoundOff: "63,830.00",
+          words: "Rupees Sixty Three Thousand Eight Hundred Thirty Only",
+        },
   };
 }
 
@@ -58,5 +73,19 @@ window.app = {
     // Simulate read latency so the ingest progress UI is visible in the browser.
     await new Promise((r) => setTimeout(r, 700));
     return fakeRow(file.fileName);
+  },
+  exportOne: async (req) => {
+    if (req.fileName.toLowerCase().includes("bad")) {
+      return { status: "refused", reason: "Discount is 0.00 — nothing to remove" };
+    }
+    // Simulate a save dialog → real download of the (untransformed) original bytes.
+    const blob = new Blob([req.data], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${req.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    return { status: "saved", path: `${a.download} (browser download)` };
   },
 };

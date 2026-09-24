@@ -79,7 +79,7 @@ export function extractRuns(stream: string): TextRun[] {
   return runs;
 }
 
-function unescapePdfString(s: string): string {
+export function unescapePdfString(s: string): string {
   return s.replace(/\\(.)/g, (_, c: string) => {
     switch (c) {
       case "n": return "\n";
@@ -128,8 +128,7 @@ export function checkFonts(doc: PDFDocument, pageIndex: number): string | null {
   return null;
 }
 
-export async function loadDocument(bytes: ArrayBuffer | Uint8Array): Promise<PDFDocument> {
-  return PDFDocument.load(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes), {
+export async function loadDocument(bytes: ArrayBuffer | Uint8Array): Promise<PDFDocument> {  return PDFDocument.load(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes), {
     ignoreEncryption: false,
     throwOnInvalidObject: false,
   });
@@ -137,4 +136,21 @@ export async function loadDocument(bytes: ArrayBuffer | Uint8Array): Promise<PDF
 
 export function pageCount(doc: PDFDocument): number {
   return doc.getPageCount();
+}
+
+/** Map text-font resource keys (`F1`, `F2`, …) to their BaseFont names. */
+export function pageFontMap(doc: PDFDocument, pageIndex: number): Map<string, string> {
+  const page = doc.getPage(pageIndex);
+  const map = new Map<string, string>();
+  const fontsDict = page.node.Resources()?.lookup(PDFName.of("Font"), PDFDict);
+  if (!fontsDict) return map;
+  for (const [key, value] of fontsDict.entries()) {
+    const font = doc.context.lookupMaybe(value, PDFDict);
+    const baseFont = font?.lookup(PDFName.of("BaseFont"));
+    if (baseFont instanceof PDFName) {
+      const name = key instanceof PDFName ? key.asString().replace("/", "") : String(key);
+      map.set(name, baseFont.asString().replace("/", ""));
+    }
+  }
+  return map;
 }

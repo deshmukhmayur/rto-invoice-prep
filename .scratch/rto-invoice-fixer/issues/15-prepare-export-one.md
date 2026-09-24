@@ -4,9 +4,9 @@
 
 **Blocked by:** 14.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Preparing `.scratch/samples/original.pdf` reproduces §2's worked example to the paisa, including the words line
-- [ ] Output opens in pdf.js identical to the original except the totals block; image objects, ruling lines, page 2, and original metadata are byte-identical
-- [ ] Right-alignment holds for a thousands-boundary-crossing amount (e.g. `9,828.56 → 10,028.56`), not just same-width substitutions
-- [ ] Per-file Download writes `<original>-RTO.pdf` to a chosen folder; the original file is never touched
+- [x] Preparing `.scratch/samples/original.pdf` reproduces §2's worked example to the paisa, including the words line
+- [x] Output opens in pdf.js identical to the original except the totals block; image objects, ruling lines, page 2, and original metadata are byte-identical
+- [x] Right-alignment holds for a thousands-boundary-crossing amount (e.g. `9,828.56 → 10,028.56`), not just same-width substitutions
+- [x] Per-file Download writes `<original>-RTO.pdf` to a chosen folder; the original file is never touched

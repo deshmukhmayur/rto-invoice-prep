@@ -61,6 +61,7 @@ describe("parseInvoice against the real sample", () => {
       grandTotal: "63,829.60",
       roundOff: "0.40",
       grandTotalAfterRoundOff: "63,830.00",
+      words: "Rupees Sixty Three Thousand Eight Hundred Thirty Only",
     });
     expect(row.details).toEqual({
       invoiceNo: "10000BI26S0001",
