@@ -31,6 +31,8 @@ function render(): void {
     </div>`;
 
   document.getElementById("upload-block")?.addEventListener("click", pickAndIngest);
+  const fill = main.querySelector<HTMLElement>(".ingest-bar-fill[data-fill]");
+  if (fill && ingest) fill.style.width = `${Math.round((ingest.done / ingest.total) * 100)}%`;
   for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-remove]")) {
     btn.addEventListener("click", () => {
       const id = Number(btn.dataset.remove);
@@ -55,11 +57,10 @@ function emptyStateHtml(): string {
 
 function ingestProgressHtml(): string {
   if (!ingest) return "";
-  const pct = Math.round((ingest.done / ingest.total) * 100);
   return `
     <div class="ingest-progress">
       <div class="ingest-progress-label">Reading ${Math.min(ingest.done + 1, ingest.total)} of ${ingest.total}…</div>
-      <div class="ingest-bar"><div class="ingest-bar-fill" style="width:${pct}%"></div></div>
+      <div class="ingest-bar"><div class="ingest-bar-fill" data-fill></div></div>
     </div>
     ${ingest.pending
       .map(

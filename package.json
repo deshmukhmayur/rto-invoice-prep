@@ -5,9 +5,9 @@
   "description": "Prepare dealership invoices for RTO registration",
   "main": "dist/main.js",
   "scripts": {
-    "build": "bunx tsc && cp src/renderer/index.html src/renderer/styles.css dist/renderer/",
+    "build": "bunx tsc && bun build src/renderer/renderer.ts --outdir dist/renderer --target browser --format iife && cp src/renderer/index.html src/renderer/styles.css dist/renderer/",
     "start": "bun run build && electron .",
-    "dev:browser": "bun build scripts/browser-mock.ts --outdir dist/renderer --target browser && bun scripts/dev-server.ts",
+    "dev:browser": "bun build src/renderer/renderer.ts scripts/browser-mock.ts --outdir dist/renderer --target browser --format iife && bun scripts/dev-server.ts",
     "typecheck": "bunx tsc --noEmit",
     "test": "bun test"
   },
