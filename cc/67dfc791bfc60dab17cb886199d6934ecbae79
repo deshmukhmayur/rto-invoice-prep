@@ -1,0 +1,24 @@
+package.json
+  s_2bf2e700caee4d::t_1cf166355480f8 8,10,24
+src/renderer/index.html
+  s_2bf2e700caee4d::t_3193a3dff16a83 6
+src/renderer/renderer.ts
+  s_2bf2e700caee4d::t_535d3ff6264f98 63
+  s_2bf2e700caee4d::t_1368b656443a96 34-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cc67dfc791bfc60dab17cb886199d6934ecbae79",
+  "prompts": {},
+  "sessions": {
+    "s_2bf2e700caee4d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f2c6bdae1ffei0V1qhsDuSyLac",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
