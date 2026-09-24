@@ -1,0 +1,28 @@
+src/main/invoice/transform.ts
+  s_9dd6d288ec231d::t_55f118c1d3928e 297-299
+  s_9dd6d288ec231d::t_386ffe6166ea30 314-319
+scripts/browser-mock.ts
+  s_9dd6d288ec231d::t_64d23f5c61888e 77-80
+  s_9dd6d288ec231d::t_d0d19b075f346b 86-91,93-95
+  s_9dd6d288ec231d::t_763336ca572054 92
+  s_9dd6d288ec231d::t_ddf126057d9dce 5
+  s_9dd6d288ec231d::t_3baaf00845847f 6
+src/renderer/styles.css
+  s_9dd6d288ec231d::t_59d1c3e57b9579 350
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0111657e9b0e528c6e81b573a6fc018cc631c46e",
+  "prompts": {},
+  "sessions": {
+    "s_9dd6d288ec231d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f2c1d3bc5ffe6hU1byKoWiDeQI",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
