@@ -5,9 +5,9 @@
     "": {
       "name": "rto-invoice-prep",
       "devDependencies": {
-        "@types/node": "^22",
-        "electron": "^33.0.0",
-        "typescript": "^5.6.0",
+        "@types/node": "^22.20.4",
+        "electron": "^33.4.11",
+        "typescript": "^5.9.3",
       },
     },
   },

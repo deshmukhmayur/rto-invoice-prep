@@ -8,6 +8,7 @@ Bun, not npm — always. Install deps with `bun install`, add them with `bun add
 - `bun run typecheck` — TypeScript check (`tsc --noEmit`)
 - `bun run build` — compile to `dist/` (tsc + copy renderer assets)
 - `bun start` — build and launch the Electron app
+- `bun run dev:browser` — dev-only: serve the renderer UI in a plain browser (no X server needed), with the preload API mocked by `scripts/browser-mock.ts` (never shipped in the app)
 
 ## Agent skills
 
