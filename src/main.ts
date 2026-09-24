@@ -1,9 +1,37 @@
-import { app, BrowserWindow, Menu, nativeTheme } from "electron";
+import { app, BrowserWindow, Menu, nativeTheme, dialog, ipcMain } from "electron";
 import { join } from "path";
+import { readFile } from "fs/promises";
+import { parseInvoice } from "./main/invoice/parse";
+import type { PickedFile } from "./shared/ingest";
 
 const APP_TITLE = "RTO Invoice Prep v0.1";
 
 let windows: BrowserWindow[] = [];
+
+function registerIpc(): void {
+  ipcMain.handle("ingest:pick-files", async (event): Promise<PickedFile[]> => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const result = await dialog.showOpenDialog(win!, {
+      title: "Upload invoices",
+      filters: [{ name: "Invoice PDFs", extensions: ["pdf"] }],
+      properties: ["openFile", "multiSelections"],
+    });
+    if (result.canceled) return [];
+    const files: PickedFile[] = [];
+    for (const path of result.filePaths) {
+      const data = await readFile(path);
+      files.push({
+        fileName: path.replace(/\\/g, "/").split("/").pop() ?? path,
+        data: data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength),
+      });
+    }
+    return files;
+  });
+
+  ipcMain.handle("ingest:parse", async (_event, file: { fileName: string; data: ArrayBuffer }) => {
+    return parseInvoice(file.fileName, new Uint8Array(file.data));
+  });
+}
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -122,6 +150,7 @@ function buildMenu(): void {
 
 app.whenReady().then(() => {
   nativeTheme.themeSource = "system";
+  registerIpc();
   buildMenu();
   createWindow();
 

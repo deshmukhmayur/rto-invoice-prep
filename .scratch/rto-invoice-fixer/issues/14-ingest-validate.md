@@ -4,9 +4,9 @@
 
 **Blocked by:** 13.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Drop / File → Upload Invoice / upload block all ingest; drag-hover overlay and ingest placeholders behave per spec §6
-- [ ] Sample `original.pdf` passes validation; every §4 refusal case is demonstrated with a synthetic/hand-made variant and shows its named-field message
-- [ ] Validator fails loudly on a deliberately mutated stream (TJ array, moved row, or subset font)
-- [ ] ✕ on any row returns to the identical empty state
+- [x] Drop / File → Upload Invoice / upload block all ingest; drag-hover overlay and ingest placeholders behave per spec §6
+- [x] Sample `original.pdf` passes validation; every §4 refusal case is demonstrated with a synthetic/hand-made variant and shows its named-field message
+- [x] Validator fails loudly on a deliberately mutated stream (TJ array, moved row, or subset font)
+- [x] ✕ on any row returns to the identical empty state

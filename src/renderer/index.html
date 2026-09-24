@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main>
+  <main id="app">
     <div class="empty-state" id="empty-state">
       <svg width="40" height="40" viewBox="0 0 16 16" aria-hidden="true">
         <path fill="currentColor" d="M3 1.5A1.5 1.5 0 0 0 1.5 3v10A1.5 1.5 0 0 0 3 14.5h10A1.5 1.5 0 0 0 14.5 13V5.5a1.5 1.5 0 0 0-1.5-1.5H8.2L6.6 2.3A1.5 1.5 0 0 0 5.6 1.5H3z"/>
@@ -19,6 +19,14 @@
       <p class="stateless">Nothing is stored between sessions — the batch lives only in this window.</p>
     </div>
   </main>
+  <div id="drag-overlay" aria-hidden="true">
+    <div class="drag-overlay-box">
+      <svg width="40" height="40" viewBox="0 0 16 16" aria-hidden="true">
+        <path fill="currentColor" d="M8.5 1.5a.5.5 0 0 0-1 0v8.3L4.35 6.65a.5.5 0 1 0-.7.7l4 4a.5.5 0 0 0 .7 0l4-4a.5.5 0 1 0-.7-.7L8.5 9.8V1.5zM2.5 12a.5.5 0 0 1 .5.5v1.5h10v-1.5a.5.5 0 0 1 1 0v2a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5z"/>
+      </svg>
+      <span>Drop PDFs to add them</span>
+    </div>
+  </div>
   <script src="renderer.js"></script>
 </body>
 </html>

@@ -8,12 +8,17 @@
     "build": "bunx tsc && cp src/renderer/index.html src/renderer/styles.css dist/renderer/",
     "start": "bun run build && electron .",
     "dev:browser": "bun build scripts/browser-mock.ts --outdir dist/renderer --target browser && bun scripts/dev-server.ts",
-    "typecheck": "bunx tsc --noEmit"
+    "typecheck": "bunx tsc --noEmit",
+    "test": "bun test"
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/bun": "^1.4.2",
     "@types/node": "^22.20.4",
     "electron": "^33.4.11",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
   }
 }
