@@ -1,0 +1,19 @@
+src/main/invoice/parse.test.ts
+  s_490f30d01cb509::t_d5385a1e413faa 66-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "57a98fcb2fb1a189931396bc15cd1be6b0279c97",
+  "prompts": {},
+  "sessions": {
+    "s_490f30d01cb509": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f280c543bffe8y1DXLuac9dHB3",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
