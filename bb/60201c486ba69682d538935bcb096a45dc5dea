@@ -1,0 +1,46 @@
+scripts/browser-mock.ts
+  s_8e61e27eadf1e7::t_32d21938fe5264 13
+  s_8e61e27eadf1e7::t_9398061a76993d 208-218
+  s_8e61e27eadf1e7::t_adf59ada8c6c88 34-36
+src/channels.ts
+  s_8e61e27eadf1e7::t_295fe86c0729cd 3,6
+src/renderer/renderer.ts
+  s_8e61e27eadf1e7::t_1604590f8008b9 635,646-708,711,713-719,721-722,724-732,735,742,748
+  s_8e61e27eadf1e7::t_14d11ff6aa9dad 720,723
+  s_8e61e27eadf1e7::t_621653d92ebcee 625-626
+  s_8e61e27eadf1e7::t_11ec6941768f2c 596,598-600,602-612,615-617,619,622,624
+  s_8e61e27eadf1e7::t_060caeedb3040c 1,13-20
+  s_8e61e27eadf1e7::t_ed56248d0a681d 623
+  s_8e61e27eadf1e7::t_436714d4d7842a 39-41,45-49
+  s_8e61e27eadf1e7::t_5ceee176553f02 21
+src/renderer/styles.css
+  s_8e61e27eadf1e7::t_32cb38b61d00b8 811-935
+src/preload.ts
+  s_8e61e27eadf1e7::t_78a6c393728cba 39-41
+  s_8e61e27eadf1e7::t_40446ee016b3d9 3
+src/renderer/app-api.ts
+  s_8e61e27eadf1e7::t_6a66e221459808 11
+  s_8e61e27eadf1e7::t_6ca331c060b4af 33-35
+src/main.ts
+  s_8e61e27eadf1e7::t_50088e3635bb09 8
+  s_8e61e27eadf1e7::t_5e6a1ab1d6b2ba 342-347,351-352,356-360
+  s_8e61e27eadf1e7::t_f8632a384cfb29 141-154
+src/shared/app.ts
+  s_8e61e27eadf1e7::t_98df27825a24cc 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bb60201c486ba69682d538935bcb096a45dc5dea",
+  "prompts": {},
+  "sessions": {
+    "s_8e61e27eadf1e7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed9a2302bffeGIY2zPj5g3Tcrv",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
