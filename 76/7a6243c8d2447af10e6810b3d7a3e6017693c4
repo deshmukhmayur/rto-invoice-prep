@@ -1,0 +1,113 @@
+src/main/log.ts
+  s_c54a4230f5f293::t_698af120880caa 11
+  s_c54a4230f5f293::t_1bb58d0d9640e6 6-7,10,15-20,24-34,53
+  s_c54a4230f5f293::t_7e7b2d75366046 23,35-45,47-49
+  s_c54a4230f5f293::t_d6eb84b7a44c52 3,5
+src/shared/log.ts
+  s_c54a4230f5f293::t_af66d352695349 1-7
+src/renderer/app-api.ts
+  s_c54a4230f5f293::t_65e7d203223566 12
+  s_c54a4230f5f293::t_3b432c67238442 27-28,30
+  s_c54a4230f5f293::t_0ae92edb66ddb4 29
+src/main.ts
+  s_c54a4230f5f293::t_1e2fc14e10e861 6
+  s_c54a4230f5f293::t_b86ab217c65832 56-60,63,65-67
+  s_c54a4230f5f293::t_a11763e3252ee7 14
+  s_c54a4230f5f293::t_03056f121ad47d 61-62,64,68-69,73
+  s_c54a4230f5f293::t_5c0f2941d34bbd 106,109
+  s_c54a4230f5f293::t_3e5cf7d3b9fc3f 123-124,132
+  s_c54a4230f5f293::t_02731db58ada0e 217-220,224,226
+  s_c54a4230f5f293::t_fb4ebef593e96c 117-122,125-131,133-135
+  s_c54a4230f5f293::t_84e85149cd8bcf 171,175,179
+  s_c54a4230f5f293::t_ff2e3168e6918e 190,196,199
+  s_c54a4230f5f293::t_dc3f9d202a6c33 194-195
+  s_c54a4230f5f293::t_1fb9f5be8848fb 24-28
+  s_c54a4230f5f293::t_5ef58780765594 223,225
+  s_c54a4230f5f293::t_428bc6df3a4751 328
+scripts/browser-mock.ts
+  s_eec409ade009c3::t_7e965bc589a3cd 71
+  s_c54a4230f5f293::t_3bfe93be557767 78-85
+  s_c54a4230f5f293::t_84997ffa9b47f4 195-198
+  s_eec409ade009c3::t_3bc6f133e617db 48,56
+  s_c54a4230f5f293::t_70a8322bab252a 190-194
+  s_c54a4230f5f293::t_2a35a06e34d1c0 189
+  s_c54a4230f5f293::t_891d819b2e9c31 188,199-202
+src/main/log.test.ts
+  s_c54a4230f5f293::t_a1711e59e20f8c 5
+  s_c54a4230f5f293::t_6e5ca1b39de2ef 33
+  s_c54a4230f5f293::t_d24ea1a3e77f00 13,17
+  s_c54a4230f5f293::t_031a6a8f943798 1-4,6-12,14-16,18-28,34,38-39
+  s_c54a4230f5f293::t_56155b58f8c235 35-37
+  s_c54a4230f5f293::t_e2290d5524a594 29-32
+src/renderer/styles.css
+  s_eec409ade009c3::t_4c88f8b253341b 313
+  s_c54a4230f5f293::t_ac5e13d75761ae 735-844
+  s_eec409ade009c3::t_92f3d244088ac8 93-113,119-120
+  s_eec409ade009c3::t_398aadcc404e93 74-90
+  s_eec409ade009c3::t_5a0bd6c5620735 116
+  s_eec409ade009c3::t_b7c69581530191 130-147
+src/preload.ts
+  s_c54a4230f5f293::t_709157ef27f6f3 33,36
+  s_c54a4230f5f293::t_ed559a654c6194 34
+  s_c54a4230f5f293::t_ddff29c3149cc3 35
+  s_c54a4230f5f293::t_4415e5eca04a3b 3
+src/renderer/renderer.ts
+  s_c54a4230f5f293::t_b3868d6dbc7b53 8
+  s_c54a4230f5f293::t_e1464025ccfc09 154
+  s_eec409ade009c3::t_6c0fac3d43e496 423-424,426-429
+  s_c54a4230f5f293::t_c7a760f12269df 615
+  s_eec409ade009c3::t_f9f8d87563ccd7 70
+  s_c54a4230f5f293::t_db5f7e846a7a99 4
+  s_eec409ade009c3::t_714a43ee6462f6 63,65
+  s_c54a4230f5f293::t_99688ba8446eb9 29-35
+  s_c54a4230f5f293::t_7bf9a229cd875c 243
+  s_eec409ade009c3::t_f5deb9f3c1431d 62
+  s_eec409ade009c3::t_035209083e8b30 318-319
+  s_c54a4230f5f293::t_a1e8785c96abc6 37-40
+  s_eec409ade009c3::t_ed2458e6fff4fd 380
+  s_eec409ade009c3::t_4471d9ac2a9d31 466-470
+  s_c54a4230f5f293::t_b5399c7ba4a89c 608
+  s_eec409ade009c3::t_7cd0d6d33d0aa6 175-187,193
+  s_c54a4230f5f293::t_0c6f3d0c878472 297
+  s_c54a4230f5f293::t_d3d40644497751 418-422,425,430-444,448-449
+  s_c54a4230f5f293::t_ee70bf51541c0c 624
+  s_c54a4230f5f293::t_b5e4438bae3c68 580,583-607,609-614,616-623,625-656
+  s_c54a4230f5f293::t_5ddc1b90b6338a 270
+  s_c54a4230f5f293::t_82946c01bda7c5 132
+  s_c54a4230f5f293::t_e382bbe797a200 36
+  s_c54a4230f5f293::t_c1b6c4ae2cc880 657
+src/renderer/index.html
+  s_eec409ade009c3::t_11f7a9338c4450 11
+  s_c54a4230f5f293::t_dcad1b5f7fb72b 12
+src/shared/ingest.ts
+  s_eec409ade009c3::t_1cc2df4bd3bcbc 7,9-10
+  s_eec409ade009c3::t_f22c68775ae176 40-48
+  s_c54a4230f5f293::t_0a8af4fced25ce 58-66
+  s_eec409ade009c3::t_091145fb0a68fc 31-32
+  s_c54a4230f5f293::t_0986495c842b55 74
+  s_c54a4230f5f293::t_26302948f0c869 93-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "767a6243c8d2447af10e6810b3d7a3e6017693c4",
+  "prompts": {},
+  "sessions": {
+    "s_c54a4230f5f293": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed9b5c881ffeJzYW6M76R6qeOU",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_eec409ade009c3": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_eed9f355affeWnH7aWXxCdfzEP",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
