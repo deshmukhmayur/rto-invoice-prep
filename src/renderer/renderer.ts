@@ -392,8 +392,8 @@ function cardHtml(row: RailRow): string {
       ? ""
       : `<dl class="details-grid">
           ${detailCell("Invoice no.", row.details.invoiceNo)}
-          ${detailCell("Customer", row.details.customer)}
           ${detailCell("Invoice date", row.details.invoiceDate)}
+          ${detailCell("Customer", row.details.customer)}
           ${detailCell("Model", row.details.model)}
           ${detailCell("Chassis no.", row.details.chassisNo)}
           ${detailCell(row.details.engineLabel === "Motor#" ? "Motor no." : "Engine no.", row.details.engineNo)}
