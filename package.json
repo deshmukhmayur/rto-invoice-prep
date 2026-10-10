@@ -20,7 +20,8 @@
       "output": "release"
     },
     "files": [
-      "dist/**/*"
+      "dist/**/*",
+      "!dist/renderer/browser-mock.js"
     ],
     "publish": [
       {

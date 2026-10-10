@@ -386,6 +386,9 @@ app.whenReady().then(() => {
   if (app.isPackaged) {
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
+    void autoUpdater.checkForUpdates().catch(() => {
+      // Offline or feed unreachable — the manual check in the About modal still works.
+    });
   }
   initLog(app.getPath("userData"));
   registerIpc();
