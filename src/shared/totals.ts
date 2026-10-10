@@ -15,21 +15,43 @@ export function formatAmount(paisa: number): string {
   return `${sign}${group}.${String(abs % 100).padStart(2, "0")}`;
 }
 
-/** Recompute the totals block as if the discount were zero (spec §2), all in paisa. */
-export function recomputeTotals(subTotal: number): {
+/**
+ * Recompute the totals block as if the discount were zero (spec §2), all in
+ * paisa. The tax rate is derived from the invoice (cgst ÷ taxable — 9% for
+ * ICE, 2.5% for EVs), and post-tax deductions (e.g. PM E-DRIVE Subsidy) are
+ * kept: Net = Ex Showroom − deductions.
+ */
+export function recomputeTotals(
+  subTotal: number,
+  taxRate = 0.09,
+  deductionsTotal = 0,
+): {
   taxable: number;
   cgst: number;
   sgst: number;
+  exShowroom: number;
+  net: number;
   grandTotal: number;
   roundOff: number;
   grandTotalAfterRoundOff: number;
 } {
   const taxable = subTotal;
-  const cgst = Math.round(taxable * 0.09);
+  const cgst = Math.round(taxable * taxRate);
   const sgst = cgst;
-  const grandTotal = taxable + cgst + sgst;
+  const exShowroom = taxable + cgst + sgst;
+  const net = exShowroom - deductionsTotal;
+  const grandTotal = net;
   const roundOff = Math.round(grandTotal / 100) * 100 - grandTotal;
-  return { taxable, cgst, sgst, grandTotal, roundOff, grandTotalAfterRoundOff: grandTotal + roundOff };
+  return {
+    taxable,
+    cgst,
+    sgst,
+    exShowroom,
+    net,
+    grandTotal,
+    roundOff,
+    grandTotalAfterRoundOff: grandTotal + roundOff,
+  };
 }
 
 const ONES = [

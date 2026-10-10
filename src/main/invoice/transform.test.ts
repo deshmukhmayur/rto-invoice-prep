@@ -20,6 +20,18 @@ const hasSample = (() => {
 
 const originalBytes = () => new Uint8Array(readFileSync(SAMPLE_PATH));
 
+const EV_SAMPLE_PATH = join(__dirname, "../../../.scratch/samples/03677.pdf");
+const hasEvSample = (() => {
+  try {
+    readFileSync(EV_SAMPLE_PATH);
+    return true;
+  } catch {
+    return false;
+  }
+});
+
+const evBytes = () => new Uint8Array(readFileSync(EV_SAMPLE_PATH));
+
 describe("number-to-words (Indian system)", () => {
   test("sample totals", () => {
     expect(rupeesInWords(6593000)).toBe("Rupees Sixty Five Thousand Nine Hundred Thirty Only");
@@ -252,6 +264,33 @@ describe("prepareInvoice against the real sample (acceptance, ticket 15)", () =>
         expect(infoDict.get(key)?.toString()).toBe(value.toString());
       }
     }
+  });
+
+  test.skipIf(!hasEvSample)("03677.pdf (EV): subsidy kept, 2.5% rate derived, net = ex showroom − subsidy", async () => {
+    const out = await prepareInvoice(evBytes(), { version: "0.1.0" });
+    const doc = await loadDocument(out);
+    const lines = groupLines(extractRuns(pageContentStream(doc, 0)));
+    const { rows, deductions } = findTotalsRows(lines);
+    const byLabel = new Map(rows.map((r) => [r.label, r]));
+
+    // Derived rate: 2,916.66 / 116,666.38 → 2.5%; taxable becomes sub total
+    // (formatAmount regroups into proper Indian lakh formatting).
+    expect(byLabel.get("Taxable Value")!.value).toBe("1,24,752.38");
+    expect(byLabel.get("CGST")!.value).toBe("3,118.81");
+    expect(byLabel.get("SGST")!.value).toBe("3,118.81");
+    expect(byLabel.get("Ex Showroom Price")!.value).toBe("1,30,990.00");
+    // Deduction row untouched; Net = Ex Showroom − Subsidy.
+    expect(deductions).toHaveLength(1);
+    expect(deductions[0]!.label).toBe("PM E-DRIVE Subsidy");
+    expect(deductions[0]!.value).toBe("5,000.00");
+    expect(byLabel.get("Net Amount")!.value).toBe("1,25,990.00");
+    expect(byLabel.get("Grand Total")!.value).toBe("1,25,990.00");
+    expect(byLabel.get("Round Off")!.value).toBe("0.00");
+    expect(byLabel.get("Grand Total (after Round Off)")!.value).toBe("1,25,990.00");
+
+    // Words regenerated for the post-subsidy amount.
+    const wordsLine = lines.find((l) => /^Rupees\b/.test(joinRuns(l.runs).trim()))!;
+    expect(joinRuns(wordsLine.runs).trim()).toBe("Rupees One Lakh Twenty Five Thousand Nine Hundred Ninety Only");
   });
 
   test.skipIf(!hasSample)("a prepared file is refused on re-ingest (no Discount row — no double processing)", async () => {

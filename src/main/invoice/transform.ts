@@ -277,13 +277,15 @@ export async function prepareInvoice(bytes: Uint8Array, meta: PreparedMetadata):
   const { widthOf } = await metrics();
 
   const subTotal = analysis.amounts.get("Sub Total")!;
-  const t = recomputeTotals(subTotal);
+  const taxRate = analysis.amounts.get("CGST")! / analysis.amounts.get("Taxable Value")!;
+  const deductionsTotal = analysis.deductions.reduce((sum, d) => sum + d.amount, 0);
+  const t = recomputeTotals(subTotal, taxRate, deductionsTotal);
   const newValues: NewValues = {
     taxable: formatAmount(t.taxable),
     cgstAmount: formatAmount(t.cgst),
     sgstAmount: formatAmount(t.sgst),
-    exShowroomPrice: formatAmount(t.grandTotal),
-    netAmount: formatAmount(t.grandTotal),
+    exShowroomPrice: formatAmount(t.exShowroom),
+    netAmount: formatAmount(t.net),
     grandTotal: formatAmount(t.grandTotal),
     roundOff: formatAmount(t.roundOff),
     grandTotalAfterRoundOff: formatAmount(t.grandTotalAfterRoundOff),

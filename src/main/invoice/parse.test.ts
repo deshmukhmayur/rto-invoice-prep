@@ -46,6 +46,18 @@ const replaceNth = (haystack: string, find: string, repl: string, n: number): st
   return haystack.slice(0, index) + repl + haystack.slice(index + find.length);
 };
 
+const EV_SAMPLE_PATH = join(__dirname, "../../../.scratch/samples/03677.pdf");
+const hasEvSample = (() => {
+  try {
+    readFileSync(EV_SAMPLE_PATH);
+    return true;
+  } catch {
+    return false;
+  }
+});
+
+const evBytes = () => new Uint8Array(readFileSync(EV_SAMPLE_PATH));
+
 describe("parseInvoice against the real sample", () => {
   test.skipIf(!hasSample)("original.pdf parses as valid with the sample's numbers", async () => {
     const row = await parseInvoice("original.pdf", originalBytes());
@@ -61,6 +73,7 @@ describe("parseInvoice against the real sample", () => {
       grandTotal: "63,829.60",
       roundOff: "0.40",
       grandTotalAfterRoundOff: "63,830.00",
+      deductions: [],
       words: "Rupees Sixty Three Thousand Eight Hundred Thirty Only",
     });
     // Details depend on the local (untracked, real-data) sample PDF, so assert
@@ -71,6 +84,18 @@ describe("parseInvoice against the real sample", () => {
       chassisNo: expect.any(String),
       engineNo: expect.any(String),
     });
+  });
+
+  test.skipIf(!hasEvSample)("03677.pdf (EV) parses valid with the PM E-DRIVE Subsidy deduction row", async () => {
+    const row = await parseInvoice("03677.pdf", evBytes());
+    expect(row.status).toBe("valid");
+    expect(row.totals?.deductions).toEqual([{ label: "PM E-DRIVE Subsidy", amount: "5,000.00" }]);
+    expect(row.totals?.subTotal).toBe("124,752.38");
+    expect(row.totals?.netAmount).toBe("117,499.70");
+    // EVs have no engine — the vehicle-table Motor# column feeds the same slot.
+    expect(row.details.engineNo).toBe("ECD001T6J14867");
+    expect(row.details.engineLabel).toBe("Motor#");
+    expect(row.details.chassisNo).toBe("MBLCEW11XT6J03677");
   });
 });
 
@@ -105,6 +130,24 @@ describe("§4 refusals (synthetic variants of the sample stream)", () => {
     const row = await parseInvoice("insurance.pdf", bytes);
     expect(row.status).toBe("refused");
     expect(row.refusalReason).toContain("Insurance");
+  });
+
+  test.skipIf(!hasSample)("deduction row in the Ex Showroom → Net gap with broken Net identity refused", async () => {
+    // Insert a subsidy row in the allowed gap but leave Net Amount unchanged.
+    const bytes = await withMutatedStream((s) => {
+      const at = s.indexOf("(Net Amount)");
+      const valueAt = s.indexOf("(63,829.60)Tj", at);
+      if (valueAt === -1) throw new Error("Net Amount value not found");
+      const blockEnd = s.indexOf("ET", valueAt);
+      // Self-contained BT…ET block so existing ops keep their positioning.
+      const insert =
+        "BT\r\n/F2\r\n 8 Tf\r\n1 0 0 1 28 312 Tm\r\n(PM E-DRIVE Subsidy)Tj\r\n1 0 0 1 555.214 312 Tm\r\n(1,000.00)Tj\r\nET\r\n";
+      return s.slice(0, blockEnd) + insert + s.slice(blockEnd);
+    });
+    const row = await parseInvoice("subsidy-broken.pdf", bytes);
+    expect(row.status).toBe("refused");
+    expect(row.refusalReason).toContain("63,829.60");
+    expect(row.refusalReason).toContain("1,000.00");
   });
 
   test.skipIf(!hasSample)("broken Sub − Discount = Taxable identity refused with observed numbers", async () => {

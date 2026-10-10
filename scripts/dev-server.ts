@@ -5,6 +5,7 @@ import { join, extname } from "path";
 import { readFileSync } from "fs";
 
 const ROOT = join(import.meta.dir, "..", "dist", "renderer");
+const SAMPLES = join(import.meta.dir, "..", ".scratch", "samples");
 const PORT = Number(process.env.PORT ?? 5173);
 
 const MIME: Record<string, string> = {
@@ -27,6 +28,12 @@ const server = Bun.serve({
         "<script src=\"browser-mock.js\"></script>\n  <script src=\"renderer.js\"></script>",
       );
       return new Response(injected, { headers: { "content-type": "text/html" } });
+    }
+
+    if (path.startsWith("/samples/")) {
+      const name = path.slice("/samples/".length);
+      if (!/^[\w.-]+\.pdf$/.test(name)) return new Response("not found", { status: 404 });
+      return new Response(Bun.file(join(SAMPLES, name)));
     }
 
     if (!file.exists) return new Response("not found", { status: 404 });

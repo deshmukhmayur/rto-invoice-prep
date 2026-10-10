@@ -68,8 +68,15 @@ export function valueText(line: Line): string | null {
 
 export type TotalsRow = { label: string; labelFull: string; value: string | null; y: number };
 
+/** A post-tax deduction row (e.g. "PM E-DRIVE Subsidy") between Ex Showroom Price and Net Amount. */
+export type DeductionRow = { label: string; labelFull: string; amount: number; y: number };
+
 /** Find the totals-block rows by label text, in document (top→bottom) order. */
-export function findTotalsRows(lines: Line[]): { rows: TotalsRow[]; extraLines: Line[] } {
+export function findTotalsRows(lines: Line[]): {
+  rows: TotalsRow[];
+  deductions: TotalsRow[];
+  extraLines: Line[];
+} {
   const recognized: TotalsRow[] = [];
   const recognizedLines = new Set<Line>();
   for (const line of lines) {
@@ -80,12 +87,18 @@ export function findTotalsRows(lines: Line[]): { rows: TotalsRow[]; extraLines: 
       recognizedLines.add(line);
     }
   }
-  if (recognized.length === 0) return { rows: recognized, extraLines: [] };
+  if (recognized.length === 0) return { rows: recognized, deductions: [], extraLines: [] };
 
   // Anything with label-column text strictly between the first and last
   // recognized row that isn't itself a totals label is an inserted extra row.
+  // Rows in the Ex Showroom Price → Net Amount gap are post-tax deductions
+  // (e.g. "PM E-DRIVE Subsidy"); rows anywhere else are disallowed extras.
   const blockTop = Math.max(...recognized.map((r) => r.y));
   const blockBottom = Math.min(...recognized.map((r) => r.y));
+  const exShowroomY = recognized.find((r) => r.label === "Ex Showroom Price")?.y;
+  const netY = recognized.find((r) => r.label === "Net Amount")?.y;
+  const deductions: TotalsRow[] = [];
+  const extraLines: Line[] = [];
   const extra = lines.filter(
     (line) =>
       !recognizedLines.has(line) &&
@@ -93,7 +106,25 @@ export function findTotalsRows(lines: Line[]): { rows: TotalsRow[]; extraLines: 
       line.y > blockBottom &&
       line.runs.some((r) => r.x < 500 && r.text.trim()),
   );
-  return { rows: recognized, extraLines: extra };
+  for (const line of extra) {
+    const inGap =
+      exShowroomY !== undefined &&
+      netY !== undefined &&
+      line.y < exShowroomY &&
+      line.y > netY;
+    if (inGap) {
+      deductions.push({
+        label: normalizeLabel(labelText(line)),
+        labelFull: normalizeLabel(labelText(line)),
+        value: valueText(line),
+        y: line.y,
+      });
+    } else {
+      extraLines.push(line);
+    }
+  }
+  deductions.sort((a, b) => b.y - a.y);
+  return { rows: recognized, deductions, extraLines };
 }
 
 function normalizeLabel(s: string): string {
@@ -129,6 +160,10 @@ export type Analysis =
       rows: TotalsRow[];
       byLabel: Map<TotalsLabel, TotalsRow>;
       amounts: Map<TotalsLabel, number>;
+      /** Post-tax deduction rows (Ex Showroom → Net gap), top→bottom. */
+      deductions: DeductionRow[];
+      /** Derived effective CGST rate (cgst ÷ taxable); SGST is validated equal. */
+      taxRate: number;
       oldWords: string | null;
     };
 
@@ -149,7 +184,7 @@ export function analyze(doc: PDFDocument, fileName: string): Analysis {
 
   const runs = extractRuns(stream);
   const lines = groupLines(runs);
-  const { rows, extraLines } = findTotalsRows(lines);
+  const { rows, deductions: deductionRows, extraLines } = findTotalsRows(lines);
 
   // Details extraction (shown even on refused rows).
   const details = extractDetails(lines);
@@ -245,6 +280,10 @@ export function analyze(doc: PDFDocument, fileName: string): Analysis {
   const subTotal = amounts.get("Sub Total")!;
   const discount = amounts.get("Discount")!;
   const taxable = amounts.get("Taxable Value")!;
+  const cgst = amounts.get("CGST")!;
+  const sgst = amounts.get("SGST")!;
+  const exShowroom = amounts.get("Ex Showroom Price")!;
+  const net = amounts.get("Net Amount")!;
 
   if (discount === 0) {
     return { ok: false, reason: "Discount is 0.00 — nothing to remove", details };
@@ -255,6 +294,46 @@ export function analyze(doc: PDFDocument, fileName: string): Analysis {
     return {
       ok: false,
       reason: `Amounts do not add up: ${formatAmount(subTotal)} − ${formatAmount(discount)} = ${formatAmount(expectedTaxable)}, but Taxable Value is ${formatAmount(taxable)}`,
+      details,
+    };
+  }
+
+  if (cgst !== sgst) {
+    return {
+      ok: false,
+      reason: `Amounts do not add up: CGST (${formatAmount(cgst)}) and SGST (${formatAmount(sgst)}) differ`,
+      details,
+    };
+  }
+  if (taxable === 0) {
+    return { ok: false, reason: "Taxable Value is 0.00 — tax rate cannot be derived", details };
+  }
+  const taxRate = cgst / taxable;
+
+  // Deduction rows (e.g. PM E-DRIVE Subsidy): each must carry a valid amount,
+  // and Net Amount must equal Ex Showroom Price minus all of them.
+  const deductions: DeductionRow[] = [];
+  let deductionsTotal = 0;
+  for (const d of deductionRows) {
+    if (d.value === null || d.value.trim() === "") {
+      return { ok: false, reason: `Deduction row "${d.labelFull}" has no amount`, details };
+    }
+    const paisa = parseAmount(d.value);
+    if (paisa === null) {
+      return {
+        ok: false,
+        reason: `Deduction row "${d.labelFull}" value "${d.value.trim()}" is not a valid amount`,
+        details,
+      };
+    }
+    deductions.push({ label: d.label, labelFull: d.labelFull, amount: paisa, y: d.y });
+    deductionsTotal += paisa;
+  }
+  const expectedNet = exShowroom - deductionsTotal;
+  if (expectedNet !== net) {
+    return {
+      ok: false,
+      reason: `Amounts do not add up: ${formatAmount(exShowroom)} − ${formatAmount(deductionsTotal)} = ${formatAmount(expectedNet)}, but Net Amount is ${formatAmount(net)}`,
       details,
     };
   }
@@ -272,6 +351,8 @@ export function analyze(doc: PDFDocument, fileName: string): Analysis {
     rows,
     byLabel,
     amounts,
+    deductions,
+    taxRate,
     oldWords,
   };
 }
@@ -304,6 +385,7 @@ export async function parseInvoice(fileName: string, bytes: Uint8Array): Promise
       grandTotal: value("Grand Total"),
       roundOff: value("Round Off"),
       grandTotalAfterRoundOff: value("Grand Total (after Round Off)"),
+      deductions: result.deductions.map((d) => ({ label: d.label, amount: formatAmount(d.amount) })),
       words: result.oldWords,
     },
   };
@@ -345,12 +427,18 @@ function extractDetails(lines: Line[]): InvoiceDetails {
   const dateLine = findLabelLine("Date");
   const customerLine = findLabelLine("Name of the Customer");
 
+  // ICE invoices carry an "Engine#" column; EVs swap it for "Motor#".
+  const engine = tableValueUnder("Engine#") !== null
+    ? { label: "Engine#", value: tableValueUnder("Engine#") }
+    : { label: "Motor#", value: tableValueUnder("Motor#") };
+
   return {
     invoiceNo: invoiceNoLine ? valueRightOf(invoiceNoLine, "Invoice #") : null,
     invoiceDate: dateLine ? valueRightOf(dateLine, "Date") : null,
     customer: customerLine ? valueRightOf(customerLine, "Name of the Customer") : null,
     model: tableValueUnder("Model"),
-    engineNo: tableValueUnder("Engine#"),
+    engineNo: engine.value,
+    engineLabel: engine.value === null ? null : engine.label,
     chassisNo: tableValueUnder("Chassis"),
   };
 }
