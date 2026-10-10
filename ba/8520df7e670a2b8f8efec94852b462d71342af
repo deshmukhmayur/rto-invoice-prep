@@ -1,0 +1,19 @@
+.scratch/rto-invoice-fixer/issues/18-help-about-modals.md
+  s_8e61e27eadf1e7::t_c14c44582ab079 7,9-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ba8520df7e670a2b8f8efec94852b462d71342af",
+  "prompts": {},
+  "sessions": {
+    "s_8e61e27eadf1e7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed9a2302bffeGIY2zPj5g3Tcrv",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
