@@ -4,8 +4,8 @@
 
 **Blocked by:** 13.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Help menu items open the matching modals; Esc/backdrop/✕ close them
-- [ ] About shows the version line, runtime versions (`process.versions`), and the four-link row from one `APP_LINKS` constant
-- [ ] User guide covers the tool's purpose, usage, and file locations per the prototype
+- [x] Help menu items open the matching modals; Esc/backdrop/✕ close them
+- [x] About shows the version line, runtime versions (`process.versions`), and the four-link row from one `APP_LINKS` constant
+- [x] User guide covers the tool's purpose, usage, and file locations per the prototype
