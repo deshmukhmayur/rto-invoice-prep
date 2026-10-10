@@ -4,8 +4,8 @@
 
 **Blocked by:** 15.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Every ingest, refusal, export, failure, and crash appends to the monthly file in the specified shape
-- [ ] Session log modal renders all line kinds plus the empty state; Open Folder opens the logs dir, Download saves a copy
-- [ ] No code path deletes or truncates a log file
+- [x] Every ingest, refusal, export, failure, and crash appends to the monthly file in the specified shape
+- [x] Session log modal renders all line kinds plus the empty state; Open Folder opens the logs dir, Download saves a copy
+- [x] No code path deletes or truncates a log file
