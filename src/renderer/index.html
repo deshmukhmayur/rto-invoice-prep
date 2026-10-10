@@ -8,17 +8,8 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main id="app">
-    <div class="empty-state" id="empty-state">
-      <svg width="40" height="40" viewBox="0 0 16 16" aria-hidden="true">
-        <path fill="currentColor" d="M3 1.5A1.5 1.5 0 0 0 1.5 3v10A1.5 1.5 0 0 0 3 14.5h10A1.5 1.5 0 0 0 14.5 13V5.5a1.5 1.5 0 0 0-1.5-1.5H8.2L6.6 2.3A1.5 1.5 0 0 0 5.6 1.5H3z"/>
-        <path fill="#fff" d="M8 6a.6.6 0 0 1 .6.6v2.3l.9-.9a.6.6 0 1 1 .85.85l-2 2a.6.6 0 0 1-.85 0l-2-2a.6.6 0 1 1 .85-.85l.9.9V6.6A.6.6 0 0 1 8 6z"/>
-      </svg>
-      <h2>No invoices yet</h2>
-      <p>Drop PDFs anywhere in this window, use <b>File → Upload Invoice</b>,<br>or the Upload block in the left rail.</p>
-      <p class="stateless">Nothing is stored between sessions — the batch lives only in this window.</p>
-    </div>
-  </main>
+  <main id="app"></main>
+  <div id="modal-root"></div>
   <div id="drag-overlay" aria-hidden="true">
     <div class="drag-overlay-box">
       <svg width="40" height="40" viewBox="0 0 16 16" aria-hidden="true">

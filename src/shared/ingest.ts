@@ -4,7 +4,10 @@ export type InvoiceDetails = {
   invoiceDate: string | null;
   model: string | null;
   chassisNo: string | null;
+  /** Combustion engine number, or the EV motor number. */
   engineNo: string | null;
+  /** The vehicle-table header the engine/motor number was read from ("Engine#" or "Motor#"). */
+  engineLabel: string | null;
 };
 
 export type ParsedRow = {
@@ -25,6 +28,8 @@ export type ParsedRow = {
     grandTotal: string;
     roundOff: string;
     grandTotalAfterRoundOff: string;
+    /** Post-tax deduction rows (e.g. PM E-DRIVE Subsidy), in document order. */
+    deductions: { label: string; amount: string }[];
     words: string | null;
   } | null;
 };
@@ -32,7 +37,15 @@ export type ParsedRow = {
 export type PickedFile = { fileName: string; data: ArrayBuffer };
 
 export function emptyDetails(): InvoiceDetails {
-  return { invoiceNo: null, customer: null, invoiceDate: null, model: null, chassisNo: null, engineNo: null };
+  return {
+    invoiceNo: null,
+    customer: null,
+    invoiceDate: null,
+    model: null,
+    chassisNo: null,
+    engineNo: null,
+    engineLabel: null,
+  };
 }
 
 export const INGEST_CHANNELS = [
@@ -42,7 +55,15 @@ export const INGEST_CHANNELS = [
 
 export type IngestChannel = (typeof INGEST_CHANNELS)[number];
 
-export type ExportRequest = { fileName: string; data: ArrayBuffer };
+/** Old → recalculated figures, gathered by the renderer for the audit log. */
+export type LogTotals = {
+  taxableOld: string;
+  taxableNew: string;
+  totalOld: string;
+  totalNew: string;
+};
+
+export type ExportRequest = { fileName: string; data: ArrayBuffer; logTotals: LogTotals | null };
 
 export type ExportResult =
   | { status: "saved"; path: string }
@@ -50,7 +71,7 @@ export type ExportResult =
   | { status: "refused"; reason: string }
   | { status: "error"; reason: string };
 
-export type BatchFileRequest = { fileName: string; data: ArrayBuffer };
+export type BatchFileRequest = { fileName: string; data: ArrayBuffer; logTotals: LogTotals | null };
 
 export type BatchFileResult =
   | { fileName: string; status: "saved"; path: string }
@@ -69,4 +90,10 @@ export const EXPORT_CHANNELS = [
   "export:save-zip",
 ] as const;
 
-export const LOG_CHANNELS = ["log:open-log", "log:report-bug"] as const;
+export const LOG_CHANNELS = [
+  "log:open-log",
+  "log:open-dir",
+  "log:get-session",
+  "log:download",
+  "log:report-bug",
+] as const;

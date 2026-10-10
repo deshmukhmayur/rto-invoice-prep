@@ -9,6 +9,7 @@ import type {
   ZipExportRequest,
 } from "../shared/ingest";
 import type { MenuChannel } from "../channels";
+import type { LogLine } from "../shared/log";
 
 declare global {
   interface Window {
@@ -23,6 +24,10 @@ declare global {
       exportBatch: (req: BatchExportRequest) => Promise<BatchFileResult[]>;
       exportZip: (req: ZipExportRequest) => Promise<ExportResult>;
       openLog: () => Promise<void>;
+      openLogFolder: () => Promise<void>;
+      getSessionLog: () => Promise<LogLine[]>;
+      logMonthFile: () => Promise<string>;
+      downloadLog: () => Promise<string | null>;
       reportBug: () => Promise<void>;
     };
   }

@@ -45,7 +45,7 @@ function fakeRow(fileName: string): ParsedRow {
       ? "Discount is 0.00 — nothing to remove"
       : null,
     details: refused
-      ? { invoiceNo: null, customer: "AARAV SHARMA", invoiceDate: null, model: "HF DELUXE", chassisNo: null, engineNo: null }
+      ? { invoiceNo: null, customer: "AARAV SHARMA", invoiceDate: null, model: "HF DELUXE", chassisNo: null, engineNo: null, engineLabel: null }
       : {
           invoiceNo: "10000BI26S0001",
           customer: "AARAV SHARMA",
@@ -53,6 +53,7 @@ function fakeRow(fileName: string): ParsedRow {
           model: "HF DELUXE",
           chassisNo: "MBLHAW502T5H00001",
           engineNo: "HA11F4T5H00001",
+          engineLabel: "Engine#",
         },
     totals: refused
       ? null
@@ -67,13 +68,21 @@ function fakeRow(fileName: string): ParsedRow {
           grandTotal: "63,829.60",
           roundOff: "0.40",
           grandTotalAfterRoundOff: "63,830.00",
+          deductions: [],
           words: "Rupees Sixty Three Thousand Eight Hundred Thirty Only",
         },
   };
 }
 
 window.app = {
-  onMenu: (channel) => console.log(`[browser dev mock] ${channel}`),
+  onMenu: (channel, handler) => {
+    // Dev harness: dispatch a CustomEvent "mock-menu" with {detail: channel}
+    // from the console to trigger menu actions.
+    window.addEventListener("mock-menu", ((e: CustomEvent<string>) => {
+      if (e.detail === channel) handler();
+    }) as EventListener);
+    console.log(`[browser dev mock] registered ${channel}`);
+  },
   pickFiles: async () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -176,5 +185,20 @@ window.app = {
     return { status: "saved", path: `${req.dir}/${zipName.trim()} (browser download)` };
   },
   openLog: async () => console.log("[browser dev mock] open log (file lives in app-data in the app)"),
+  openLogFolder: async () => console.log("[browser dev mock] open logs folder (file lives in app-data in the app)"),
+  getSessionLog: async () => [    { kind: "OK", time: "2026-10-10T10:00:00.000Z", text: "OK invoice-1.pdf — extracted invoice MH-2026-001, chassis ABC123456" },
+    { kind: "OK", time: "2026-10-10T10:01:00.000Z", text: "OK invoice-1.pdf\n  taxable 63,324.00 → 63,660.00\n  total   63,830.00 → 64,640.00\n  wrote /out/invoice-1-RTO.pdf" },
+    { kind: "REFUSED", time: "2026-10-10T10:02:00.000Z", text: "REFUSED invoice-2.pdf: already prepared (contains RTO marker)" },
+    { kind: "FAILED", time: "2026-10-10T10:03:00.000Z", text: "FAILED invoice-3.pdf: EACCES: permission denied, write /out/invoice-3-RTO.pdf" },
+    { kind: "ERROR", time: "2026-10-10T10:04:00.000Z", text: "ERROR invoice-4.pdf: parser crash — unexpected end of stream" },
+  ],
+  logMonthFile: async () => {
+    const d = new Date();
+    return `rto-invoice-prep-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}.log`;
+  },
+  downloadLog: async () => {
+    console.log("[browser dev mock] download log copy");
+    return null;
+  },
   reportBug: async () => console.log("[browser dev mock] report a bug"),
 };

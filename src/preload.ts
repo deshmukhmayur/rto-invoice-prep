@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { MENU_CHANNELS, type MenuChannel } from "./channels";
+import type { LogLine } from "./shared/log";
 import type {
   BatchExportRequest,
   BatchFileResult,
@@ -29,5 +30,9 @@ contextBridge.exposeInMainWorld("app", {
   exportZip: (req: ZipExportRequest): Promise<ExportResult> =>
     ipcRenderer.invoke("export:save-zip", req),
   openLog: (): Promise<void> => ipcRenderer.invoke("log:open-log"),
+  openLogFolder: (): Promise<void> => ipcRenderer.invoke("log:open-dir"),
+  getSessionLog: (): Promise<LogLine[]> => ipcRenderer.invoke("log:get-session"),
+  logMonthFile: (): Promise<string> => ipcRenderer.invoke("log:month-file"),
+  downloadLog: (): Promise<string | null> => ipcRenderer.invoke("log:download"),
   reportBug: (): Promise<void> => ipcRenderer.invoke("log:report-bug"),
 });

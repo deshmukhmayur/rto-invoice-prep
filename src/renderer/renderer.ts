@@ -1,9 +1,11 @@
 import type {
   BatchFileResult,
   ExportResult,
+  LogTotals,
   ParsedRow,
 } from "../shared/ingest";
 import { emptyDetails } from "../shared/ingest";
+import type { LogLine } from "../shared/log";
 import { formatAmount, parseAmount, recomputeTotals, rupeesInWords } from "../shared/totals";
 import "./app-api";
 
@@ -24,6 +26,18 @@ let dirBlock: { reason: string } | null = null;
 let batchSummary: { kind: "ok" | "error"; text: string } | null = null;
 let zipMenuOpen = false;
 let exporting = false;
+let logModal: { open: boolean; lines: LogLine[] | null; savedTo: string | null } = {
+  open: false,
+  lines: null,
+  savedTo: null,
+};
+
+const modalRoot = document.getElementById("modal-root")!;
+
+let monthFile: string | null = null;
+void window.app.logMonthFile().then((name) => {
+  monthFile = name;
+});
 
 void window.app.defaultFolder().then((dir) => {
   outDir = dir;
@@ -45,12 +59,15 @@ function validRows(): RailRow[] {
 }
 
 function render(): void {
-  if (rows.length === 0 && !ingest) {
+  const empty = rows.length === 0 && !ingest;
+  if (empty) {
     main.innerHTML = emptyStateHtml();
+    document.getElementById("empty-upload")?.addEventListener("click", pickAndIngest);
     return;
   }
   const selected = rows.find((r) => r.id === selectedId) ?? null;
   main.innerHTML = `
+    ${!ingest && rows.length > 0 ? exportBarHtml() : ""}
     <div class="layout">
       <aside class="rail" id="rail">
         <button class="upload-block" id="upload-block" type="button">
@@ -59,7 +76,6 @@ function render(): void {
         </button>
         ${ingest ? ingestProgressHtml() : ""}
         ${rows.map(rowHtml).join("")}
-        ${!ingest && rows.length > 0 ? exportBarHtml() : ""}
         ${!ingest && rows.length > 0 && rows.every((r) => r.status !== "valid")
           ? `<div class="refused-strip" role="alert">No file in this batch can be exported (refused or unreadable). Remove the files or upload different ones.</div>`
           : ""}
@@ -113,7 +129,7 @@ function render(): void {
     btn.addEventListener("click", () => void retryOne(Number(btn.dataset.retry)));
   }
   for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-open-log]")) {
-    btn.addEventListener("click", () => void window.app.openLog());
+    btn.addEventListener("click", () => void openLogModal());
   }
   for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-report-bug]")) {
     btn.addEventListener("click", () => void window.app.reportBug());
@@ -135,7 +151,7 @@ async function exportOne(id: number): Promise<void> {
   if (!row || row.status !== "valid") return;
   const btn = main.querySelector<HTMLButtonElement>(`[data-export="${id}"]`);
   if (btn) btn.disabled = true;
-  const result = await window.app.exportOne({ fileName: row.fileName, data: row.data });
+  const result = await window.app.exportOne({ fileName: row.fileName, data: row.data, logTotals: logTotalsFor(row) });
   row.export = result;
   render();
 }
@@ -156,23 +172,25 @@ function exportBarHtml(): string {
       ? `<button class="export-primary" id="export-batch" type="button" disabled>Nothing to export</button>`
       : `<button class="export-primary" id="export-batch" type="button" ${exporting ? "disabled" : ""}>${exporting ? "Exporting…" : `Export ${n} file${n === 1 ? "" : "s"}`}</button>`;
   return `
-    <div class="export-bar">
-      <button class="folder-picker${blocked ? " blocked" : ""}" id="folder-picker" type="button" title="${escapeHtml(outDir ?? "Choose output folder")}">
-        ${blocked ? `<span class="warn" aria-hidden="true">⚠</span>` : folderIcon()}
-        <span class="folder-path">${escapeHtml(folderLabel)}</span>
-      </button>
-      <div class="export-combo">
-        ${primary}
-        <button class="zip-caret" id="zip-caret" type="button" ${n === 0 || exporting ? "disabled" : ""} title="More export options" aria-haspopup="menu" aria-expanded="${zipMenuOpen}">▾</button>
-        ${zipMenuOpen
-          ? `<div class="export-menu" role="menu"><button type="button" data-export-zip role="menuitem">Export as Zip</button></div>`
-          : ""}
+    <header class="topbar">
+      <div class="export-controls">
+        <button class="folder-picker${blocked ? " blocked" : ""}" id="folder-picker" type="button" title="${escapeHtml(outDir ?? "Choose output folder")}">
+          ${blocked ? `<span class="warn" aria-hidden="true">⚠</span>` : folderIcon()}
+          <span class="folder-path">${escapeHtml(folderLabel)}</span>
+        </button>
+        <div class="export-combo">
+          ${primary}
+          <button class="zip-caret" id="zip-caret" type="button" ${n === 0 || exporting ? "disabled" : ""} title="More export options" aria-haspopup="menu" aria-expanded="${zipMenuOpen}">▾</button>
+          ${zipMenuOpen
+            ? `<div class="export-menu" role="menu"><button type="button" data-export-zip role="menuitem">Export as Zip</button></div>`
+            : ""}
+        </div>
       </div>
       ${dirBlock
         ? `<div class="export-banner" role="alert"><span>Export blocked — ${escapeHtml(dirBlock.reason)}</span><button type="button" data-pick-folder>Pick another folder</button></div>`
         : ""}
       ${batchSummary ? `<div class="batch-summary ${batchSummary.kind}" role="status">${escapeHtml(batchSummary.text)}</div>` : ""}
-    </div>`;
+    </header>`;
 }
 
 function folderIcon(): string {
@@ -222,7 +240,7 @@ async function exportBatch(): Promise<void> {
   render();
   const results = await window.app.exportBatch({
     dir: outDir!,
-    files: targets.map((r) => ({ fileName: r.fileName, data: r.data })),
+    files: targets.map((r) => ({ fileName: r.fileName, data: r.data, logTotals: logTotalsFor(r) })),
   });
   applyBatchResults(results);
   const failed = results.filter((r) => r.status === "error");
@@ -249,7 +267,7 @@ async function exportZip(): Promise<void> {
   const result = await window.app.exportZip({
     dir: outDir!,
     zipName: zipNameForToday(),
-    files: targets.map((r) => ({ fileName: r.fileName, data: r.data })),
+    files: targets.map((r) => ({ fileName: r.fileName, data: r.data, logTotals: logTotalsFor(r) })),
   });
   batchSummary =
     result.status === "saved"
@@ -276,7 +294,7 @@ async function retryOne(id: number): Promise<void> {
   render();
   const [result] = await window.app.exportBatch({
     dir: outDir!,
-    files: [{ fileName: row.fileName, data: row.data }],
+    files: [{ fileName: row.fileName, data: row.data, logTotals: logTotalsFor(row) }],
   });
   if (result) {
     row.batch = result;
@@ -297,7 +315,8 @@ function emptyStateHtml(): string {
         <path fill="#fff" d="M8 6a.6.6 0 0 1 .6.6v2.3l.9-.9a.6.6 0 1 1 .85.85l-2 2a.6.6 0 0 1-.85 0l-2-2a.6.6 0 1 1 .85-.85l.9.9V6.6A.6.6 0 0 1 8 6z"/>
       </svg>
       <h2>No invoices yet</h2>
-      <p>Drop PDFs anywhere in this window, use <b>File → Upload Invoice</b>,<br>or the Upload block in the left rail.</p>
+      <p>Drop PDFs anywhere in this window, use <b>File → Upload Invoice</b>,<br>or the button below.</p>
+      <button class="empty-upload" id="empty-upload" type="button">Upload invoices</button>
       <p class="stateless">Nothing is stored between sessions — the batch lives only in this window.</p>
     </div>`;
 }
@@ -358,7 +377,7 @@ function cardHtml(row: RailRow): string {
           ${detailCell("Invoice date", row.details.invoiceDate)}
           ${detailCell("Model", row.details.model)}
           ${detailCell("Chassis no.", row.details.chassisNo)}
-          ${detailCell("Engine no.", row.details.engineNo)}
+          ${detailCell(row.details.engineLabel === "Motor#" ? "Motor no." : "Engine no.", row.details.engineNo)}
         </dl>`;
   return `
     <div class="card">
@@ -396,12 +415,38 @@ function writeFailHtml(row: RailRow): string {
     </div>`;
 }
 
+function recomputeFor(row: RailRow): ReturnType<typeof recomputeTotals> | null {
+  const t = row.totals;
+  if (row.status !== "valid" || !t) return null;
+  const sub = parseAmount(t.subTotal);
+  if (sub === null) return null;
+  const cgst = parseAmount(t.cgst);
+  const taxable = parseAmount(t.taxableValue);
+  if (cgst === null || taxable === null || taxable === 0) return null;
+  const deductionsTotal = t.deductions.reduce((sum, d) => {
+    const paisa = parseAmount(d.amount);
+    return paisa === null ? sum : sum + paisa;
+  }, 0);
+  return recomputeTotals(sub, cgst / taxable, deductionsTotal);
+}
+
+function logTotalsFor(row: RailRow): LogTotals | null {
+  const t = row.totals;
+  const n = recomputeFor(row);
+  if (!t || !n) return null;
+  return {
+    taxableOld: t.taxableValue,
+    taxableNew: formatAmount(n.taxable),
+    totalOld: t.grandTotalAfterRoundOff,
+    totalNew: formatAmount(n.grandTotalAfterRoundOff),
+  };
+}
+
 function facsimileHtml(row: RailRow): string {
   const t = row.totals;
   if (row.status !== "valid" || !t) return "";
-  const sub = parseAmount(t.subTotal);
-  if (sub === null) return "";
-  const n = recomputeTotals(sub);
+  const n = recomputeFor(row);
+  if (!n) return "";
   const newTaxable = formatAmount(n.taxable);
   const grand = formatAmount(n.grandTotal);
   const oldWords = t.words ?? "";
@@ -418,8 +463,11 @@ function facsimileHtml(row: RailRow): string {
       ${facRow("Taxable Value", changed(t.taxableValue, newTaxable))}
       ${facRow(`CGST on ${escapeHtml(newTaxable)}`, changed(t.cgst, formatAmount(n.cgst)))}
       ${facRow(`SGST on ${escapeHtml(newTaxable)}`, changed(t.sgst, formatAmount(n.sgst)))}
-      ${facRow("Ex Showroom Price", changed(t.exShowroomPrice, grand))}
-      ${facRow("Net Amount", changed(t.netAmount, grand))}
+      ${facRow("Ex Showroom Price", changed(t.exShowroomPrice, formatAmount(n.exShowroom)))}
+      ${t.deductions
+        .map((d) => facRow(escapeHtml(d.label), escapeHtml(d.amount)))
+        .join("\n      ")}
+      ${facRow("Net Amount", changed(t.netAmount, formatAmount(n.net)))}
       ${facRow("Grand Total", changed(t.grandTotal, grand))}
       ${facRow("Round Off", changed(t.roundOff, formatAmount(n.roundOff)))}
       ${facRow("Grand Total (after Round Off)", changed(t.grandTotalAfterRoundOff, formatAmount(n.grandTotalAfterRoundOff)))}
@@ -529,6 +577,82 @@ window.addEventListener("drop", (e) => {
 // --- Menu ------------------------------------------------------------------
 
 window.app.onMenu("menu:upload-invoice", () => void pickAndIngest());
+window.app.onMenu("menu:open-log", () => void openLogModal());
 window.app.onMenu("menu:about", () => console.log("menu:about"));
+
+// --- Session log modal -------------------------------------------------------
+
+async function openLogModal(): Promise<void> {
+  logModal = { open: true, lines: null, savedTo: null };
+  renderLogModal();
+  logModal.lines = await window.app.getSessionLog();
+  renderLogModal();
+}
+
+function closeLogModal(): void {
+  logModal = { open: false, lines: null, savedTo: null };
+  renderLogModal();
+}
+
+function logLineHtml(line: LogLine): string {
+  const cls =
+    line.kind === "ERROR" ? "log-error" : line.kind === "REFUSED" || line.kind === "FAILED" ? "log-bad" : "log-ok";
+  return `<div class="log-line ${cls}"><span class="log-time">${escapeHtml(line.time)}</span> ${escapeHtml(line.text)}</div>`;
+}
+
+function renderLogModal(): void {
+  if (!logModal.open) {
+    modalRoot.innerHTML = "";
+    return;
+  }
+  const monthFileName = monthFile ?? `rto-invoice-prep-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}.log`;
+  const body =
+    logModal.lines === null
+      ? `<div class="logempty"><p>Loading…</p></div>`
+      : logModal.lines.length === 0
+        ? `<div class="logempty">
+             <p><b>Nothing logged yet…</b> Activity appears here as files are read, prepared, refused, or written.</p>
+             <p>Across sessions, entries append to a monthly file — <span class="log-month-file">${escapeHtml(monthFileName)}</span> — which is never rotated away or deleted; you manage it by hand via Open Folder.</p>
+           </div>`
+        : `<pre class="log-lines">${logModal.lines.map(logLineHtml).join("")}</pre>`;
+  modalRoot.innerHTML = `
+    <div class="modal-backdrop" id="log-backdrop"></div>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="log-title">
+      <header class="modal-head">
+        <h2 id="log-title">Log — this session</h2>
+        <div class="modal-actions">
+          <button class="modal-icon-btn" id="log-open-folder" type="button" title="Open the log folder (%APPDATA%\\rto-invoice-prep\\logs) — ${escapeHtml(monthFileName)}" aria-label="Open log folder">
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M1.5 3A1.5 1.5 0 0 1 3 1.5h2.6c.4 0 .78.16 1.06.44l1.06 1.06c.1.1.23.15.35.15H13A1.5 1.5 0 0 1 14.5 4.5v8A1.5 1.5 0 0 1 13 14H3a1.5 1.5 0 0 1-1.5-1.5V3z"/></svg>
+          </button>
+          <button class="modal-icon-btn" id="log-download" type="button" title="Save a copy of this session's log" aria-label="Save a copy of the log">
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.6.6 0 0 1 .6.6v7.44l2.72-2.72a.6.6 0 1 1 .85.85l-3.75 3.75a.6.6 0 0 1-.85 0L3.82 7.67a.6.6 0 1 1 .85-.85l2.72 2.72V2.1A.6.6 0 0 1 8 1.5zM2.5 13.4a.6.6 0 0 1 .6-.6h9.8a.6.6 0 1 1 0 1.2H3.1a.6.6 0 0 1-.6-.6z"/></svg>
+          </button>
+          <button class="modal-close" id="log-close" type="button" aria-label="Close">✕</button>
+        </div>
+      </header>
+      <div class="modal-body">
+        ${body}
+        ${logModal.savedTo ? `<div class="log-saved-note" role="status">Copy saved to ${escapeHtml(logModal.savedTo)}</div>` : ""}
+      </div>
+    </div>`;
+
+  document.getElementById("log-backdrop")?.addEventListener("click", closeLogModal);
+  document.getElementById("log-close")?.addEventListener("click", closeLogModal);
+  document.getElementById("log-open-folder")?.addEventListener("click", () => void window.app.openLogFolder());
+  document.getElementById("log-download")?.addEventListener("click", () => void downloadLogCopy());
+}
+
+async function downloadLogCopy(): Promise<void> {
+  const saved = await window.app.downloadLog();
+  if (saved) {
+    logModal.savedTo = saved;
+    renderLogModal();
+  }
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (logModal.open) closeLogModal();
+});
 
 render();

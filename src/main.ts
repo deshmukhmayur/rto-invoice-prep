@@ -3,7 +3,7 @@ import { join } from "path";
 import { readFile, unlink, writeFile } from "fs/promises";
 import { parseInvoice } from "./main/invoice/parse";
 import { PrepareRefusal, prepareInvoice } from "./main/invoice/transform";
-import { appendLog, initLog, logFilePath } from "./main/log";
+import { appendLog, initLog, logFilePath, logsDirectory, monthFilePath, sessionLines, sessionLogText } from "./main/log";
 import { createZip } from "./shared/zip";
 import type {
   BatchExportRequest,
@@ -11,6 +11,7 @@ import type {
   ExportRequest,
   ExportResult,
   FolderCheck,
+  LogTotals,
   ParsedRow,
   PickedFile,
   ZipExportRequest,
@@ -19,6 +20,11 @@ import { emptyDetails } from "./shared/ingest";
 import { uniqueName } from "./shared/unique";
 
 const reasonOf = (err: unknown): string => (err instanceof Error ? err.message : String(err));
+
+const totalsLines = (t: LogTotals | null): string =>
+  t
+    ? `\n  taxable ${t.taxableOld} → ${t.taxableNew}\n  total   ${t.totalOld} → ${t.totalNew}`
+    : "";
 
 const APP_TITLE = "RTO Invoice Prep v0.1";
 
@@ -47,12 +53,24 @@ function registerIpc(): void {
   ipcMain.handle("ingest:parse", async (_event, file: { fileName: string; data: ArrayBuffer }): Promise<ParsedRow> => {
     try {
       const row = await parseInvoice(file.fileName, new Uint8Array(file.data));
-      if (row.status === "valid") await appendLog(`OK ${file.fileName} — parsed`);
-      else await appendLog(`REFUSED ${file.fileName}: ${row.refusalReason}`);
+      if (row.status === "valid") {
+        const d = row.details;
+        const extracted = [
+          d.invoiceNo && `invoice ${d.invoiceNo}`,
+          d.customer && `customer ${d.customer}`,
+          d.invoiceDate && `dated ${d.invoiceDate}`,
+          d.model && `model ${d.model}`,
+          d.chassisNo && `chassis ${d.chassisNo}`,
+          d.engineNo && `${d.engineLabel === "Motor#" ? "motor" : "engine"} ${d.engineNo}`,
+        ]
+          .filter(Boolean)
+          .join(", ");
+        await appendLog("OK", `${file.fileName}${extracted ? ` — extracted ${extracted}` : " — parsed"}`);
+      } else await appendLog("REFUSED", `${file.fileName}: ${row.refusalReason}`);
       return row;
     } catch (err) {
       const reason = reasonOf(err);
-      await appendLog(`ERROR ${file.fileName}: parser crash — ${reason}`);
+      await appendLog("ERROR", `${file.fileName}: parser crash — ${reason}`);
       return {
         fileName: file.fileName,
         status: "error",
@@ -85,15 +103,34 @@ function registerIpc(): void {
       await writeFile(result.filePath, prepared);
     } catch (err) {
       const reason = err instanceof PrepareRefusal ? err.message : reasonOf(err);
-      await appendLog(`FAILED ${req.fileName} (single save → ${result.filePath}): ${reason}`);
+      await appendLog("FAILED", `${req.fileName} (single save → ${result.filePath}): ${reason}`);
       return { status: "error", reason };
     }
-    await appendLog(`OK ${req.fileName} — saved (single) → ${result.filePath}`);
+    await appendLog("OK", `${req.fileName}${totalsLines(req.logTotals)}\n  wrote ${result.filePath} (single save)`);
     return { status: "saved", path: result.filePath };
   });
 
   ipcMain.handle("log:open-log", () => {
     shell.showItemInFolder(logFilePath());
+  });
+
+  ipcMain.handle("log:open-dir", async () => {
+    await shell.openPath(logsDirectory());
+  });
+
+  ipcMain.handle("log:get-session", () => sessionLines());
+
+  ipcMain.handle("log:month-file", (): string => monthFilePath().replace(/\\/g, "/").split("/").pop()!);
+
+  ipcMain.handle("log:download", async (event): Promise<string | null> => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const result = await dialog.showSaveDialog(win!, {
+      title: "Save a copy of the log",
+      defaultPath: `rto-invoice-prep-log-${new Date().toISOString().slice(0, 10)}.txt`,
+    });
+    if (result.canceled || !result.filePath) return null;
+    await writeFile(result.filePath, sessionLogText());
+    return result.filePath;
   });
 
   ipcMain.handle("log:report-bug", () => {
@@ -131,15 +168,15 @@ function registerIpc(): void {
         const name = uniqueName(`${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`, used);
         const dest = join(req.dir, name);
         await writeFile(dest, prepared);
-        await appendLog(`OK ${file.fileName} — exported → ${dest}`);
+        await appendLog("OK", `${file.fileName}${totalsLines(file.logTotals)}\n  wrote ${dest}`);
         results.push({ fileName: file.fileName, status: "saved", path: dest });
       } catch (err) {
         if (err instanceof PrepareRefusal) {
-          await appendLog(`REFUSED ${file.fileName}: ${err.message}`);
+          await appendLog("REFUSED", `${file.fileName}: ${err.message}`);
           results.push({ fileName: file.fileName, status: "error", reason: err.message });
         } else {
           const reason = reasonOf(err);
-          await appendLog(`FAILED ${file.fileName}: ${reason}`);
+          await appendLog("FAILED", `${file.fileName}: ${reason}`);
           results.push({ fileName: file.fileName, status: "error", reason });
         }
       }
@@ -150,13 +187,16 @@ function registerIpc(): void {
   ipcMain.handle("export:save-zip", async (event, req: ZipExportRequest): Promise<ExportResult> => {
     const used = new Set<string>();
     const entries: { name: string; data: Uint8Array }[] = [];
+    const logged: { fileName: string; asName: string; logTotals: LogTotals | null }[] = [];
     for (const file of req.files) {
       try {
         const prepared = await prepareInvoice(new Uint8Array(file.data), { version: app.getVersion() });
-        entries.push({ name: uniqueName(`${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`, used), data: prepared });
+        const name = uniqueName(`${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`, used);
+        entries.push({ name, data: prepared });
+        logged.push({ fileName: file.fileName, asName: name, logTotals: file.logTotals });
       } catch (err) {
         const kind = err instanceof PrepareRefusal ? "REFUSED" : "FAILED";
-        await appendLog(`${kind} ${file.fileName} (zip): ${reasonOf(err)}`);
+        await appendLog(kind, `${file.fileName} (zip): ${reasonOf(err)}`);
         return {
           status: err instanceof PrepareRefusal ? "refused" : "error",
           reason: `${file.fileName}: ${reasonOf(err)}`,
@@ -174,10 +214,16 @@ function registerIpc(): void {
       await writeFile(result.filePath, createZip(entries));
     } catch (err) {
       const reason = reasonOf(err);
-      await appendLog(`FAILED zip (${entries.length} files) → ${result.filePath}: ${reason}`);
+      for (const entry of logged) {
+        await appendLog("FAILED", `${entry.fileName} (zip → ${result.filePath}): ${reason}`);
+      }
+      await appendLog("FAILED", `zip (${entries.length} files) → ${result.filePath}: ${reason}`);
       return { status: "error", reason };
     }
-    await appendLog(`OK zip — ${entries.length} files → ${result.filePath}`);
+    for (const entry of logged) {
+      await appendLog("OK", `${entry.fileName}${totalsLines(entry.logTotals)}\n  wrote ${result.filePath} (zip, as ${entry.asName})`);
+    }
+    await appendLog("OK", `zip — ${entries.length} files → ${result.filePath}`);
     return { status: "saved", path: result.filePath };
   });
 }
@@ -279,7 +325,7 @@ function buildMenu(): void {
       submenu: [
         {
           label: "User &guide — Open Log",
-          click: () => shell.showItemInFolder(logFilePath()),
+          click: () => focused()?.webContents.send("menu:open-log"),
         },
         {
           label: "&Report a bug — Check for updates",
