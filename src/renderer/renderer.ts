@@ -1,3 +1,4 @@
+import type { AppVersions } from "../shared/app";
 import type {
   BatchFileResult,
   ExportResult,
@@ -8,6 +9,15 @@ import { emptyDetails } from "../shared/ingest";
 import type { LogLine } from "../shared/log";
 import { formatAmount, parseAmount, recomputeTotals, rupeesInWords } from "../shared/totals";
 import "./app-api";
+
+// TODO (ticket 19): fill these in when the repo is public and GitHub Pages exists.
+const APP_LINKS = {
+  website: "https://TODO.github.io/rto-invoice-prep/",
+  docs: "https://TODO.github.io/rto-invoice-prep/docs/",
+  repo: "https://github.com/TODO/rto-invoice-prep",
+  bugTemplate: "https://github.com/TODO/rto-invoice-prep/issues/new?template=bug_report.yml",
+  featureTemplate: "https://github.com/TODO/rto-invoice-prep/issues/new?template=feature_request.yml",
+};
 
 type RailRow = ParsedRow & {
   id: number;
@@ -26,11 +36,17 @@ let dirBlock: { reason: string } | null = null;
 let batchSummary: { kind: "ok" | "error"; text: string } | null = null;
 let zipMenuOpen = false;
 let exporting = false;
-let logModal: { open: boolean; lines: LogLine[] | null; savedTo: string | null } = {
-  open: false,
+type ModalKind = "log" | "guide" | "about";
+let modal: ModalKind | null = null;
+let logModal: { lines: LogLine[] | null; savedTo: string | null } = {
   lines: null,
   savedTo: null,
 };
+let versions: AppVersions | null = null;
+void window.app.versions().then((v) => {
+  versions = v;
+  renderModal();
+});
 
 const modalRoot = document.getElementById("modal-root")!;
 
@@ -577,21 +593,37 @@ window.addEventListener("drop", (e) => {
 // --- Menu ------------------------------------------------------------------
 
 window.app.onMenu("menu:upload-invoice", () => void pickAndIngest());
+window.app.onMenu("menu:user-guide", () => openModal("guide"));
 window.app.onMenu("menu:open-log", () => void openLogModal());
-window.app.onMenu("menu:about", () => console.log("menu:about"));
+window.app.onMenu("menu:report-bug", () => void window.app.openExternal(APP_LINKS.bugTemplate));
+window.app.onMenu("menu:check-updates", () => void checkForUpdates());
+window.app.onMenu("menu:about", () => openModal("about"));
 
-// --- Session log modal -------------------------------------------------------
+// --- Modals ------------------------------------------------------------------
 
-async function openLogModal(): Promise<void> {
-  logModal = { open: true, lines: null, savedTo: null };
-  renderLogModal();
-  logModal.lines = await window.app.getSessionLog();
-  renderLogModal();
+function openModal(kind: ModalKind): void {
+  modal = kind;
+  renderModal();
 }
 
-function closeLogModal(): void {
-  logModal = { open: false, lines: null, savedTo: null };
-  renderLogModal();
+function closeModal(): void {
+  modal = null;
+  renderModal();
+}
+
+async function openLogModal(): Promise<void> {
+  modal = "log";
+  logModal = { lines: null, savedTo: null };
+  renderModal();
+  logModal.lines = await window.app.getSessionLog();
+  renderModal();
+}
+
+async function checkForUpdates(): Promise<void> {
+  if (modal !== "about") openModal("about");
+  const note = await window.app.checkUpdates();
+  const el = document.getElementById("update-status");
+  if (el) el.textContent = note;
 }
 
 function logLineHtml(line: LogLine): string {
@@ -600,11 +632,7 @@ function logLineHtml(line: LogLine): string {
   return `<div class="log-line ${cls}"><span class="log-time">${escapeHtml(line.time)}</span> ${escapeHtml(line.text)}</div>`;
 }
 
-function renderLogModal(): void {
-  if (!logModal.open) {
-    modalRoot.innerHTML = "";
-    return;
-  }
+function logBodyHtml(): string {
   const monthFileName = monthFile ?? `rto-invoice-prep-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}.log`;
   const body =
     logModal.lines === null
@@ -615,44 +643,109 @@ function renderLogModal(): void {
              <p>Across sessions, entries append to a monthly file — <span class="log-month-file">${escapeHtml(monthFileName)}</span> — which is never rotated away or deleted; you manage it by hand via Open Folder.</p>
            </div>`
         : `<pre class="log-lines">${logModal.lines.map(logLineHtml).join("")}</pre>`;
-  modalRoot.innerHTML = `
-    <div class="modal-backdrop" id="log-backdrop"></div>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="log-title">
-      <header class="modal-head">
-        <h2 id="log-title">Log — this session</h2>
-        <div class="modal-actions">
-          <button class="modal-icon-btn" id="log-open-folder" type="button" title="Open the log folder (%APPDATA%\\rto-invoice-prep\\logs) — ${escapeHtml(monthFileName)}" aria-label="Open log folder">
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M1.5 3A1.5 1.5 0 0 1 3 1.5h2.6c.4 0 .78.16 1.06.44l1.06 1.06c.1.1.23.15.35.15H13A1.5 1.5 0 0 1 14.5 4.5v8A1.5 1.5 0 0 1 13 14H3a1.5 1.5 0 0 1-1.5-1.5V3z"/></svg>
-          </button>
-          <button class="modal-icon-btn" id="log-download" type="button" title="Save a copy of this session's log" aria-label="Save a copy of the log">
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.6.6 0 0 1 .6.6v7.44l2.72-2.72a.6.6 0 1 1 .85.85l-3.75 3.75a.6.6 0 0 1-.85 0L3.82 7.67a.6.6 0 1 1 .85-.85l2.72 2.72V2.1A.6.6 0 0 1 8 1.5zM2.5 13.4a.6.6 0 0 1 .6-.6h9.8a.6.6 0 1 1 0 1.2H3.1a.6.6 0 0 1-.6-.6z"/></svg>
-          </button>
-          <button class="modal-close" id="log-close" type="button" aria-label="Close">✕</button>
-        </div>
-      </header>
-      <div class="modal-body">
-        ${body}
-        ${logModal.savedTo ? `<div class="log-saved-note" role="status">Copy saved to ${escapeHtml(logModal.savedTo)}</div>` : ""}
+  return `
+    <header class="modal-head">
+      <h2 id="modal-title">Log — this session</h2>
+      <div class="modal-actions">
+        <button class="modal-icon-btn" id="log-open-folder" type="button" title="Open the log folder (%APPDATA%\\rto-invoice-prep\\logs) — ${escapeHtml(monthFileName)}" aria-label="Open log folder">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M1.5 3A1.5 1.5 0 0 1 3 1.5h2.6c.4 0 .78.16 1.06.44l1.06 1.06c.1.1.23.15.35.15H13A1.5 1.5 0 0 1 14.5 4.5v8A1.5 1.5 0 0 1 13 14H3a1.5 1.5 0 0 1-1.5-1.5V3z"/></svg>
+        </button>
+        <button class="modal-icon-btn" id="log-download" type="button" title="Save a copy of this session's log" aria-label="Save a copy of the log">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.6.6 0 0 1 .6.6v7.44l2.72-2.72a.6.6 0 1 1 .85.85l-3.75 3.75a.6.6 0 0 1-.85 0L3.82 7.67a.6.6 0 1 1 .85-.85l2.72 2.72V2.1A.6.6 0 0 1 8 1.5zM2.5 13.4a.6.6 0 0 1 .6-.6h9.8a.6.6 0 1 1 0 1.2H3.1a.6.6 0 0 1-.6-.6z"/></svg>
+        </button>
+        <button class="modal-close" type="button" data-modal-close aria-label="Close">✕</button>
+      </div>
+    </header>
+    <div class="modal-body">
+      ${body}
+      ${logModal.savedTo ? `<div class="log-saved-note" role="status">Copy saved to ${escapeHtml(logModal.savedTo)}</div>` : ""}
+    </div>`;
+}
+
+function guideBodyHtml(): string {
+  return `
+    <header class="modal-head">
+      <h2 id="modal-title">User guide</h2>
+      <div class="modal-actions">
+        <button class="modal-link-btn" type="button" data-open-link="${APP_LINKS.docs}" title="Opens the full documentation on the project website">
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M4 1.5A2.5 2.5 0 0 0 1.5 4v8A2.5 2.5 0 0 0 4 14.5h8a.75.75 0 0 0 0-1.5H4a1 1 0 0 1 0-2h8.25c.41 0 .75-.34.75-.75V2.25A.75.75 0 0 0 12.25 1.5H4z"/></svg>
+          View full documentation
+        </button>
+        <button class="modal-close" type="button" data-modal-close aria-label="Close">✕</button>
+      </div>
+    </header>
+    <div class="modal-body">
+      <p><b>What this tool does.</b> It prepares dealership invoices for RTO registration: it removes the discount row from an OEM tax invoice and recalculates every downstream figure at the full, undiscounted price.</p>
+      <p><b>How to use it.</b> Drop invoice PDFs onto the window (or use File → Upload Invoice), check each file's recalculated numbers on its preview card, then Export. Files that do not match the expected invoice template are refused with the reason named — they are never exported.</p>
+      <p><b>Where files go.</b> Prepared PDFs are written to the output directory shown in the toolbar. Originals are never overwritten, and every batch is recorded in the log.</p>
+    </div>`;
+}
+
+function aboutBodyHtml(): string {
+  const v = versions;
+  const runtime = v
+    ? `Runs on Electron ${v.electron} · Chromium ${v.chrome} · Node ${v.node}`
+    : `Runs on Electron · Chromium · Node`;
+  return `
+    <button class="modal-close floating" type="button" data-modal-close aria-label="Close">✕</button>
+    <div class="modal-body">
+      <div class="about-head">
+        <span class="about-icon" aria-hidden="true">R</span>
+        <span>
+          <div class="about-name">RTO Invoice Prep</div>
+          <div class="about-sub"><span class="ver">v${escapeHtml(v?.app ?? "0.1")}</span><span class="dot">·</span>
+          <button class="linklike small" type="button" id="check-updates">Check for updates</button></div>
+          <div class="tagline">Prepare dealership invoices for RTO registration.</div>
+        </span>
+      </div>
+      <p>Made for a single dealership desk. Stateless — nothing is stored between runs, originals are never overwritten, and every batch is recorded in the log.</p>
+      <div class="runtime-line">${runtime}</div>
+      <div class="update-status" id="update-status" role="status"></div>
+      <div class="about-links">
+        <button class="linklike" type="button" data-open-link="${APP_LINKS.website}">Website</button><span class="dot">·</span>
+        <button class="linklike" type="button" data-open-link="${APP_LINKS.repo}">Source</button><span class="dot">·</span>
+        <button class="linklike" type="button" data-open-link="${APP_LINKS.bugTemplate}">Report a bug</button><span class="dot">·</span>
+        <button class="linklike" type="button" data-open-link="${APP_LINKS.featureTemplate}">Feature request</button>
       </div>
     </div>`;
+}
 
-  document.getElementById("log-backdrop")?.addEventListener("click", closeLogModal);
-  document.getElementById("log-close")?.addEventListener("click", closeLogModal);
+function renderModal(): void {
+  if (modal === null) {
+    modalRoot.innerHTML = "";
+    return;
+  }
+  const body = modal === "log" ? logBodyHtml() : modal === "guide" ? guideBodyHtml() : aboutBodyHtml();
+  const plain = modal === "about";
+  const labelledBy = plain ? "" : ` aria-labelledby="modal-title"`;
+  modalRoot.innerHTML = `
+    <div class="modal-backdrop" data-modal-close></div>
+    <div class="modal${plain ? " plain" : ""}" role="dialog" aria-modal="true"${labelledBy}>
+      ${body}
+    </div>`;
+
+  for (const btn of modalRoot.querySelectorAll<HTMLButtonElement>("[data-modal-close]")) {
+    btn.addEventListener("click", closeModal);
+  }
+  for (const btn of modalRoot.querySelectorAll<HTMLButtonElement>("[data-open-link]")) {
+    btn.addEventListener("click", () => void window.app.openExternal(btn.dataset.openLink!));
+  }
   document.getElementById("log-open-folder")?.addEventListener("click", () => void window.app.openLogFolder());
   document.getElementById("log-download")?.addEventListener("click", () => void downloadLogCopy());
+  document.getElementById("check-updates")?.addEventListener("click", () => void checkForUpdates());
 }
 
 async function downloadLogCopy(): Promise<void> {
   const saved = await window.app.downloadLog();
   if (saved) {
     logModal.savedTo = saved;
-    renderLogModal();
+    renderModal();
   }
 }
 
 window.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
-  if (logModal.open) closeLogModal();
+  if (modal !== null) closeModal();
 });
 
 render();

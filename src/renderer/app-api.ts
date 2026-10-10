@@ -8,6 +8,7 @@ import type {
   PickedFile,
   ZipExportRequest,
 } from "../shared/ingest";
+import type { AppVersions } from "../shared/app";
 import type { MenuChannel } from "../channels";
 import type { LogLine } from "../shared/log";
 
@@ -29,6 +30,9 @@ declare global {
       logMonthFile: () => Promise<string>;
       downloadLog: () => Promise<string | null>;
       reportBug: () => Promise<void>;
+      versions: () => Promise<AppVersions>;
+      openExternal: (url: string) => Promise<void>;
+      checkUpdates: () => Promise<string>;
     };
   }
 }

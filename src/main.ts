@@ -5,6 +5,7 @@ import { parseInvoice } from "./main/invoice/parse";
 import { PrepareRefusal, prepareInvoice } from "./main/invoice/transform";
 import { appendLog, initLog, logFilePath, logsDirectory, monthFilePath, sessionLines, sessionLogText } from "./main/log";
 import { createZip } from "./shared/zip";
+import type { AppVersions } from "./shared/app";
 import type {
   BatchExportRequest,
   BatchFileResult,
@@ -136,6 +137,20 @@ function registerIpc(): void {
   ipcMain.handle("log:report-bug", () => {
     shell.showItemInFolder(logFilePath());
   });
+
+  ipcMain.handle("app:versions", (): AppVersions => ({
+    app: app.getVersion(),
+    electron: process.versions.electron ?? "?",
+    chrome: process.versions.chrome ?? "?",
+    node: process.versions.node ?? "?",
+  }));
+
+  ipcMain.handle("app:open-external", (_event, url: string) => {
+    if (/^https:\/\//.test(url)) void shell.openExternal(url);
+  });
+
+  // Ticket 19 wires electron-updater; until then this is a visible no-op.
+  ipcMain.handle("app:check-updates", (): string => "You are up to date (update checking arrives with the first published release).");
 
   ipcMain.handle("export:default-dir", (): string => app.getPath("downloads"));
 
@@ -324,16 +339,25 @@ function buildMenu(): void {
       label: "&Help",
       submenu: [
         {
-          label: "User &guide — Open Log",
-          click: () => focused()?.webContents.send("menu:open-log"),
-        },
-        {
-          label: "&Report a bug — Check for updates",
-          click: () => shell.showItemInFolder(logFilePath()),
+          label: "User &guide",
+          click: () => focused()?.webContents.send("menu:user-guide"),
         },
         { type: "separator" },
         {
-          label: "&About",
+          label: "Open &Log",
+          click: () => focused()?.webContents.send("menu:open-log"),
+        },
+        {
+          label: "&Report a bug",
+          click: () => focused()?.webContents.send("menu:report-bug"),
+        },
+        { type: "separator" },
+        {
+          label: "Check for &updates",
+          click: () => focused()?.webContents.send("menu:check-updates"),
+        },
+        {
+          label: "&About RTO Invoice Prep",
           click: () => focused()?.webContents.send("menu:about"),
         },
       ],

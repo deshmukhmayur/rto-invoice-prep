@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { MENU_CHANNELS, type MenuChannel } from "./channels";
+import type { AppVersions } from "./shared/app";
 import type { LogLine } from "./shared/log";
 import type {
   BatchExportRequest,
@@ -35,4 +36,7 @@ contextBridge.exposeInMainWorld("app", {
   logMonthFile: (): Promise<string> => ipcRenderer.invoke("log:month-file"),
   downloadLog: (): Promise<string | null> => ipcRenderer.invoke("log:download"),
   reportBug: (): Promise<void> => ipcRenderer.invoke("log:report-bug"),
+  versions: (): Promise<AppVersions> => ipcRenderer.invoke("app:versions"),
+  openExternal: (url: string): Promise<void> => ipcRenderer.invoke("app:open-external", url),
+  checkUpdates: (): Promise<string> => ipcRenderer.invoke("app:check-updates"),
 });

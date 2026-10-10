@@ -10,6 +10,7 @@ import type {
   PickedFile,
   ZipExportRequest,
 } from "../src/shared/ingest";
+import type { AppVersions } from "../src/shared/app";
 import type { MenuChannel } from "../src/channels";
 import { prepareInvoice } from "../src/main/invoice/transform";
 import { parseInvoice } from "../src/main/invoice/parse";
@@ -30,6 +31,9 @@ declare global {
       exportZip: (req: ZipExportRequest) => Promise<ExportResult>;
       openLog: () => Promise<void>;
       reportBug: () => Promise<void>;
+      versions: () => Promise<AppVersions>;
+      openExternal: (url: string) => Promise<void>;
+      checkUpdates: () => Promise<string>;
     };
   }
 }
@@ -201,4 +205,15 @@ window.app = {
     return null;
   },
   reportBug: async () => console.log("[browser dev mock] report a bug"),
+  versions: async (): Promise<AppVersions> => ({
+    app: "0.1.0 (browser dev)",
+    electron: "33.0.0 (mock)",
+    chrome: "130.0.0 (mock)",
+    node: "20.0.0 (mock)",
+  }),
+  openExternal: async (url) => {
+    console.log("[browser dev mock] openExternal:", url);
+    window.open(url, "_blank", "noopener");
+  },
+  checkUpdates: async () => "You are up to date (browser dev mock — update checking arrives with ticket 19).",
 };
