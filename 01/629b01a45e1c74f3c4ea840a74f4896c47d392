@@ -1,0 +1,52 @@
+src/main/invoice/transform.test.ts
+  s_eec409ade009c3::t_f43b48c1ebec4c 269-275,279-280,282-285,288,290-291
+  s_eec409ade009c3::t_b91f41f3c721bd 23-34
+  s_eec409ade009c3::t_0ff17cdbb3eea5 276-278
+  s_eec409ade009c3::t_6340fbc4ed2a62 281,286-287,289,292-293
+  s_eec409ade009c3::t_8ce1d814309335 294-295
+src/main/invoice/parse.ts
+  s_eec409ade009c3::t_e8eb3f1de37ba0 71-73,75-79,90,94-95,98-101,109-127
+  s_eec409ade009c3::t_241daccc238a0f 388
+  s_eec409ade009c3::t_89771d495bf1de 163-166
+  s_eec409ade009c3::t_4cb43d39d00c22 283-286,301-340,354-355
+  s_eec409ade009c3::t_fc6e48d64148e0 187
+  s_eec409ade009c3::t_f15372954a3b26 430-434,440-441
+scripts/dev-server.ts
+  s_eec409ade009c3::t_9db9b83eacf050 8
+  s_eec409ade009c3::t_f98bc66712a0c9 33-36
+  s_eec409ade009c3::t_bf2358a3e14fd4 37-38
+src/shared/totals.ts
+  s_eec409ade009c3::t_9ac8c25354b507 18-28,32-33,39,41-43,45-54
+src/main/invoice/parse.test.ts
+  s_eec409ade009c3::t_daaee80c2f154f 88-89
+  s_eec409ade009c3::t_5d7ccc3313731d 141-142,144-145
+  s_eec409ade009c3::t_a7243dbc516500 135-138,140,143,146-150
+  s_eec409ade009c3::t_5ee80cf0140399 76
+  s_eec409ade009c3::t_688e602d25940d 139
+  s_eec409ade009c3::t_56b99da054f0d2 49-60
+  s_eec409ade009c3::t_aafb1dd056569d 95-98
+  s_eec409ade009c3::t_d556f14ed1432a 90-94
+  s_eec409ade009c3::t_04216ac250991b 99
+  s_eec409ade009c3::t_ff1e12872112c1 151-152
+CONTEXT.md
+  s_eec409ade009c3::t_4cef9bef8ddd94 10-12
+  s_eec409ade009c3::t_ff0096c3b32e0b 15
+src/main/invoice/transform.ts
+  s_eec409ade009c3::t_6a5a334ba7f5a7 280-282,287-288
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "01629b01a45e1c74f3c4ea840a74f4896c47d392",
+  "prompts": {},
+  "sessions": {
+    "s_eec409ade009c3": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_eed9f355affeWnH7aWXxCdfzEP",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
