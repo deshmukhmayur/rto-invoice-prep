@@ -1,0 +1,19 @@
+.scratch/rto-invoice-fixer/issues/17-logging.md
+  s_c54a4230f5f293::t_558afd605148d2 7,9-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a7863a81e5bbf6251b0446969259a038cd5e5165",
+  "prompts": {},
+  "sessions": {
+    "s_c54a4230f5f293": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed9b5c881ffeJzYW6M76R6qeOU",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
