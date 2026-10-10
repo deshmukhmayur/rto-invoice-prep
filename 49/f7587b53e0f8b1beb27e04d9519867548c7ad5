@@ -1,0 +1,34 @@
+scripts/make-icon.py
+  s_bde5dc9af6167e::t_229cb3d43d9bb3 9-10,27-29,31-32,34,42,44-47
+  s_bde5dc9af6167e::t_9a639b1b5ae0d3 1-8,11-26,30,33,35-41,43,48-63
+package.json
+  s_bde5dc9af6167e::t_50c4845b4e92fe 35
+.scratch/rto-invoice-fixer/issues/21-app-icon.md
+  s_f6ca356d0637be::t_1ca388ed8cc27b 1-6,8,12
+  s_bde5dc9af6167e::t_0ee56b92afaa18 7
+  s_bde5dc9af6167e::t_49cd84f1a8fdca 9-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "49f7587b53e0f8b1beb27e04d9519867548c7ad5",
+  "prompts": {},
+  "sessions": {
+    "s_bde5dc9af6167e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed956cbdaffey301K3Ersqa1Tc",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_f6ca356d0637be": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed98f8523ffek3lCq8XT72inK9",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
