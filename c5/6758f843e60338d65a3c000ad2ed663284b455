@@ -1,0 +1,19 @@
+.github/workflows/release.yml
+  s_f6ca356d0637be::t_c143c85d8106ea 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c56758f843e60338d65a3c000ad2ed663284b455",
+  "prompts": {},
+  "sessions": {
+    "s_f6ca356d0637be": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed98f8523ffek3lCq8XT72inK9",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
