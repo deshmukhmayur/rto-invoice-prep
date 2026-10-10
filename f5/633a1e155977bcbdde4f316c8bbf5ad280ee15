@@ -1,0 +1,72 @@
+src/shared/app.ts
+  s_f6ca356d0637be::t_39360f57be700e 8-13
+src/preload.ts
+  s_f6ca356d0637be::t_f7879b338eb984 3
+  s_f6ca356d0637be::t_450be804567658 41
+scripts/dev-server.ts
+  s_a6ceb4809ec497::t_0b198e190cc94a 19
+src/renderer/styles.css
+  s_a6ceb4809ec497::t_1c1f6b60a5fa8d 100-103,105-113,115-126,129-146,148,150,153
+  s_4a4b875fe196d0::t_e63137f7d7ab82 546
+  s_f6ca356d0637be::t_e518da8a9824a9 897,901
+  s_a6ceb4809ec497::t_f8938e38cce854 568
+  s_f6ca356d0637be::t_992513bc5dce32 902
+src/main.ts
+  s_a6ceb4809ec497::t_7673cad103ff50 321-339
+  s_f6ca356d0637be::t_02892141ec390d 155,157,162-163,165
+  s_f6ca356d0637be::t_0a78f9e5c25857 9
+  s_a6ceb4809ec497::t_d4e23d27adaf7f 320
+src/renderer/renderer.ts
+  s_a6ceb4809ec497::t_9cfcc34444c461 184,189-193,196-198,200-209
+  s_f6ca356d0637be::t_017cb8796ef18f 630,632-635
+  s_a6ceb4809ec497::t_011dd5ca79cbd2 85
+  s_a6ceb4809ec497::t_1e3d762ffd9a4d 599-601
+  s_a6ceb4809ec497::t_31f9ae7e5ed107 199
+src/renderer/app-api.ts
+  s_f6ca356d0637be::t_98c576c79385bf 11
+  s_f6ca356d0637be::t_b1197713dc7503 35
+CONTEXT.md
+  s_a07312c26eac56::t_b1aeb828569b3d 15-17
+src/channels.ts
+  s_a6ceb4809ec497::t_a5c66abba5e1ec 8-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f5633a1e155977bcbdde4f316c8bbf5ad280ee15",
+  "prompts": {},
+  "sessions": {
+    "s_4a4b875fe196d0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed94fc1daffe1jtQPhBG7NkxMX",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_a07312c26eac56": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed946520affepwes4S4xOOSJSw",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_a6ceb4809ec497": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed952ecb9ffefOBwV4AZBd1IPl",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_f6ca356d0637be": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed98f8523ffek3lCq8XT72inK9",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
