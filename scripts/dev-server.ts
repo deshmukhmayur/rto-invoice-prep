@@ -16,6 +16,7 @@ const MIME: Record<string, string> = {
 
 const server = Bun.serve({
   port: PORT,
+  hostname: "0.0.0.0",
   fetch(req) {
     const url = new URL(req.url);
     let path = url.pathname === "/" ? "/index.html" : url.pathname;

@@ -6,7 +6,7 @@ import { parseInvoice } from "./main/invoice/parse";
 import { PrepareRefusal, prepareInvoice } from "./main/invoice/transform";
 import { appendLog, initLog, logFilePath, logsDirectory, monthFilePath, sessionLines, sessionLogText } from "./main/log";
 import { createZip } from "./shared/zip";
-import type { AppVersions } from "./shared/app";
+import type { AppVersions, UpdateCheckResult } from "./shared/app";
 import type {
   BatchExportRequest,
   BatchFileResult,
@@ -152,17 +152,17 @@ function registerIpc(): void {
 
   // Feed comes from app-update.yml (owner/repo baked in by electron-builder);
   // setFeedURL is never called. Checking is a no-op in unpackaged dev runs.
-  ipcMain.handle("app:check-updates", async (): Promise<string> => {
+  ipcMain.handle("app:check-updates", async (): Promise<UpdateCheckResult> => {
     if (!app.isPackaged) {
-      return "You are up to date (update checking works in the installed build).";
+      return { kind: "ok", text: "You are up to date (update checking works in the installed build)." };
     }
     try {
       const result = await autoUpdater.checkForUpdates();
       const version = result?.updateInfo.version;
-      if (!version || version === app.getVersion()) return "You are up to date.";
-      return `Version ${version} is available — it installs automatically when you quit the app.`;
+      if (!version || version === app.getVersion()) return { kind: "ok", text: "You are up to date." };
+      return { kind: "ok", text: `Version ${version} is available — it installs automatically when you quit the app.` };
     } catch (err) {
-      return `Update check failed: ${reasonOf(err)}`;
+      return { kind: "error", text: `Update check failed: ${reasonOf(err)}` };
     }
   });
 
@@ -314,6 +314,26 @@ function buildMenu(): void {
           label: "&Quit",
           accelerator: "CmdOrCtrl+Q",
           role: "quit",
+        },
+      ],
+    },
+    {
+      label: "&Export",
+      submenu: [
+        {
+          label: "Export &files",
+          accelerator: "CmdOrCtrl+E",
+          click: () => focused()?.webContents.send("menu:export-batch"),
+        },
+        {
+          label: "Export as &Zip",
+          accelerator: "CmdOrCtrl+Shift+E",
+          click: () => focused()?.webContents.send("menu:export-zip"),
+        },
+        { type: "separator" },
+        {
+          label: "&Choose output folder…",
+          click: () => focused()?.webContents.send("menu:choose-folder"),
         },
       ],
     },

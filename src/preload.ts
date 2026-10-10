@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { MENU_CHANNELS, type MenuChannel } from "./channels";
-import type { AppVersions } from "./shared/app";
+import type { AppVersions, UpdateCheckResult } from "./shared/app";
 import type { LogLine } from "./shared/log";
 import type {
   BatchExportRequest,
@@ -38,5 +38,5 @@ contextBridge.exposeInMainWorld("app", {
   reportBug: (): Promise<void> => ipcRenderer.invoke("log:report-bug"),
   versions: (): Promise<AppVersions> => ipcRenderer.invoke("app:versions"),
   openExternal: (url: string): Promise<void> => ipcRenderer.invoke("app:open-external", url),
-  checkUpdates: (): Promise<string> => ipcRenderer.invoke("app:check-updates"),
+  checkUpdates: (): Promise<UpdateCheckResult> => ipcRenderer.invoke("app:check-updates"),
 });

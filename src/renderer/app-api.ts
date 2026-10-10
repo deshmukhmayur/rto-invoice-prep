@@ -8,7 +8,7 @@ import type {
   PickedFile,
   ZipExportRequest,
 } from "../shared/ingest";
-import type { AppVersions } from "../shared/app";
+import type { AppVersions, UpdateCheckResult } from "../shared/app";
 import type { MenuChannel } from "../channels";
 import type { LogLine } from "../shared/log";
 
@@ -32,7 +32,7 @@ declare global {
       reportBug: () => Promise<void>;
       versions: () => Promise<AppVersions>;
       openExternal: (url: string) => Promise<void>;
-      checkUpdates: () => Promise<string>;
+      checkUpdates: () => Promise<UpdateCheckResult>;
     };
   }
 }

@@ -97,19 +97,60 @@ main#app {
 }
 
 .topbar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px 16px 0;
+  padding: 10px 16px;
 }
 
-.export-controls {
+.command-bar {
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+  align-items: center;
+  gap: 14px;
 }
 
-.export-controls .folder-picker { width: auto; max-width: 300px; }
+.cmd-status {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cmd-status.ok { color: var(--success); }
+.cmd-status.error { color: var(--error); }
+
+.cmd-status > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmd-status-action {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  flex-shrink: 0;
+}
+
+.cmd-status-action:hover { opacity: 0.8; }
+
+.cmd-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cmd-actions .folder-picker { width: auto; max-width: 260px; }
 
 .layout {
   display: grid;
@@ -502,7 +543,7 @@ main#app {
 
 .export-primary {
   flex: 1;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border: 1px solid var(--accent);
   border-right: none;
   border-radius: 6px 0 0 6px;
@@ -524,7 +565,7 @@ main#app {
 }
 
 .zip-caret {
-  padding: 8px 10px;
+  padding: 6px 10px;
   border: 1px solid var(--accent);
   border-radius: 0 6px 6px 0;
   background: var(--accent);
@@ -570,54 +611,6 @@ main#app {
 }
 
 .export-menu button:hover { background: var(--border); }
-
-.export-banner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border: 1px solid var(--error);
-  border-radius: 6px;
-  color: var(--error);
-  font-size: 12.5px;
-}
-
-.export-banner span { flex: 1; min-width: 0; }
-
-.export-banner button {
-  border: 1px solid var(--error);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--error);
-  font: inherit;
-  font-size: 12px;
-  padding: 3px 8px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.export-banner button:hover { background: color-mix(in srgb, var(--error) 12%, transparent); }
-
-.batch-summary {
-  padding: 7px 10px;
-  border-radius: 6px;
-  font-size: 12.5px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.batch-summary.ok {
-  border: 1px solid color-mix(in srgb, var(--success) 50%, transparent);
-  background: color-mix(in srgb, var(--success) 10%, transparent);
-  color: var(--success);
-}
-
-.batch-summary.error {
-  border: 1px solid color-mix(in srgb, var(--error) 50%, transparent);
-  background: color-mix(in srgb, var(--error) 10%, transparent);
-  color: var(--error);
-}
 
 /* --- Row tags & crash dot ----------------------------------------------------- */
 
@@ -901,9 +894,11 @@ main#app {
 .update-status {
   min-height: 0;
   font-size: 12.5px;
-  color: var(--success);
+  color: var(--text-secondary);
   margin: 0 0 6px;
 }
+
+.update-status.error { color: var(--error); }
 
 .update-status:empty { display: none; }
 

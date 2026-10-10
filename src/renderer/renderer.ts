@@ -82,7 +82,7 @@ function render(): void {
   }
   const selected = rows.find((r) => r.id === selectedId) ?? null;
   main.innerHTML = `
-    ${!ingest && rows.length > 0 ? exportBarHtml() : ""}
+    ${exportBarHtml()}
     <div class="layout">
       <aside class="rail" id="rail">
         <button class="upload-block" id="upload-block" type="button">
@@ -180,31 +180,35 @@ function zipNameForToday(): string {
 function exportBarHtml(): string {
   const valid = validRows();
   const n = valid.length;
-  const blocked = dirBlock !== null;
   const folderLabel = outDir ?? "Choose output folder";
+  const attention = rows.filter((r) => r.status !== "valid").length;
   const primary =
     n === 0
       ? `<button class="export-primary" id="export-batch" type="button" disabled>Nothing to export</button>`
       : `<button class="export-primary" id="export-batch" type="button" ${exporting ? "disabled" : ""}>${exporting ? "Exporting…" : `Export ${n} file${n === 1 ? "" : "s"}`}</button>`;
+  const status = batchSummary
+    ? `<div class="cmd-status ${batchSummary.kind}" role="status">${escapeHtml(batchSummary.text)}</div>`
+    : dirBlock
+      ? `<div class="cmd-status error" role="alert"><span>Export blocked — ${escapeHtml(dirBlock.reason)}</span><button type="button" class="cmd-status-action" data-pick-folder>Pick another folder</button></div>`
+      : `<div class="cmd-status">${rows.length} file${rows.length === 1 ? "" : "s"} · ${attention === 0 ? "all ready to export" : `${attention} need${attention === 1 ? "s" : ""} attention`}</div>`;
   return `
     <header class="topbar">
-      <div class="export-controls">
-        <button class="folder-picker${blocked ? " blocked" : ""}" id="folder-picker" type="button" title="${escapeHtml(outDir ?? "Choose output folder")}">
-          ${blocked ? `<span class="warn" aria-hidden="true">⚠</span>` : folderIcon()}
-          <span class="folder-path">${escapeHtml(folderLabel)}</span>
-        </button>
-        <div class="export-combo">
-          ${primary}
-          <button class="zip-caret" id="zip-caret" type="button" ${n === 0 || exporting ? "disabled" : ""} title="More export options" aria-haspopup="menu" aria-expanded="${zipMenuOpen}">▾</button>
-          ${zipMenuOpen
-            ? `<div class="export-menu" role="menu"><button type="button" data-export-zip role="menuitem">Export as Zip</button></div>`
-            : ""}
+      <div class="command-bar">
+        ${status}
+        <div class="cmd-actions">
+          <button class="folder-picker${dirBlock ? " blocked" : ""}" id="folder-picker" type="button" title="${escapeHtml(outDir ?? "Choose output folder")}">
+            ${dirBlock ? `<span class="warn" aria-hidden="true">⚠</span>` : folderIcon()}
+            <span class="folder-path">${escapeHtml(folderLabel)}</span>
+          </button>
+          <div class="export-combo">
+            ${primary}
+            <button class="zip-caret" id="zip-caret" type="button" ${n === 0 || exporting ? "disabled" : ""} title="More export options" aria-haspopup="menu" aria-expanded="${zipMenuOpen}">▾</button>
+            ${zipMenuOpen
+              ? `<div class="export-menu" role="menu"><button type="button" data-export-zip role="menuitem">Export as Zip</button></div>`
+              : ""}
+          </div>
         </div>
       </div>
-      ${dirBlock
-        ? `<div class="export-banner" role="alert"><span>Export blocked — ${escapeHtml(dirBlock.reason)}</span><button type="button" data-pick-folder>Pick another folder</button></div>`
-        : ""}
-      ${batchSummary ? `<div class="batch-summary ${batchSummary.kind}" role="status">${escapeHtml(batchSummary.text)}</div>` : ""}
     </header>`;
 }
 
@@ -592,6 +596,9 @@ window.addEventListener("drop", (e) => {
 // --- Menu ------------------------------------------------------------------
 
 window.app.onMenu("menu:upload-invoice", () => void pickAndIngest());
+window.app.onMenu("menu:export-batch", () => void exportBatch());
+window.app.onMenu("menu:export-zip", () => void exportZip());
+window.app.onMenu("menu:choose-folder", () => void pickFolder());
 window.app.onMenu("menu:user-guide", () => openModal("guide"));
 window.app.onMenu("menu:open-log", () => void openLogModal());
 window.app.onMenu("menu:report-bug", () => void window.app.openExternal(APP_LINKS.bugTemplate));
@@ -620,9 +627,12 @@ async function openLogModal(): Promise<void> {
 
 async function checkForUpdates(): Promise<void> {
   if (modal !== "about") openModal("about");
-  const note = await window.app.checkUpdates();
+  const result = await window.app.checkUpdates();
   const el = document.getElementById("update-status");
-  if (el) el.textContent = note;
+  if (el) {
+    el.textContent = result.text;
+    el.classList.toggle("error", result.kind === "error");
+  }
 }
 
 function logLineHtml(line: LogLine): string {
