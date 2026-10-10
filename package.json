@@ -7,18 +7,55 @@
   "scripts": {
     "build": "bunx tsc && bun build src/renderer/renderer.ts --outdir dist/renderer --target browser --format iife && cp src/renderer/index.html src/renderer/styles.css dist/renderer/",
     "start": "bun run build && electron .",
+    "dist": "bun run build && electron-builder --publish never",
     "dev:browser": "bun build src/renderer/renderer.ts --outdir dist/renderer --target browser --format iife && bun build scripts/browser-mock.ts --outdir dist/renderer --target browser --format iife && bun scripts/dev-server.ts",
     "typecheck": "bunx tsc --noEmit",
     "test": "bun test"
   },
   "license": "MIT",
+  "build": {
+    "appId": "com.deshmukhmayur.rtoinvoiceprep",
+    "productName": "RTOInvoicePrep",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "deshmukhmayur",
+        "repo": "rto-invoice-prep",
+        "releaseType": "draft"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "rto-invoice-prep-Setup-${version}.${ext}"
+    }
+  },
   "devDependencies": {
     "@types/bun": "^1.4.2",
     "@types/node": "^22.20.4",
     "electron": "^33.4.11",
+    "electron-builder": "^26.15.3",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "pdf-lib": "^1.17.1"
   }
 }

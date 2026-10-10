@@ -4,7 +4,7 @@
 
 **Blocked by:** 16, 17, 18.
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] `.scratch/samples/` is gitignored and verified absent from the tracked tree before anything is published
 - [ ] Tag push builds the unsigned NSIS installer in CI and attaches it to a draft GitHub Release on this repo

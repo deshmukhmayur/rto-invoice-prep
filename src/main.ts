@@ -1,4 +1,5 @@
 import { app, BrowserWindow, Menu, nativeTheme, dialog, ipcMain, shell } from "electron";
+import { autoUpdater } from "electron-updater";
 import { join } from "path";
 import { readFile, unlink, writeFile } from "fs/promises";
 import { parseInvoice } from "./main/invoice/parse";
@@ -149,8 +150,21 @@ function registerIpc(): void {
     if (/^https:\/\//.test(url)) void shell.openExternal(url);
   });
 
-  // Ticket 19 wires electron-updater; until then this is a visible no-op.
-  ipcMain.handle("app:check-updates", (): string => "You are up to date (update checking arrives with the first published release).");
+  // Feed comes from app-update.yml (owner/repo baked in by electron-builder);
+  // setFeedURL is never called. Checking is a no-op in unpackaged dev runs.
+  ipcMain.handle("app:check-updates", async (): Promise<string> => {
+    if (!app.isPackaged) {
+      return "You are up to date (update checking works in the installed build).";
+    }
+    try {
+      const result = await autoUpdater.checkForUpdates();
+      const version = result?.updateInfo.version;
+      if (!version || version === app.getVersion()) return "You are up to date.";
+      return `Version ${version} is available — it installs automatically when you quit the app.`;
+    } catch (err) {
+      return `Update check failed: ${reasonOf(err)}`;
+    }
+  });
 
   ipcMain.handle("export:default-dir", (): string => app.getPath("downloads"));
 
@@ -369,6 +383,10 @@ function buildMenu(): void {
 
 app.whenReady().then(() => {
   nativeTheme.themeSource = "system";
+  if (app.isPackaged) {
+    autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = true;
+  }
   initLog(app.getPath("userData"));
   registerIpc();
   buildMenu();

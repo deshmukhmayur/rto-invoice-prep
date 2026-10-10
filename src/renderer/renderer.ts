@@ -10,13 +10,12 @@ import type { LogLine } from "../shared/log";
 import { formatAmount, parseAmount, recomputeTotals, rupeesInWords } from "../shared/totals";
 import "./app-api";
 
-// TODO (ticket 19): fill these in when the repo is public and GitHub Pages exists.
 const APP_LINKS = {
-  website: "https://TODO.github.io/rto-invoice-prep/",
-  docs: "https://TODO.github.io/rto-invoice-prep/docs/",
-  repo: "https://github.com/TODO/rto-invoice-prep",
-  bugTemplate: "https://github.com/TODO/rto-invoice-prep/issues/new?template=bug_report.yml",
-  featureTemplate: "https://github.com/TODO/rto-invoice-prep/issues/new?template=feature_request.yml",
+  website: "https://deshmukhmayur.github.io/rto-invoice-prep/",
+  docs: "https://deshmukhmayur.github.io/rto-invoice-prep/docs/",
+  repo: "https://github.com/deshmukhmayur/rto-invoice-prep",
+  bugTemplate: "https://github.com/deshmukhmayur/rto-invoice-prep/issues/new?template=bug_report.yml",
+  featureTemplate: "https://github.com/deshmukhmayur/rto-invoice-prep/issues/new?template=feature_request.yml",
 };
 
 type RailRow = ParsedRow & {
@@ -678,6 +677,7 @@ function guideBodyHtml(): string {
       <p><b>What this tool does.</b> It prepares dealership invoices for RTO registration: it removes the discount row from an OEM tax invoice and recalculates every downstream figure at the full, undiscounted price.</p>
       <p><b>How to use it.</b> Drop invoice PDFs onto the window (or use File → Upload Invoice), check each file's recalculated numbers on its preview card, then Export. Files that do not match the expected invoice template are refused with the reason named — they are never exported.</p>
       <p><b>Where files go.</b> Prepared PDFs are written to the output directory shown in the toolbar. Originals are never overwritten, and every batch is recorded in the log.</p>
+      <p><b>Installing and updating.</b> The installer is not code-signed, so Windows SmartScreen may show "Windows protected your PC" — choose <b>More info → Run anyway</b>; this is asked only once. If Windows 11 <b>Smart App Control</b> is turned on, it blocks unsigned apps with no override — you would need to turn it off (Settings → Privacy &amp; security → Windows Security) to install this app. Updates download in the background and install automatically when you quit the app.</p>
     </div>`;
 }
 
