@@ -1,0 +1,19 @@
+src/renderer/renderer.ts
+  s_f6ca356d0637be::t_57d0ae06852e51 396
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f4c0f3930b084f7a8752e80039cd133a5cddf0e3",
+  "prompts": {},
+  "sessions": {
+    "s_f6ca356d0637be": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed98f8523ffek3lCq8XT72inK9",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
