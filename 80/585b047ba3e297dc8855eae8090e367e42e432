@@ -1,0 +1,22 @@
+src/main/invoice/parse.test.ts
+  s_454847d32be65f::t_44a9d5ac412265 16
+  s_454847d32be65f::t_56e763946916e0 57
+src/main/invoice/transform.test.ts
+  s_454847d32be65f::t_b0a913a422ed46 19,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "80585b047ba3e297dc8855eae8090e367e42e432",
+  "prompts": {},
+  "sessions": {
+    "s_454847d32be65f": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_eca1d5f88ffeFgkexuSl4d6ukA",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
