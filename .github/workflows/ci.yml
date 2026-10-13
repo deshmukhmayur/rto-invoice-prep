@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  app:
+  verify-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
       # workflow on windows-latest; here we verify the compile step.
       - run: bunx tsc --noEmit
 
-  docs:
+  verify-docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
