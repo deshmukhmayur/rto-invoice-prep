@@ -1,0 +1,22 @@
+docs/src/components/Footer.astro
+  s_3b62c89ebe7786::t_5998a0c2327e1e 44-54,56,58-61
+docs/src/components/HeroInvoice.astro
+  s_3b62c89ebe7786::t_b6c9d3727e2a4c 26-32
+  s_3b62c89ebe7786::t_835dd9ef68163a 36-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4581c6c4f302176f479eb4fd2a87f28fbaf727e3",
+  "prompts": {},
+  "sessions": {
+    "s_3b62c89ebe7786": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ec9ba958dffe6e0VlhgSfpdU3k",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
