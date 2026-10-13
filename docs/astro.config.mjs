@@ -53,9 +53,11 @@ export default defineConfig({
 				{ slug: 'faq' },
 			],
 			logo: { src: './src/public/icon.png', alt: 'RTO Invoice Prep' },
+			favicon: '/icon.png',
 			pagefind: false,
 			customCss: ['./src/custom.css'],
 			components: {
+				Head: './src/components/CustomHead.astro',
 				Footer: './src/components/Footer.astro',
 				Hero: './src/components/HeroInvoice.astro',
 				Header: './src/components/SiteHeader.astro',

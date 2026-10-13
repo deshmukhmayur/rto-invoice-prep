@@ -1,0 +1,41 @@
+---
+import config from 'virtual:starlight/user-config';
+
+const { head, entry } = Astro.locals.starlightRoute;
+const { title, description } = entry.data;
+// config.title is normalized to a per-language object ({ en: '...' }).
+const siteTitle =
+	typeof config.title === 'string' ? config.title : (config.title[entry.lang] ?? config.title.en);
+
+// Starlight's default Head duplicates the site title on the homepage
+// (pageTitle === siteTitle there), so compute the full title ourselves.
+const pageTitle = title === siteTitle ? siteTitle : `${title} | ${siteTitle}`;
+
+// og:image and twitter:title/description/image are missing from Starlight's
+// generated head; patch the rest instead of duplicating it.
+const ogImage = new URL(`${import.meta.env.BASE_URL}og.png`, Astro.site);
+const imageAlt = `${siteTitle} — ${description}`;
+const ogTags = [
+	{ tag: 'title', attrs: {}, content: pageTitle },
+	{ tag: 'meta', attrs: { property: 'og:title', content: pageTitle } },
+	{ tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
+	{ tag: 'meta', attrs: { property: 'og:image', content: ogImage } },
+	{ tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+	{ tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+	{ tag: 'meta', attrs: { property: 'og:image:alt', content: imageAlt } },
+	{ tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
+	{ tag: 'meta', attrs: { name: 'twitter:title', content: pageTitle } },
+	{ tag: 'meta', attrs: { name: 'twitter:description', content: description } },
+	{ tag: 'meta', attrs: { name: 'twitter:image', content: ogImage } },
+];
+
+const isReplaced = ({ tag, attrs }) =>
+	tag === 'title' ||
+	(tag === 'meta' &&
+		(attrs.property === 'og:title' || attrs.property === 'og:type' || attrs.name === 'twitter:card'));
+
+const kept = head.filter((entry) => !isReplaced(entry));
+---
+
+{kept.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
+{ogTags.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}

@@ -132,17 +132,17 @@ starlight-lang-select select {
 
 /* Links: red pen for content links, navy otherwise; unlayered so they
    beat both Starlight's layered defaults and the UA's :visited purple. */
-.sl-markdown-content a:not(:where(.not-content *)) {
+.sl-markdown-content a:not(.not-content):not(:where(.not-content *)) {
 	color: var(--sl-color-text-accent);
 	text-decoration-thickness: 1px;
 	text-underline-offset: 3px;
 }
 
-.sl-markdown-content a:not(:where(.not-content *)):hover {
+.sl-markdown-content a:not(.not-content):not(:where(.not-content *)):hover {
 	color: var(--sl-color-white);
 }
 
-.sl-markdown-content a:not(:where(.not-content *)):visited {
+.sl-markdown-content a:not(.not-content):not(:where(.not-content *)):visited {
 	color: var(--sl-color-text-accent);
 }
 
@@ -198,19 +198,13 @@ starlight-lang-select select {
 .sl-link-button.primary {
 	background: var(--ledger-blue);
 	border-color: var(--ledger-blue);
-	color: #fff;
-}
-
-:root[data-theme='dark'] .sl-link-button.primary {
-	color: #10161b;
+	/* --sl-color-text-invert flips with the theme (and with the missing-
+	   data-theme fallback), so no attribute-scoped override is needed. */
+	color: var(--sl-color-text-invert);
 }
 
 .sl-link-button.primary:hover {
 	background: var(--ledger-blue-soft);
-	color: var(--ledger-blue);
-}
-
-:root[data-theme='dark'] .sl-link-button.primary:hover {
 	color: var(--ledger-blue);
 }
 

@@ -44,63 +44,72 @@ const isActive = (href: string) =>
 
 <style>
 	@layer starlight.components {
-		.site-header {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 1.5rem;
-			height: 100%;
-			max-width: 78rem;
-			margin-inline: auto;
-		}
+.site-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.5rem;
+	/* Span the header's full height (across its vertical padding) so
+	   stretched nav links reach the header's bottom border. */
+	height: var(--sl-nav-height);
+	margin-block: calc(-1 * var(--sl-nav-pad-y));
+	margin-inline: auto;
+	max-width: 78rem;
+}
 
-		.header-left {
-			display: flex;
-			align-items: center;
-			gap: 1.75rem;
-			min-width: 0;
-			height: 100%;
-		}
+.header-left {
+	display: flex;
+	align-items: stretch;
+	gap: 1.75rem;
+	min-width: 0;
+	height: 100%;
+}
 
-		/* Undo Starlight's title padding so the logo + links share one axis */
-		.header-left :global(.site-title) {
-			padding-block: 0;
-		}
+/* Undo Starlight's title padding so the logo + links share one axis,
+   and center the title on the header's full height. */
+.header-left :global(.site-title) {
+	display: flex;
+	align-items: center;
+	padding-block: 0;
+}
 
-		.header-nav {
-			display: flex;
-			align-items: center;
-			gap: 1.25rem;
-			/* Compensate for the underline's visual weight so link text
-			   centers on the same line as the logo text. */
-			transform: translateY(1px);
-		}
+.header-nav {
+	display: flex;
+	align-items: stretch;
+	gap: 1.25rem;
+}
 
-		.header-nav-link {
-			font-size: var(--sl-text-sm);
-			font-weight: 500;
-			color: var(--ledger-muted);
-			text-decoration: none;
-			white-space: nowrap;
-			border-bottom: 2px solid transparent;
-			padding-block: 0.25rem;
-		}
+/* Links stretch the full header height; their 2px border-bottom is the
+   active highlight. The negative bottom margin pulls it down over
+   Starlight's own 1px header border so the two merge into one line. */
+.header-nav-link {
+	display: inline-flex;
+	align-items: center;
+	font-size: var(--sl-text-sm);
+	font-weight: 500;
+	color: var(--ledger-muted);
+	text-decoration: none;
+	white-space: nowrap;
+	border-bottom: 2px solid transparent;
+}
 
-		.header-nav-link:hover {
-			color: var(--ledger-ink);
-		}
+.header-nav-link:hover {
+	color: var(--ledger-ink);
+}
 
-		.header-nav-link.active {
-			color: var(--ledger-ink);
-			border-bottom-color: var(--ledger-blue);
-			font-weight: 600;
-		}
+.header-nav-link.active {
+	color: var(--ledger-ink);
+	font-weight: 600;
+	border-bottom-color: var(--ledger-blue);
+}
 
-		.header-right {
-			display: flex;
-			align-items: center;
-			gap: 1rem;
-		}
+	.header-right {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+
 
 		.social-icons {
 			display: flex;
