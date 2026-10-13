@@ -41,9 +41,24 @@ import DefaultFooter from '@astrojs/starlight/components/Footer.astro';
 		pagination.parentElement.insertBefore(siteFooter, pagination.nextSibling);
 	};
 
+	// Starlight's built-in header social icon and footer edit link don't
+	// open in a new tab; patch any external link we didn't render ourselves.
+	const openExternalLinksInNewTab = () => {
+		document
+			.querySelectorAll('a[href^="http"]:not([target])')
+			.forEach((a) => {
+				a.target = '_blank';
+				a.relList?.add('noopener', 'noreferrer');
+			});
+	};
+
 	moveSiteFooterBelowPagination();
+	openExternalLinksInNewTab();
 	// Starlight may re-render the frame during view transitions.
-	document.addEventListener('astro:after-swap', moveSiteFooterBelowPagination);
+	document.addEventListener('astro:after-swap', () => {
+		moveSiteFooterBelowPagination();
+		openExternalLinksInNewTab();
+	});
 </script>
 
 <style>

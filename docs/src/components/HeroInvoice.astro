@@ -23,12 +23,18 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
 			actions.length > 0 && (
 				<div class="sl-flex actions">
 					{actions.map(
-						({ attrs: { class: className, ...attrs } = {}, icon, link: href, text, variant }) => (
-							<LinkButton {href} {variant} icon={icon?.name} class:list={[className]} {...attrs}>
+						({ attrs: { class: className, ...attrs } = {}, icon, link: href, text, variant }) => {
+							const external = /^https?:\/\//.test(href);
+							return (
+							<LinkButton {href} {variant} icon={icon?.name} class:list={[className]}
+								target={external ? '_blank' : undefined}
+								rel={external ? 'noopener noreferrer' : undefined}
+								{...attrs}>
 								{text}
 								{icon?.html && <Fragment set:html={icon.html} />}
 							</LinkButton>
-						)
+							);
+						}
 					)}
 				</div>
 			)
