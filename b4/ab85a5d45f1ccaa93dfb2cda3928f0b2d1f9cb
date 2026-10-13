@@ -1,0 +1,81 @@
+docs/src/content/docs/mr/getting-started.md
+  s_d9f4c63c53bab5::t_825420dab87a00 1-4,6-11,13-57
+  s_d9f4c63c53bab5::t_494c28ecebfe31 12
+  s_d9f4c63c53bab5::t_7a540c14a8d0b4 5
+docs/src/content/docs/hi/faq.md
+  s_d9f4c63c53bab5::t_591bebcee1c3cf 1-6,8-103
+  s_d9f4c63c53bab5::t_7a540c14a8d0b4 7
+docs/src/content/docs/hi/getting-started.md
+  s_d9f4c63c53bab5::t_494c28ecebfe31 12
+  s_d9f4c63c53bab5::t_825420dab87a00 1-4,6-11,13-58
+  s_d9f4c63c53bab5::t_7a540c14a8d0b4 5
+docs/src/content/docs/hi/index.md
+  s_d9f4c63c53bab5::t_cd9f3f7c6d99a2 1-16,18-35
+  s_d9f4c63c53bab5::t_7a540c14a8d0b4 17
+docs/src/components/Footer.astro
+  s_d9f4c63c53bab5::t_2c9a61f9b61035 1-53
+docs/src/content/docs/hi/guide.md
+  s_d9f4c63c53bab5::t_7a540c14a8d0b4 7
+  s_d9f4c63c53bab5::t_591bebcee1c3cf 1-6,8-116
+docs/src/content.config.ts
+  s_d9f4c63c53bab5::t_aa68f534d1b3a0 4-5,68-73
+  s_d9f4c63c53bab5::t_40ac3541519708 1,7,9-62,64,74-75
+  s_d9f4c63c53bab5::t_d1ec1a4d0b5c89 2-3,6,63,65-67
+  s_d9f4c63c53bab5::t_b28093d7768a9c 8
+docs/src/content/docs/mr/faq.md
+  s_d9f4c63c53bab5::t_591bebcee1c3cf 1-6,8-104
+  s_d9f4c63c53bab5::t_7a540c14a8d0b4 7
+docs/astro.config.mjs
+  s_d9f4c63c53bab5::t_c71ece616a6fe4 56
+  s_d9f4c63c53bab5::t_7350aa80c56cad 55
+  s_d9f4c63c53bab5::t_2e2dc91ddca87f 24,27-28,32,35-36,40,43-44
+  s_d9f4c63c53bab5::t_b21e5061131018 9
+  s_d9f4c63c53bab5::t_a0d5dd34398db3 1-6,8,10-23,25-26,29-31,33-34,37-39,41-42,45-54,57-59
+  s_d9f4c63c53bab5::t_be84335baa8588 7
+docs/src/content/docs/mr/index.md
+  s_d9f4c63c53bab5::t_7a540c14a8d0b4 17
+  s_d9f4c63c53bab5::t_cd9f3f7c6d99a2 1-16,18-35
+docs/src/content/docs/index.md
+  s_d9f4c63c53bab5::t_cd9f3f7c6d99a2 1-38
+src/renderer/renderer.ts
+  s_d9f4c63c53bab5::t_05e49951f13d86 16
+docs/src/content/i18n/ui.json
+  s_d9f4c63c53bab5::t_6e656ed5dd064a 1,5
+  s_d9f4c63c53bab5::t_cda860e208d241 2-4
+docs/tsconfig.json
+  s_d9f4c63c53bab5::t_6b05935fabbb1a 1-5
+docs/src/content/docs/mr/guide.md
+  s_d9f4c63c53bab5::t_591bebcee1c3cf 1-6,8-116
+  s_d9f4c63c53bab5::t_7a540c14a8d0b4 7
+docs/package.json
+  s_d9f4c63c53bab5::t_af6e4f7e04eb41 1-12
+.github/workflows/docs.yml
+  s_d9f4c63c53bab5::t_75a9f59977eb3b 1-49
+docs/src/content/docs/getting-started.md
+  s_d9f4c63c53bab5::t_494c28ecebfe31 11
+  s_d9f4c63c53bab5::t_825420dab87a00 1-10,12-58
+.gitignore
+  s_d9f4c63c53bab5::t_eb114a1251df76 4-5
+docs/bun.lock
+  s_d9f4c63c53bab5::t_edf8ecdcdf7c37 1-720
+docs/src/content/docs/faq.md
+  s_d9f4c63c53bab5::t_38efb9e4a4133d 1-107
+docs/src/content/docs/guide.md
+  s_d9f4c63c53bab5::t_3c8be66b32db18 1-123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b4ab85a5d45f1ccaa93dfb2cda3928f0b2d1f9cb",
+  "prompts": {},
+  "sessions": {
+    "s_d9f4c63c53bab5": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ecb03153fffeD3rtJqOlzzZL5H",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
