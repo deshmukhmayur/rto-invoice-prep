@@ -369,6 +369,7 @@ function buildMenu(): void {
       submenu: [
         {
           label: "User &guide",
+          accelerator: "F1",
           click: () => focused()?.webContents.send("menu:user-guide"),
         },
         { type: "separator" },

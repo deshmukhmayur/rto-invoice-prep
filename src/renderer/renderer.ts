@@ -801,9 +801,9 @@ function guideBodyHtml(): string {
       </div>
     </header>
     <div class="modal-body">
-      <p><b>What this tool does.</b> It prepares dealership invoices for RTO registration: it removes the discount row from an OEM tax invoice and recalculates every downstream figure at the full, undiscounted price.</p>
-      <p><b>How to use it.</b> Drop invoice PDFs onto the window (or use File → Upload Invoice), check each file's recalculated numbers on its preview card, then Export. Files that do not match the expected invoice template are refused with the reason named — they are never exported.</p>
-      <p><b>Where files go.</b> Prepared PDFs are written to the output directory shown in the toolbar. Originals are never overwritten, and every batch is recorded in the log.</p>
+      <p><b>What this tool does.</b> It prepares dealership invoices for RTO registration: it removes the dealership's discount row from an OEM tax invoice and recalculates every downstream figure at the full, undiscounted price. Post-tax deduction rows (such as a PM E-DRIVE Subsidy on EV invoices) are kept unchanged, and the tax rate is derived from the invoice itself, so both ICE and EV invoices are handled.</p>
+      <p><b>How to use it.</b> Drop invoice PDFs onto the window (or use File → Upload Invoice), check each file's recalculated numbers on its preview card, set a save-name pattern ({name}, {seq}, {date} placeholders), then Export — either as individual PDFs into the chosen folder or as a single ZIP. Invoices that don't match the expected template — a different totals layout, more than one discount row, extra line items between Ex Showroom Price and Net Amount, or a missing discount — are refused with the reason named, never exported and never guessed at.</p>
+      <p><b>Where files go.</b> Prepared PDFs are written to the output directory shown in the toolbar; original PDFs are never overwritten. Every batch is recorded in the session log, which also appends to a monthly log file you manage via Help → Open Log.</p>
       <p><b>Installing and updating.</b> The installer is not code-signed, so Windows SmartScreen may show "Windows protected your PC" — choose <b>More info → Run anyway</b>; this is asked only once. If Windows 11 <b>Smart App Control</b> is turned on, it blocks unsigned apps with no override — you would need to turn it off (Settings → Privacy &amp; security → Windows Security) to install this app. Updates download in the background and install automatically when you quit the app.</p>
     </div>`;
 }
