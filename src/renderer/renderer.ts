@@ -8,6 +8,7 @@ import type {
 import { emptyDetails } from "../shared/ingest";
 import type { LogLine } from "../shared/log";
 import { formatAmount, parseAmount, recomputeTotals, rupeesInWords } from "../shared/totals";
+import { DEFAULT_NAMING_PATTERN, resolveSaveName, sanitizeFileName } from "../shared/naming";
 import "./app-api";
 
 const APP_LINKS = {
@@ -21,6 +22,8 @@ const APP_LINKS = {
 type RailRow = ParsedRow & {
   id: number;
   data: ArrayBuffer;
+  /** User-set export name; undefined means the naming pattern drives the name. */
+  saveName?: string;
   export?: ExportResult;
   batch?: BatchFileResult;
   retrying?: boolean;
@@ -31,6 +34,7 @@ let rows: RailRow[] = [];
 let selectedId: number | null = null;
 let ingest: { total: number; done: number; pending: string[] } | null = null;
 let outDir: string | null = null;
+let namingPattern: string = DEFAULT_NAMING_PATTERN;
 let dirBlock: { reason: string } | null = null;
 let batchSummary: { kind: "ok" | "error"; text: string } | null = null;
 let zipMenuOpen = false;
@@ -71,6 +75,21 @@ function removeRow(id: number): void {
 
 function validRows(): RailRow[] {
   return rows.filter((r) => r.status === "valid");
+}
+
+const todayForPattern = (): string => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+function saveNameFor(row: RailRow): string {
+  if (row.saveName !== undefined) return sanitizeFileName(row.saveName);
+  return resolveSaveName(namingPattern, {
+    name: row.fileName.replace(/\.pdf$/i, ""),
+    seq: validRows().indexOf(row) + 1,
+    date: todayForPattern(),
+  });
 }
 
 function render(): void {
@@ -129,6 +148,20 @@ function render(): void {
     btn.addEventListener("click", () => void exportOne(Number(btn.dataset.export)));
   }
   document.getElementById("folder-picker")?.addEventListener("click", () => void pickFolder());
+  const patternInput = main.querySelector<HTMLInputElement>("#naming-pattern");
+  patternInput?.addEventListener("change", () => {
+    namingPattern = patternInput.value.trim() || DEFAULT_NAMING_PATTERN;
+    render();
+  });
+  for (const input of main.querySelectorAll<HTMLInputElement>("[data-save-name]")) {
+    input.addEventListener("change", () => {
+      const row = rows.find((r) => r.id === Number(input.dataset.saveName));
+      if (!row) return;
+      const value = input.value.trim();
+      row.saveName = value === "" || value === saveNameFor(row) ? undefined : value;
+      render();
+    });
+  }
   for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-pick-folder]")) {
     btn.addEventListener("click", () => void pickFolder());
   }
@@ -200,15 +233,13 @@ async function exportOne(id: number): Promise<void> {
   if (!row || row.status !== "valid") return;
   const btn = main.querySelector<HTMLButtonElement>(`[data-export="${id}"]`);
   if (btn) btn.disabled = true;
-  const result = await window.app.exportOne({ fileName: row.fileName, data: row.data, logTotals: logTotalsFor(row) });
+  const result = await window.app.exportOne({ fileName: row.fileName, data: row.data, logTotals: logTotalsFor(row), saveName: saveNameFor(row) });
   row.export = result;
   render();
 }
 
 function zipNameForToday(): string {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `rto-invoices-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.zip`;
+  return `rto-invoices-${todayForPattern()}.zip`;
 }
 
 function exportBarHtml(): string {
@@ -257,6 +288,8 @@ function exportBarHtml(): string {
           ${note}
         </div>
         <div class="bar-actions">
+          <label class="save-to" for="naming-pattern" title="File name pattern — {name} is the original file name, {date} is today, {seq} is the file's position">Naming</label>
+          <input class="naming-pattern" id="naming-pattern" type="text" value="${escapeHtml(namingPattern)}" spellcheck="false" ${exporting ? "disabled" : ""}>
           <label class="save-to">Save to</label>
           <button class="folder-picker${dirBlock ? " blocked" : ""}" id="folder-picker" type="button" title="${escapeHtml(outDir ?? "Choose output folder")}">
             ${dirBlock ? `<span class="warn" aria-hidden="true">⚠</span>` : folderIcon()}
@@ -322,7 +355,7 @@ async function exportBatch(): Promise<void> {
   render();
   const results = await window.app.exportBatch({
     dir: outDir!,
-    files: targets.map((r) => ({ fileName: r.fileName, data: r.data, logTotals: logTotalsFor(r) })),
+    files: targets.map((r) => ({ fileName: r.fileName, data: r.data, logTotals: logTotalsFor(r), saveName: saveNameFor(r) })),
   });
   applyBatchResults(results);
   const failed = results.filter((r) => r.status === "error");
@@ -349,7 +382,7 @@ async function exportZip(): Promise<void> {
   const result = await window.app.exportZip({
     dir: outDir!,
     zipName: zipNameForToday(),
-    files: targets.map((r) => ({ fileName: r.fileName, data: r.data, logTotals: logTotalsFor(r) })),
+    files: targets.map((r) => ({ fileName: r.fileName, data: r.data, logTotals: logTotalsFor(r), saveName: saveNameFor(r) })),
   });
   batchSummary =
     result.status === "saved"
@@ -376,7 +409,7 @@ async function retryOne(id: number): Promise<void> {
   render();
   const [result] = await window.app.exportBatch({
     dir: outDir!,
-    files: [{ fileName: row.fileName, data: row.data, logTotals: logTotalsFor(row) }],
+    files: [{ fileName: row.fileName, data: row.data, logTotals: logTotalsFor(row), saveName: saveNameFor(row) }],
   });
   if (result) {
     row.batch = result;
@@ -461,10 +494,19 @@ function cardHtml(row: RailRow): string {
           ${detailCell("Chassis no.", row.details.chassisNo)}
           ${detailCell(row.details.engineLabel === "Motor#" ? "Motor no." : "Engine no.", row.details.engineNo)}
         </dl>`;
+  const rawName = row.saveName ?? saveNameFor(row);
+  const illegal = /[/\\:*?"<>|]/.test(rawName);
+  const invalid = illegal
+    ? ' class="invalid" title="Characters \\ / : * ? < > | are not allowed in file names — they will be replaced with _ when exporting"'
+    : "";
+  const nameField =
+    row.status === "valid"
+      ? `<input type="text" data-save-name="${row.id}" value="${escapeHtml(rawName)}" spellcheck="false" aria-label="Export file name"${invalid}>`
+      : `<span class="card-name" title="${escapeHtml(row.fileName)}">${escapeHtml(row.fileName)}</span>`;
   return `
     <div class="card">
       <div class="card-head">
-        <span class="card-name" title="${escapeHtml(row.fileName)}">${escapeHtml(row.fileName)}</span>
+        ${nameField}
         ${download}
       </div>
       ${details}
@@ -593,10 +635,11 @@ async function ingestFiles(files: { fileName: string; data: ArrayBuffer }[]): Pr
   for (const file of files) {
     try {
       const parsed = await window.app.parse(file);
-      rows.push({ ...parsed, id: nextId++, data: file.data });
+      rows.push({ ...parsed, id: nextId, data: file.data });
+      nextId++;
     } catch (err) {
       rows.push({
-        id: nextId++,
+        id: nextId,
         fileName: file.fileName,
         status: "error",
         refusalReason: null,
@@ -605,6 +648,7 @@ async function ingestFiles(files: { fileName: string; data: ArrayBuffer }[]): Pr
         totals: null,
         data: file.data,
       });
+      nextId++;
     }
     ingest.done++;
     ingest.pending.shift();

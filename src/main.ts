@@ -20,6 +20,7 @@ import type {
 } from "./shared/ingest";
 import { emptyDetails } from "./shared/ingest";
 import { uniqueName } from "./shared/unique";
+import { sanitizeSaveName } from "./shared/naming";
 
 const reasonOf = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
@@ -94,7 +95,7 @@ function registerIpc(): void {
       const reason = err instanceof Error ? err.message : String(err);
       return { status: "error", reason };
     }
-    const defaultName = `${req.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`;
+    const defaultName = sanitizeSaveName(req.saveName, `${req.fileName.replace(/\.pdf$/i, "")}-RTO`);
     const result = await dialog.showSaveDialog(win!, {
       title: "Save prepared invoice",
       defaultPath: defaultName,
@@ -194,7 +195,7 @@ function registerIpc(): void {
     for (const file of req.files) {
       try {
         const prepared = await prepareInvoice(new Uint8Array(file.data), { version: app.getVersion() });
-        const name = uniqueName(`${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`, used);
+        const name = uniqueName(sanitizeSaveName(file.saveName, `${file.fileName.replace(/\.pdf$/i, "")}-RTO`), used);
         const dest = join(req.dir, name);
         await writeFile(dest, prepared);
         await appendLog("OK", `${file.fileName}${totalsLines(file.logTotals)}\n  wrote ${dest}`);
@@ -220,7 +221,7 @@ function registerIpc(): void {
     for (const file of req.files) {
       try {
         const prepared = await prepareInvoice(new Uint8Array(file.data), { version: app.getVersion() });
-        const name = uniqueName(`${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`, used);
+        const name = uniqueName(sanitizeSaveName(file.saveName, `${file.fileName.replace(/\.pdf$/i, "")}-RTO`), used);
         entries.push({ name, data: prepared });
         logged.push({ fileName: file.fileName, asName: name, logTotals: file.logTotals });
       } catch (err) {

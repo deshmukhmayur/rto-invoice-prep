@@ -643,6 +643,47 @@ main#app {
   white-space: nowrap;
 }
 
+.naming-pattern {
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+}
+
+.naming-pattern:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.card-head input[data-save-name] {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.card-head input[data-save-name]:hover { border-color: var(--border); }
+
+.card-head input[data-save-name]:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--card-bg);
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.card-head input[data-save-name].invalid { border-color: var(--error); }
+
 .export-combo {
   position: relative;
   display: flex;

@@ -63,7 +63,7 @@ export type LogTotals = {
   totalNew: string;
 };
 
-export type ExportRequest = { fileName: string; data: ArrayBuffer; logTotals: LogTotals | null };
+export type ExportRequest = { fileName: string; data: ArrayBuffer; logTotals: LogTotals | null; saveName?: string };
 
 export type ExportResult =
   | { status: "saved"; path: string }
@@ -71,7 +71,7 @@ export type ExportResult =
   | { status: "refused"; reason: string }
   | { status: "error"; reason: string };
 
-export type BatchFileRequest = { fileName: string; data: ArrayBuffer; logTotals: LogTotals | null };
+export type BatchFileRequest = { fileName: string; data: ArrayBuffer; logTotals: LogTotals | null; saveName?: string };
 
 export type BatchFileResult =
   | { fileName: string; status: "saved"; path: string }

@@ -16,6 +16,7 @@ import { prepareInvoice } from "../src/main/invoice/transform";
 import { parseInvoice } from "../src/main/invoice/parse";
 import { createZip } from "../src/shared/zip";
 import { uniqueName } from "../src/shared/unique";
+import { sanitizeSaveName } from "../src/shared/naming";
 
 declare global {
   interface Window {
@@ -129,7 +130,7 @@ window.app = {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${req.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`;
+    a.download = sanitizeSaveName(req.saveName, `${req.fileName.replace(/\.pdf$/i, "")}-RTO`);
     a.click();
     URL.revokeObjectURL(url);
     return { status: "saved", path: `${a.download} (browser download)` };
@@ -149,14 +150,14 @@ window.app = {
       await new Promise((r) => setTimeout(r, 350));
       // fail*.pdf simulates a mid-batch write failure (retryable in the UI).
       if (/fail/i.test(file.fileName)) {
-        const reason = `EACCES: permission denied, write '${req.dir}/${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf'`;
+        const reason = `EACCES: permission denied, write '${req.dir}/${file.saveName ?? `${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`}'`;
         console.error("[browser dev mock] simulated write failure for", file.fileName);
         results.push({ fileName: file.fileName, status: "error", reason });
       } else {
         results.push({
           fileName: file.fileName,
           status: "saved",
-          path: `${req.dir}/${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf (simulated write)`,
+          path: `${req.dir}/${sanitizeSaveName(file.saveName, `${file.fileName.replace(/\.pdf$/i, "")}-RTO`)} (simulated write)`,
         });
       }
     }
@@ -171,7 +172,7 @@ window.app = {
     for (const file of req.files) {
       try {
         const data = await prepareInvoice(file.data, { version: "0.1" });
-        entries.push({ name: uniqueName(`${file.fileName.replace(/\.pdf$/i, "")}-RTO.pdf`, used), data });
+        entries.push({ name: uniqueName(sanitizeSaveName(file.saveName, `${file.fileName.replace(/\.pdf$/i, "")}-RTO`), used), data });
       } catch (err) {
         return {
           status: "error",
