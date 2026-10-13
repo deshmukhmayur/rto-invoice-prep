@@ -39,6 +39,12 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
@@ -47,6 +53,9 @@
       "perMachine": false,
       "deleteAppDataOnUninstall": false,
       "artifactName": "rto-invoice-prep-Setup-${version}.${ext}"
+    },
+    "zip": {
+      "artifactName": "rto-invoice-prep-${version}-portable.${ext}"
     }
   },
   "devDependencies": {
