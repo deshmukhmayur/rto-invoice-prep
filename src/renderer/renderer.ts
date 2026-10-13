@@ -153,6 +153,13 @@ function render(): void {
     namingPattern = patternInput.value.trim() || DEFAULT_NAMING_PATTERN;
     render();
   });
+  for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-focus-name]")) {
+    btn.addEventListener("click", () => {
+      const input = main.querySelector<HTMLInputElement>(`[data-save-name="${btn.dataset.focusName}"]`);
+      input?.focus();
+      input?.select();
+    });
+  }
   for (const input of main.querySelectorAll<HTMLInputElement>("[data-save-name]")) {
     input.addEventListener("change", () => {
       const row = rows.find((r) => r.id === Number(input.dataset.saveName));
@@ -501,7 +508,10 @@ function cardHtml(row: RailRow): string {
     : "";
   const nameField =
     row.status === "valid"
-      ? `<input type="text" data-save-name="${row.id}" value="${escapeHtml(rawName)}" spellcheck="false" aria-label="Export file name"${invalid}>`
+      ? `<button class="edit-name" type="button" data-focus-name="${row.id}" title="Click to edit the exported file name" aria-label="Edit exported file name">
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M11.5 1.3a1.7 1.7 0 0 1 2.4 2.4l-.9.9-2.4-2.4.9-.9zM9.8 3l2.4 2.4-6.3 6.3-3.2.8.8-3.2 6.3-6.3zM2 13.5h12a.6.6 0 0 1 0 1.2H2a.6.6 0 0 1 0-1.2z"/></svg>
+        </button>
+        <input type="text" data-save-name="${row.id}" value="${escapeHtml(rawName)}" spellcheck="false" aria-label="Export file name"${invalid}>`
       : `<span class="card-name" title="${escapeHtml(row.fileName)}">${escapeHtml(row.fileName)}</span>`;
   return `
     <div class="card">

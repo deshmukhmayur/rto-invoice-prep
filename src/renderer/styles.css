@@ -659,6 +659,20 @@ main#app {
   border-color: var(--accent);
 }
 
+.card-head .edit-name {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.card-head .edit-name:hover { background: var(--border); color: var(--accent); }
+
 .card-head input[data-save-name] {
   flex: 1;
   min-width: 0;
