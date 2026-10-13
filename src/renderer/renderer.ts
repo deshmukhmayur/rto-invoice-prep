@@ -504,14 +504,14 @@ function cardHtml(row: RailRow): string {
   const rawName = row.saveName ?? saveNameFor(row);
   const illegal = /[/\\:*?"<>|]/.test(rawName);
   const invalid = illegal
-    ? ' class="invalid" title="Characters \\ / : * ? < > | are not allowed in file names — they will be replaced with _ when exporting"'
+    ? ' class="invalid" title="File name for exports. Characters \\ / : * ? < > | are not allowed — they will be replaced with _ when exporting"'
     : "";
   const nameField =
     row.status === "valid"
-      ? `<button class="edit-name" type="button" data-focus-name="${row.id}" title="Click to edit the exported file name" aria-label="Edit exported file name">
+      ? `<button class="edit-name" type="button" data-focus-name="${row.id}" title="Edit the file name for exports" aria-label="Edit exported file name">
           <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M11.5 1.3a1.7 1.7 0 0 1 2.4 2.4l-.9.9-2.4-2.4.9-.9zM9.8 3l2.4 2.4-6.3 6.3-3.2.8.8-3.2 6.3-6.3zM2 13.5h12a.6.6 0 0 1 0 1.2H2a.6.6 0 0 1 0-1.2z"/></svg>
         </button>
-        <input type="text" data-save-name="${row.id}" value="${escapeHtml(rawName)}" spellcheck="false" aria-label="Export file name"${invalid}>`
+        <input type="text" data-save-name="${row.id}" value="${escapeHtml(rawName)}" spellcheck="false" aria-label="Export file name" title="File name used when exporting — set a default pattern in the Naming field below"${invalid}>`
       : `<span class="card-name" title="${escapeHtml(row.fileName)}">${escapeHtml(row.fileName)}</span>`;
   return `
     <div class="card">

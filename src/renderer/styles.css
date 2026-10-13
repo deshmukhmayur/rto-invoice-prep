@@ -692,8 +692,6 @@ main#app {
   outline: none;
   border-color: var(--accent);
   background: var(--card-bg);
-  font-weight: 400;
-  font-size: 13px;
 }
 
 .card-head input[data-save-name].invalid { border-color: var(--error); }
