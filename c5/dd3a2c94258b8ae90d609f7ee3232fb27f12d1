@@ -1,0 +1,22 @@
+src/main/invoice/pdf-ops.ts
+  s_11db9ba22b766c::t_7c091f4a6e8232 135-138
+.scratch/rto-invoice-fixer/issues/13-app-shell.md
+  s_11db9ba22b766c::t_201ebf3016aa23 7
+  s_11db9ba22b766c::t_dca97eab048289 9-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c5dd3a2c94258b8ae90d609f7ee3232fb27f12d1",
+  "prompts": {},
+  "sessions": {
+    "s_11db9ba22b766c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed9bf53b2ffeo6RoU6TrN0ItfW",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
