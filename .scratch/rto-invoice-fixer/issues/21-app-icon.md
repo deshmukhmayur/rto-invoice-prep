@@ -4,9 +4,9 @@
 
 **Blocked by:** 19 (done).
 
-**Status:** implemented (pending Windows verification)
+**Status:** done
 
 - [x] Icon source (SVG or ≥512px PNG) committed to the repo
 - [x] `build.win.icon` set in package.json; packaged exe shows the icon in Explorer, taskbar, and Alt-Tab
 - [x] Window-level icon acceptable to skip (Windows uses the exe icon for packaged builds)
-- [ ] Verify on a Windows machine via the portable build
+- [x] Verify on a Windows machine via the portable build
