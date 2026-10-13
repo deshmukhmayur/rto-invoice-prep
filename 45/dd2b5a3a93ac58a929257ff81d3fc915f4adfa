@@ -1,0 +1,21 @@
+docs/adr/0001-defer-telemetry-github-download-counts.md
+  s_a07312c26eac56::t_fa1292452c9aab 1-27
+CONTEXT.md
+  s_a07312c26eac56::t_04e962be910ed4 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "45dd2b5a3a93ac58a929257ff81d3fc915f4adfa",
+  "prompts": {},
+  "sessions": {
+    "s_a07312c26eac56": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed946520affepwes4S4xOOSJSw",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
