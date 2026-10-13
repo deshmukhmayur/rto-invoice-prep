@@ -23,6 +23,14 @@ jobs:
 
       - run: bun test
 
+      # electron-builder's parallel artifact uploads (exe, blockmap, latest.yml)
+      # each check "does a draft exist?" and race — creating duplicate drafts.
+      # Pre-creating it makes every upload reuse the same release.
+      - name: Pre-create draft release
+        run: gh release view "$env:GITHUB_REF_NAME" 2>$null; if (-not $?) { gh release create "$env:GITHUB_REF_NAME" --draft --title "$env:GITHUB_REF_NAME" }
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and publish draft release
         run: bun run build && bunx --bun electron-builder --windows --publish always
         env:
