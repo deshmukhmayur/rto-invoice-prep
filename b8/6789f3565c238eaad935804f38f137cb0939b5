@@ -1,0 +1,20 @@
+.scratch/rto-invoice-fixer/issues/21-app-icon.md
+  s_11c273fbe0f1c6::t_2821d9d905261e 7
+  s_11c273fbe0f1c6::t_a5c3bc99cb9c06 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b86789f3565c238eaad935804f38f137cb0939b5",
+  "prompts": {},
+  "sessions": {
+    "s_11c273fbe0f1c6": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ecb811eb0ffeTJZ2HJxIJXyy0g",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
