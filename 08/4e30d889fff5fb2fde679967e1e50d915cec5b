@@ -1,0 +1,74 @@
+src/renderer/styles.css
+  s_a6ceb4809ec497::t_dd5ef01e583321 104,111,117,119-167,178-179,197,212,214,221-224
+  s_b2252851787474::t_4b2ce74912d600 181-189
+  s_b2252851787474::t_94b02261bcd24b 192
+  s_a6ceb4809ec497::t_98ca2492e729e3 661,663,666,686,688
+  s_a6ceb4809ec497::t_77c9c3c8127ccb 225
+  s_a6ceb4809ec497::t_b2fddfb9b264b6 264-267
+  s_a6ceb4809ec497::t_f2b18adb79f4e6 99-103,105-108,113-114
+  s_a6ceb4809ec497::t_90cb6c170f5f65 634
+  s_a6ceb4809ec497::t_c2e8b531ad92a7 605,607-608
+  s_7a052970191a4a::t_ac0a312c0ffcde 498-499,502,506-507,510-511,523,550-565,571-572
+  s_a6ceb4809ec497::t_d46d4dbea858d5 215-216,218,228-230
+  s_a6ceb4809ec497::t_bcdcecb5b3c191 703
+  s_a6ceb4809ec497::t_f014ff05efb316 665
+  s_a6ceb4809ec497::t_91c7cda7bdd2bf 190,226,615,618,621-627
+  s_a6ceb4809ec497::t_bf9b4782f459c0 727
+  s_a6ceb4809ec497::t_7ddd947b75ffa6 227
+src/main.ts
+  s_a6ceb4809ec497::t_2428019a36e192 314
+src/renderer/renderer.ts
+  s_b2252851787474::t_fb3fe599541e99 286
+  s_a6ceb4809ec497::t_950e7dd38d9025 149-154
+  s_7a052970191a4a::t_735702618f138d 555
+  s_7a052970191a4a::t_0d0aaccccaf571 542
+  s_b2252851787474::t_01e182874dc433 233,235-236
+  s_a6ceb4809ec497::t_caf442966bfd8e 136-144
+  s_a6ceb4809ec497::t_b9e0566255f27c 218-232,234,237-246,251,254-260
+  s_a6ceb4809ec497::t_179da5d9ddefee 96
+  s_a6ceb4809ec497::t_750dc4da2caf7f 253,274
+  s_a6ceb4809ec497::t_908956a9a9ad46 169-186
+  s_a6ceb4809ec497::t_61002fb3d3dd1b 187
+.scratch/rto-invoice-fixer/issues/22-configurable-bulk-export-naming.md
+  s_af39b810311126::t_d947f89d033da4 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "084e30d889fff5fb2fde679967e1e50d915cec5b",
+  "prompts": {},
+  "sessions": {
+    "s_7a052970191a4a": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed90ca8ffffe2qrTQBMnH0R6RM",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_a6ceb4809ec497": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed952ecb9ffefOBwV4AZBd1IPl",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_af39b810311126": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed938bb8affeuMrxFLD8e2lfYQ",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    },
+    "s_b2252851787474": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ecbdf660bffeijqRwNbqdJdZ2C",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
