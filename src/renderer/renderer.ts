@@ -13,7 +13,7 @@ import "./app-api";
 
 const APP_LINKS = {
   website: "https://deshmukhmayur.github.io/rto-invoice-prep/",
-  docs: "https://deshmukhmayur.github.io/rto-invoice-prep/docs/",
+  docs: "https://deshmukhmayur.github.io/rto-invoice-prep/guide/",
   repo: "https://github.com/deshmukhmayur/rto-invoice-prep",
   bugTemplate: "https://github.com/deshmukhmayur/rto-invoice-prep/issues/new?template=bug_report.yml",
   featureTemplate: "https://github.com/deshmukhmayur/rto-invoice-prep/issues/new?template=feature_request.yml",

@@ -1,0 +1,35 @@
+---
+title: RTO Invoice Prep
+description: RTO पंजीकरण के लिए डीलरशिप इनवॉइस तैयार करें — OEM टैक्स इनवॉइस से डिस्काउंट लाइन PDF में ही हटाएँ।
+template: splash
+hero:
+  title: RTO Invoice Prep
+  tagline: RTO पंजीकरण के लिए डीलरशिप इनवॉइस तैयार करें।
+  actions:
+    - text: Windows के लिए v{{VERSION}} डाउनलोड करें
+      link: "{{DOWNLOAD_URL}}"
+    - text: अन्य रिलीज़
+      link: https://github.com/deshmukhmayur/rto-invoice-prep/releases
+    - text: शुरुआत करें
+      link: /hi/getting-started/
+      variant: minimal
+---
+<!-- Machine-drafted translation; pending human review before publishing. -->
+
+import { Aside } from '@astrojs/starlight/components';
+
+वाहन पंजीकरण संभालने वाली डीलरशिप डेस्क के लिए निःशुल्क Windows ऐप।
+OEM सिस्टम की टैक्स इनवॉइस PDF खोलें, ऐप डिस्काउंट लाइन हटा देगा और GST
+आँकड़े तथा शब्दों में रकम दोबारा लिख देगा — ताकि RTO की कॉपी पर हिसाब
+बराबर बैठे।
+
+- **लोकल पहले।** इनवॉइस आपके कंप्यूटर से बाहर नहीं जाते। ऐप इंटरनेट का
+  उपयोग केवल अपडेट जाँचने के लिए करता है।
+- **हर इनवॉइस पर दो मिनट।** PDF छोड़ें, संशोधित कॉपी मूल फ़ाइल के बगल में
+  सेव करें।
+- **एक डीलरशिप डेस्क के लिए बनाया गया।** न अकाउंट, न सर्वर, न सब्सक्रिप्शन।
+
+<Aside type="tip">
+  ऐप मोटरसाइकिल निर्माताओं के मानक टेम्पलेट की OEM टैक्स इनवॉइस PDF पढ़ता
+  है। अगर आपका इनवॉइस लेआउट अलग है, तो [FAQ](/hi/faq/) देखें।
+</Aside>

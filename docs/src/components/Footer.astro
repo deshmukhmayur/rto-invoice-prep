@@ -1,0 +1,53 @@
+---
+import DefaultFooter from '@astrojs/starlight/components/Footer.astro';
+---
+
+<div class="site-footer">
+	<p class="site-footer-note">
+		<a href="https://github.com/deshmukhmayur/rto-invoice-prep/blob/main/LICENSE">
+			MIT licensed
+		</a>
+		<span aria-hidden="true">·</span>
+		<span>Made for a single dealership desk</span>
+	</p>
+	<p class="site-footer-links">
+		<a
+			href="https://github.com/deshmukhmayur/rto-invoice-prep/issues/new?template=bug_report.yml"
+			>Report a bug</a
+		>
+		<span aria-hidden="true">·</span>
+		<a
+			href="https://github.com/deshmukhmayur/rto-invoice-prep/issues/new?template=feature_request.yml"
+			>Request a feature</a
+		>
+	</p>
+</div>
+<DefaultFooter />
+
+<style>
+	@layer starlight.components {
+		.site-footer {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.5rem 1.5rem;
+			justify-content: space-between;
+			margin-top: 2rem;
+			padding-top: 1rem;
+			border-top: 1px solid var(--sl-color-gray-6);
+			font-size: var(--sl-text-sm);
+			color: var(--sl-color-gray-3);
+		}
+		.site-footer p {
+			display: flex;
+			gap: 0.5rem;
+			margin: 0;
+		}
+		.site-footer a {
+			color: inherit;
+			text-decoration-color: var(--sl-color-gray-5);
+		}
+		.site-footer a:hover {
+			color: var(--sl-color-white);
+		}
+	}
+</style>

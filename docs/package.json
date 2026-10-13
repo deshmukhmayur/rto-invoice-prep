@@ -1,0 +1,12 @@
+{
+  "name": "rto-invoice-prep-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "astro build"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.42.6",
+    "astro": "^7.3.8"
+  }
+}
