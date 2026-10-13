@@ -13,7 +13,7 @@ const hasSample = (() => {
   } catch {
     return false;
   }
-});
+})();
 
 const originalBytes = () => new Uint8Array(readFileSync(SAMPLE_PATH));
 
@@ -54,7 +54,7 @@ const hasEvSample = (() => {
   } catch {
     return false;
   }
-});
+})();
 
 const evBytes = () => new Uint8Array(readFileSync(EV_SAMPLE_PATH));
 
