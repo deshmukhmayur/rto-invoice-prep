@@ -1,0 +1,96 @@
+---
+template: splash
+title: Getting started
+description: Download RTO Invoice Prep, install it on Windows, and prepare your first invoice in about two minutes.
+---
+
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import appBatch from '../../assets/app-batch.png';
+import appVerify from '../../assets/app-verify.png';
+import appEmptyState from '../../assets/app-empty-state.png';
+
+## Download
+
+[Download the latest release for Windows](https://github.com/deshmukhmayur/rto-invoice-prep/releases). The installer is
+signed, roughly 90 MB, and works on Windows 10 and 11 (64-bit).
+
+The latest release is always listed on the
+[Releases page](https://github.com/deshmukhmayur/rto-invoice-prep/releases).
+You will also see the version in the app's title bar.
+
+## Install
+
+<Steps>
+1. Run the installer you downloaded from the Releases page.
+2. If Windows SmartScreen shows *Windows protected your PC*, click
+   **More info** → **Run anyway**. The installer is unsigned by a
+   certificate authority but comes straight from the official release page.
+3. Follow the installer. RTO Invoice Prep installs per-user and adds a
+   Start-menu shortcut — no administrator rights needed.
+4. Launch **RTO Invoice Prep** from the Start menu.
+</Steps>
+
+## Prepare your first invoice
+
+<figure class="app-shot">
+  <img
+    src={appEmptyState.src}
+    alt="The RTO Invoice Prep window with no invoices loaded: an empty state panel reads “No invoices yet — drop PDFs anywhere in this window, use File → Upload Invoice, or the button below”, above an Upload invoices button."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>The app at first launch — nothing loaded, nothing stored.</figcaption>
+</figure>
+
+<Steps>
+1. **Upload the invoice.** Click *Upload invoices* (or drag PDFs onto the
+   window) and pick the tax invoice your OEM system printed. You can pick
+   several at once — the app queues them as a batch.
+2. **Check the totals.** Click the file in the list on the left. The app
+   shows the invoice details it read and a *Final Invoice Totals* panel
+   where every changed figure — taxable value, CGST, SGST, grand total,
+   amount in words — appears struck through with the corrected value
+   beside it.
+3. **Export.** Choose an output folder under *Save to* (Downloads by
+   default), adjust the file *Naming* pattern if you like, and click
+   *Export 1 file*. The corrected PDF is written there — nothing is
+   uploaded or stored anywhere else.
+</Steps>
+
+<figure class="app-shot">
+  <img
+    src={appBatch.src}
+    alt="The RTO Invoice Prep window with a batch of two invoices in the left-hand list: one row with a green status dot and one with a red dot marked as needing attention. The selected file's card on the right shows the invoice details and the Final Invoice Totals panel with the discount struck out and corrected values highlighted."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>A batch of two invoices — one ready to export, one refused.</figcaption>
+</figure>
+
+<figure class="app-shot">
+  <img
+    src={appVerify.src}
+    alt="A selected invoice's card: invoice number, date, customer, model, chassis and engine numbers, and below them the Final Invoice Totals panel where the discount row is struck out and taxable value, CGST, SGST, grand total and the amount in words show the old value struck through with the corrected value highlighted beside it."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>Checking the totals — every rewritten figure shows the original struck through beside the corrected value.</figcaption>
+</figure>
+
+That's it. Total taxable value, GST amounts, and the amount in words are
+recomputed on the corrected copy.
+
+<Aside type="caution">
+  Keep the original invoice file untouched. RTO Invoice Prep always writes
+  a **new** PDF — it never edits your originals.
+</Aside>
+
+## Where your data lives
+
+Nowhere. The app keeps nothing between sessions: no accounts, no saved
+vehicles, no settings files. Each PDF is read from disk, processed in
+memory, and exported where you choose. The only network activity is a
+check for new releases.

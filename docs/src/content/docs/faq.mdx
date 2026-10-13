@@ -1,11 +1,11 @@
 ---
+template: splash
 title: FAQ
 description: Answers to common questions about RTO Invoice Prep — privacy, supported invoices, GST, and troubleshooting.
-sidebar:
-  order: 4
 ---
 
 import { Aside } from '@astrojs/starlight/components';
+import appRefused from '../../assets/app-refused.png';
 
 ## Privacy & data
 
@@ -35,14 +35,14 @@ delivery note, or your dealership's own challan.
 
 ### My invoice doesn't have a discount line. Can I still use it?
 
-Yes — just load it and check that the detected discount is zero. If it is,
-the original PDF already adds up and there's nothing to change; you can
-hand over the original.
+There's nothing to change — the original PDF already adds up, so hand over
+the original. The app tells you this itself: it refuses the file with
+"Discount is 0.00 — nothing to remove".
 
 ### What GST rate does the app use?
 
-Whatever rate is printed on your invoice. Most two-wheelers use CGST 14% +
-SGST 14%, and the app reads that from the PDF itself rather than assuming
+Whatever rate is printed on your invoice. Most two-wheelers use CGST 9% +
+SGST 9%, and the app reads that from the PDF itself rather than assuming
 a fixed rate.
 
 ### Does the corrected copy include the amount in words?
@@ -59,17 +59,33 @@ representative if you're unsure.
 
 ## Troubleshooting
 
-### The app says "Discount line not found"
+### The app refused my invoice — "Template validation failed"
 
-See the [troubleshooting section of the user guide](/guide/#troubleshooting)
-for the common causes and fixes.
+<figure class="app-shot">
+  <img
+    src={appRefused.src}
+    alt="A refused file's card in RTO Invoice Prep: every detail field reads “~unreadable~” and a red banner explains the template validation failure."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>A refused file shows a red banner instead of a totals panel.</figcaption>
+</figure>
+
+See [When the app refuses a file](guide/#when-the-app-refuses-a-file) in
+the user guide for the common reasons and what to do.
 
 ### The amounts don't match my invoice
 
-Re-open the PDF and verify the discount amount digit by digit, then check
+Re-upload the PDF and verify the discount amount digit by digit, then check
 the GST rates printed on the invoice. If your invoice uses a structure the
 app doesn't understand, treat the output as a starting point and verify by
 hand.
+
+### A file failed to write
+
+Pick another output folder under *Save to*, or click **Retry this file** on
+the failed row. See [Troubleshooting in the user guide](guide/#troubleshooting).
 
 ### The app won't start
 
@@ -84,7 +100,7 @@ Open an issue using the
 [bug report template](https://github.com/deshmukhmayur/rto-invoice-prep/issues/new?template=bug_report.yml).
 Please include:
 
-- the app version (shown in the footer),
+- the app version (shown in the title bar),
 - your Windows version,
 - a **redacted** copy of the invoice PDF — black out the chassis number,
   engine number, customer name, and any personal details before attaching.

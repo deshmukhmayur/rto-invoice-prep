@@ -1,12 +1,12 @@
 ---
+template: splash
 title: वारंवार विचारले जाणारे प्रश्न
 description: RTO Invoice Prep विषयी सामान्य प्रश्नांची उत्तरे — गोपनीयता, समर्थित इन्व्हॉइस, GST आणि अडचणी.
-sidebar:
-  order: 4
 ---
-<!-- Machine-drafted translation; pending human review before publishing. -->
+{/* Machine-drafted translation; pending human review before publishing. */}
 
 import { Aside } from '@astrojs/starlight/components';
+import appRefused from '../../../assets/app-refused.png';
 
 ## गोपनीयता आणि डेटा
 
@@ -36,12 +36,13 @@ import { Aside } from '@astrojs/starlight/components';
 
 ### माझ्या इन्व्हॉइसमध्ये सूट लाइन नाही. तरीही वापरता येईल का?
 
-हो — ती उघडा आणि सापडलेली सूट शून्य आहे का ते पहा. असल्यास मूळ PDF
-आधीच बरोबर आहे आणि काही बदलण्याची गरज नाही; मूळ इन्व्हॉइसच द्या.
+बदलण्यासारखे काही नाही — मूळ PDF आधीच हिशोब बरोबर ठेवते, मूळ इन्व्हॉइसच
+द्या. अ‍ॅपही असेच सांगते: फाईल नाकारून "Discount is 0.00 — nothing to
+remove" दाखवते.
 
 ### अ‍ॅप कोणता GST दर वापरते?
 
-तुमच्या इन्व्हॉइसवर छापलेलाच दर. बहुतेक दुचाकींवर CGST 14% + SGST 14%
+तुमच्या इन्व्हॉइसवर छापलेलाच दर. बहुतेक दुचाकींवर CGST 9% + SGST 9%
 असते, आणि अ‍ॅप स्थिर दर गृहीत धरण्याऐवजी तो PDF मधूनच वाचते.
 
 ### दुरुस्त कॉपीमध्ये शब्दांतील रक्कम असते का?
@@ -58,10 +59,23 @@ import { Aside } from '@astrojs/starlight/components';
 
 ## अडचणी सोडवणे
 
-### अ‍ॅप "Discount line not found" म्हणते
+### अ‍ॅपने इन्व्हॉइस नाकारली — "Template validation failed"
 
-सामान्य कारणे आणि उपायांसाठी [वापरकर्ता मार्गदर्शकातील अडचणी
-विभाग](/mr/guide/#अडचणी-सोडवणे) पहा.
+<figure class="app-shot">
+  <img
+    src={appRefused.src}
+    alt="नाकारलेल्या फाईलचे कार्ड: प्रत्येक तपशील “~unreadable~” दिसतो आणि लाल बँर Template validation failed संदेश देते."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>नाकारलेली फाईल — कार्ड सांगते की फाईल का नाकारली गई.</figcaption>
+</figure>
+
+
+
+आमची कारणे आणि पुढचा मार्ग [वापरकर्ता मार्गदर्शकातील "अ‍ॅप काही फाईल
+नाकारते"](mr/guide/#अ‍ॅप-काही-फाईल-नाकारते) विभागात आहेत.
 
 ### रकमा माझ्या इन्व्हॉइसशी जुळत नाहीत
 

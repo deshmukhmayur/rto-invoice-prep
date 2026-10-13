@@ -1,0 +1,238 @@
+---
+template: splash
+title: User guide
+description: How to load, verify, and export corrected invoices with RTO Invoice Prep.
+---
+
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import appBatch from '../../assets/app-batch.png';
+import appVerify from '../../assets/app-verify.png';
+import appRefused from '../../assets/app-refused.png';
+import appCrash from '../../assets/app-crash.png';
+
+## The workflow
+
+<Steps>
+1. **Upload** — click *Upload invoices* or drop PDFs anywhere on the
+   window. Load one invoice or a whole day's batch.
+2. **Verify** — click a file in the list to open its card. Check the
+   invoice details and the *Final Invoice Totals* panel against your own
+   copy of the invoice.
+3. **Export** — pick the output folder, adjust the naming pattern if you
+   like, and click *Export* (or *Export as Zip* for a single archive).
+</Steps>
+
+The whole loop takes a couple of minutes for a batch. There are no settings
+to configure and no data is kept between sessions — every batch starts from
+a clean slate.
+
+<Aside type="note">
+  RTO Invoice Prep works on the **OEM tax invoice** (the "Tax Invoice"
+  printed by the manufacturer's system), not on the purchase order, the
+  delivery note, or your dealership's own challan.
+</Aside>
+
+## The batch list
+
+<figure class="app-shot">
+  <img
+    src={appBatch.src}
+    alt="The RTO Invoice Prep window with two invoices loaded: the left-hand list shows one row with a green status dot and one with a red dot, and the selected file's card on the right shows the invoice details and the Final Invoice Totals panel. The export bar at the bottom reads “2 files · 1 needs attention” above the Naming pattern, Save to folder, and Export controls."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>The batch list on the left, the selected file's card on the right, and the export bar along the bottom.</figcaption>
+</figure>
+
+Every PDF you upload becomes a row in the list on the left, with a status
+dot:
+
+- a **green dot** means the invoice parsed and was corrected — ready to
+  export;
+- an **amber dot** means the row needs attention: the parser refused the
+  file, or the corrected copy could not be written;
+- while files are being read, a progress bar shows *Reading N of M…*.
+
+Rows you no longer want can be removed with the ✕ button; removing a row
+never touches any file on disk.
+
+Click a row to open its card: the invoice number, date, customer, model,
+chassis and engine numbers as the app read them, and the totals panel.
+
+## What the app removes
+
+OEM tax invoices carry a line such as:
+
+> Less: Dealer Discount ₹ 18,500
+
+That discount was already settled between you and the OEM. When the RTO
+office sees it on the registration copy, they ask for paperwork you don't
+have — so the line has to come off. RTO Invoice Prep removes:
+
+- the **discount amount** from the discount line,
+- the discount's share of **taxable value**, CGST, and SGST,
+- stale **totals** and **rounding** figures, and
+- the **amount in words**, rewritten for the new total.
+
+Everything else on the invoice — chassis number, engine number, vehicle
+description, HSN, dealer details, taxes actually collected — stays exactly
+as the OEM printed it.
+
+## Checking the totals
+
+<figure class="app-shot">
+  <img
+    src={appVerify.src}
+    alt="A selected invoice's card: invoice number, date, customer, model, chassis and engine numbers as the app read them, and below them the Final Invoice Totals panel. The discount row is struck out and marked removed; taxable value, CGST, SGST, ex-showroom price, net amount, grand total, round off and the amount in words each show the original value struck through with the corrected value highlighted beside it."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>The Final Invoice Totals panel — the old value struck through, the corrected value highlighted beside it.</figcaption>
+</figure>
+
+Each file's card shows a *Final Invoice Totals* panel — a facsimile of the
+invoice's own totals block. Every recalculated figure appears twice: the
+original value struck through, the corrected value beside it in a
+highlight. Deduction rows that appear between *Ex Showroom Price* and *Net
+Amount* — a **PM E-DRIVE Subsidy** on EV invoices, for example — are
+carried over unchanged: they are government credits, not the dealer's
+discount.
+
+The panel is read-only: the discount comes off automatically, and the
+amounts are recomputed from the figures the app read. If a struck-through
+value doesn't match your own copy of the invoice, trust your copy — remove
+the file and check the PDF you were given.
+
+## What the app recalculates
+
+RTO Invoice Prep recomputes the money figures from the remaining taxable
+value using the GST rates shown on the invoice itself:
+
+- **Total taxable value** = price − discount.
+- **CGST / SGST** = taxable value × the rate printed on your invoice
+  (typically 14% + 14% for most two-wheelers, or 18% split evenly for
+  standard vehicles).
+- **Net amount** = ex-showroom price − deduction rows.
+- **Grand total** = net amount, **rounded** to the nearest rupee, with the
+  round-off shown separately.
+- **Amount in words** = the rounded grand total, spelled out in Indian
+  numbering (e.g. "Rupees One Lakh Twelve Thousand Three Hundred Forty Five
+  Only").
+
+If the invoice shows a different GST structure, the app still uses the
+rates **printed on that invoice**, so the corrected copy always matches the
+tax your OEM actually collected.
+
+## Exporting the corrected files
+
+The export bar at the bottom of the window controls where corrected copies
+go and what they are called:
+
+- **Save to** — the output folder. The default is your Downloads folder;
+  click the button to pick another.
+- **Naming** — a file name pattern. `{name}` is the original file name,
+  `{seq}` is the file's position in the batch, and `{date}` is today's
+  date. The default pattern `{name}-RTO` turns `invoice.pdf` into:
+
+  ```
+  invoice.pdf       →  invoice-RTO.pdf
+  ```
+
+- **Export N files** writes every ready row to the output folder at once.
+  The ▾ caret next to it offers **Export as Zip**, which packs the same
+  files into a single `rto-invoices-YYYY-MM-DD.zip` archive.
+- Rows that could not be written get a **Retry this file** button; rows the
+  parser refused never export.
+
+<Aside type="caution">
+  The app refuses to overwrite your original file. Exported copies get a
+  distinct name, and if that name collides with an existing file, the app
+  writes a numbered copy instead.
+</Aside>
+
+## When the app refuses a file
+
+<figure class="app-shot">
+  <img
+    src={appRefused.src}
+    alt="A refused file's card: every detail field reads “~unreadable~” in italics, and a red banner reads “Template validation failed: found 121 TJ array op(s) — expected only absolute-position Tj runs”. The row in the batch list carries a red status dot."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>A refused row exports nothing — the card explains why the file was rejected.</figcaption>
+</figure>
+
+Some invoices are refused rather than corrected — the row shows a message
+beginning **Template validation failed**. Common reasons:
+
+- **"No Discount row found"** — the PDF is not the OEM tax invoice (it
+  may be the purchase order or delivery note), or the discount is
+  genuinely zero. If the discount is zero, hand over the original.
+- **"Multiple Discount rows found"** — the invoice has more than one
+  discount line, which this tool does not attempt.
+- **"expected 2 pages, found N"** or a label out of position — the OEM's
+  layout has drifted from the template the tool was validated against.
+- **"Discount is 0.00 — nothing to remove"** — nothing to do; the
+  original already adds up.
+- **"Not a readable PDF document"** — the file is damaged, encrypted, or
+  not a PDF at all.
+
+A refused row exports nothing. The app never guesses at an invoice it
+doesn't recognise — a wrong guess on an RTO copy costs more than a refusal.
+
+If your layout really is different, [file a bug](faq/#reporting-bugs)
+with a redacted copy of the invoice.
+
+## Troubleshooting
+
+### A row says the write failed
+
+The output folder may be read-only, full, or briefly locked by another
+program. Pick another folder, or click **Retry this file** once the
+problem is fixed.
+
+### The parser crashed on this file
+
+<figure class="app-shot">
+  <img
+    src={appCrash.src}
+    alt="A crashed file's card: a red panel titled “The parser crashed on this file” with the error message, the file name, and Open Log and Report a bug buttons. The row in the batch list carries a hollow red status dot."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>A parser crash — use Open Log to get the log, then report the bug.</figcaption>
+</figure>
+
+A rare bug in the app itself, not a problem with your invoice. Use the
+**Open Log** button on the crash panel, then report it via
+[the FAQ](faq/#reporting-bugs) with the log attached.
+
+### The amounts don't match my invoice
+
+Re-upload the PDF and check the discount amount digit by digit, then check
+the GST rates printed on the invoice. If your invoice uses a structure the
+app doesn't understand, treat the output as a starting point and verify by
+hand before submission.
+
+### The app won't start
+
+- Make sure you installed the latest release from the
+  [Releases page](https://github.com/deshmukhmayur/rto-invoice-prep/releases).
+- If Windows SmartScreen blocks the first run, click **More info** →
+  **Run anyway**.
+- If it still won't start, [report the bug](faq/#reporting-bugs) with your
+  Windows version and the release you downloaded.
+
+## Keyboard shortcuts
+
+| Action | Shortcut |
+|---|---|
+| Upload invoice | `Ctrl+O` |
+| Export files | `Ctrl+E` |
+| Export as Zip | `Ctrl+Shift+E` |
+| New window | `Ctrl+Shift+N` |
+| Open user guide | `F1` |

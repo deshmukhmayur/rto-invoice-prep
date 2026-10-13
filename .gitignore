@@ -2,4 +2,5 @@ node_modules/
 dist/
 .scratch/samples/
 release/docs/.astro/
+docs/.astro/
 docs/dist/

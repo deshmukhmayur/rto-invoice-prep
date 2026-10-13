@@ -47,15 +47,15 @@ function tokenDocsLoader() {
     load: (context) =>
       inner.load({
         ...context,
-        store: {
-          set(entry) {
-            context.store.set({ ...entry, data: rewrite(entry.data) });
+        store: new Proxy(context.store, {
+          get(target, prop, receiver) {
+            if (prop === 'set') {
+              return (entry) => target.set({ ...entry, data: rewrite(entry.data) });
+            }
+            const value = Reflect.get(target, prop, target);
+            return typeof value === 'function' ? value.bind(target) : value;
           },
-          get: (key) => context.store.get(key),
-          keys: () => context.store.keys(),
-          values: () => context.store.values(),
-          delete: (key) => context.store.delete(key),
-        },
+        }),
       }),
   };
 }

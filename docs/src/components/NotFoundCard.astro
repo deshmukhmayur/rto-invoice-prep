@@ -1,0 +1,38 @@
+---
+// The 404 counterpart to InvoiceCard: a mock "Missing Page Notice" filed in
+// the same ledger style. Static on purpose — nothing to correct here.
+---
+
+<figure class="invoice-card notfound-card" aria-label="Mock missing page notice stating that the requested page was not found">
+	<span class="stamp" aria-hidden="true">Not Found</span>
+	<div class="invoice-card-head">
+		<span class="invoice-card-title">Missing Page Notice</span>
+		<span class="invoice-card-gstin">REF 404-NF</span>
+	</div>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">Description</th>
+				<th scope="col">Status</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="notfound">
+				<td>Requested page</td>
+				<td class="status-missing">not on file</td>
+			</tr>
+			<tr>
+				<td>The link you followed</td>
+				<td>broken or moved</td>
+			</tr>
+			<tr>
+				<td>Suggested correction</td>
+				<td class="status-fix">start from home</td>
+			</tr>
+		</tbody>
+	</table>
+	<p class="invoice-card-words">
+		No discount to strike, no totals to rewrite &mdash;&nbsp;
+		<strong>this page simply doesn&rsquo;t exist.</strong>
+	</p>
+</figure>

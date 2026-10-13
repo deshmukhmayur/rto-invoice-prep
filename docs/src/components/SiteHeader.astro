@@ -1,0 +1,133 @@
+---
+import config from 'virtual:starlight/user-config';
+import LanguageSelect from 'virtual:starlight/components/LanguageSelect';
+import SiteTitle from 'virtual:starlight/components/SiteTitle';
+import SocialIcons from 'virtual:starlight/components/SocialIcons';
+import ThemeToggle from './ThemeToggle.astro';
+
+const { locale, siteTitleHref } = Astro.locals.starlightRoute;
+// Site title href already carries the base path; derive the base from it.
+const base = siteTitleHref.endsWith('/') ? siteTitleHref : `${siteTitleHref}/`;
+// Navigation is header-only: the site is three pages, all top level.
+const nav = [
+	{ href: `${base}getting-started/`, label: 'Getting started' },
+	{ href: `${base}guide/`, label: 'User guide' },
+	{ href: `${base}faq/`, label: 'FAQ' },
+];
+
+const current = Astro.url.pathname;
+const isActive = (href: string) =>
+	current === href || current === href.replace(/\/$/, '') || current === `${href}index.html`;
+---
+
+<header class="site-header">
+	<div class="header-left">
+		<SiteTitle />
+		<nav class="header-nav" aria-label="Main">
+			{
+				nav.map(({ href, label }) => (
+					<a href={href} class:list={['header-nav-link', { active: isActive(href) }]} aria-current={isActive(href) ? 'page' : undefined}>
+						{label}
+					</a>
+				))
+			}
+		</nav>
+	</div>
+	<div class="header-right">
+		<div class="social-icons">
+			<SocialIcons />
+		</div>
+		<ThemeToggle />
+		<LanguageSelect />
+	</div>
+</header>
+
+<style>
+	@layer starlight.components {
+		.site-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1.5rem;
+			height: 100%;
+			max-width: 78rem;
+			margin-inline: auto;
+		}
+
+		.header-left {
+			display: flex;
+			align-items: center;
+			gap: 1.75rem;
+			min-width: 0;
+			height: 100%;
+		}
+
+		/* Undo Starlight's title padding so the logo + links share one axis */
+		.header-left :global(.site-title) {
+			padding-block: 0;
+		}
+
+		.header-nav {
+			display: flex;
+			align-items: center;
+			gap: 1.25rem;
+			/* Compensate for the underline's visual weight so link text
+			   centers on the same line as the logo text. */
+			transform: translateY(1px);
+		}
+
+		.header-nav-link {
+			font-size: var(--sl-text-sm);
+			font-weight: 500;
+			color: var(--ledger-muted);
+			text-decoration: none;
+			white-space: nowrap;
+			border-bottom: 2px solid transparent;
+			padding-block: 0.25rem;
+		}
+
+		.header-nav-link:hover {
+			color: var(--ledger-ink);
+		}
+
+		.header-nav-link.active {
+			color: var(--ledger-ink);
+			border-bottom-color: var(--ledger-blue);
+			font-weight: 600;
+		}
+
+		.header-right {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+		}
+
+		.social-icons {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+		}
+
+		.social-icons::after {
+			content: '';
+			height: 2rem;
+			border-inline-end: 1px solid var(--sl-color-gray-5);
+		}
+
+		.social-icons:empty::after {
+			display: none;
+		}
+
+		@media (max-width: 49.99rem) {
+			.header-nav {
+				display: none;
+			}
+		}
+
+		@media (min-width: 50rem) {
+			.social-icons::after {
+				display: none;
+			}
+		}
+	}
+</style>

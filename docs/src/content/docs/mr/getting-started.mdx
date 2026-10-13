@@ -1,0 +1,99 @@
+---
+template: splash
+title: सुरु करा
+description: RTO Invoice Prep डाउनलोड करा, Windows वर इंस्टॉल करा आणि जवळपास दोन मिनिटांत पहिले इन्व्हॉइस तयार करा.
+---
+{/* Machine-drafted translation; pending human review before publishing. */}
+
+import { Steps } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+import appEmptyState from '../../../assets/app-empty-state.png';
+import appBatch from '../../../assets/app-batch.png';
+import appVerify from '../../../assets/app-verify.png';
+
+## डाउनलोड
+
+[Windows साठी नवीनतम रिलीज डाउनलोड करा](https://github.com/deshmukhmayur/rto-invoice-prep/releases). इंस्टॉलर
+जवळपास 90 MB आहे आणि Windows 10 व 11 (64-bit) वर चालतो.
+
+नवीनतम रिलीज नेहमी
+[रिलीज पृष्ठावर](https://github.com/deshmukhmayur/rto-invoice-prep/releases)
+दिसतो. आवृत्ती अ‍ॅपच्या फूटरमध्येही दिसते.
+
+## इंस्टॉल करा
+
+<Steps>
+1. रिलीज पृष्ठावरून डाउनलोड केलेला इंस्टॉलर चालवा.
+2. Windows SmartScreen *Windows protected your PC* दाखवल्यास
+   **More info** → **Run anyway** वर क्लिक करा. इंस्टॉलर थेट अधिकृत
+   रिलीज पृष्ठावरून येतो.
+3. इंस्टॉलरच्या सूचना पाळा. RTO Invoice Prep प्रति-वापरकर्ता इंस्टॉल होतो
+   आणि स्टार्ट मेनूमध्ये शॉर्टकट तयार करतो — प्रशासक अधिकारांची गरज नाही.
+4. स्टार्ट मेनूमधून **RTO Invoice Prep** उघडा.
+</Steps>
+
+## पहिले इन्व्हॉइस तयार करा
+
+<figure class="app-shot">
+  <img
+    src={appEmptyState.src}
+    alt="RTO Invoice Prep चौकी पहिल्यांदा उघडल्यावर: रिकामी स्थिती “No invoices yet” दाखवते, खाली Upload invoices बटण."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>पहिल्यांदा अ‍ॅप — काही लोड नाही, काही साठवले नाही.</figcaption>
+</figure>
+
+
+
+<Steps>
+1. **इन्व्हॉइस अपलोड करा.** *Upload invoices* वर क्लिक करा (किंवा PDF
+   विंडोवर ओढा) आणि OEM सिस्टीमची टॅक्स इन्व्हॉइस निवडा. एकावेळी अनेक PDF
+   निवडता येतात — अ‍ॅप त्या बॅच म्हणून लावतो.
+2. **आकडे तपासा.** डाव्या यादीतून फाईल निवडा. अ‍ॅप वाचलेले इन्व्हॉइस
+   तपशील आणि *Final Invoice Totals* पॅनेल दाखवतो, जिथे बदललेला प्रत्येक
+   आकडा — करपात्र मूल्य, CGST, SGST, एकूण रक्कम, शब्दांतील रक्कम —
+   काटलेला आणि त्यासोबत दुरुस्त आकडा दिसतो.
+3. **एक्सपोर्ट करा.** *Save to* मध्ये आउटपुट फोल्डर निवडा (डीफॉल्ट
+   Downloads), हवे असल्यास *Naming* पॅटर्न बदला, आणि *Export 1 file* वर
+   क्लिक करा. दुरुस्त PDF तिथेच लिहिली जाते; काहीही अपलोड किंवा दुसरीकडे
+   साठवले जात नाही.
+</Steps>
+
+<figure class="app-shot">
+  <img
+    src={appBatch.src}
+    alt="दोन इन्व्हॉइसांचा बॅच: डाव्या यादीत एका ओळीवर हिरवा बिंदू आणि एकावर लाल, उजवीकडे निवडलेल्या फाईलचे कार्ड आणि Final Invoice Totals पॅनेल."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>दोन इन्व्हॉइसांचा बॅच — एक एक्सपोर्टसाठी तयार, एक नाकारलेली.</figcaption>
+</figure>
+
+<figure class="app-shot">
+  <img
+    src={appVerify.src}
+    alt="निवडलेल्या इन्व्हॉइसचे कार्ड: तपशील आणि Final Invoice Totals पॅनेल, ज्यात सूट ओळ खोडली आहे आणि प्रत्येक बदललेल्या रकमेसोबत जुनी रक्कम खोडून नवीन रक्कम हायलाइटमध्ये दिसते."
+    loading="lazy"
+    width={1166}
+    height={773}
+  />
+  <figcaption>रकमांची तपासणी — प्रत्येक पुन्हा लिहिलेली रक्कम जुन्या आकड्यावर खोडून दुरुस्त आकडा दाखवते.</figcaption>
+</figure>
+
+इतकेच. एकूण करपात्र मूल्य, GST रकमा आणि शब्दांतील रक्कम दुरुस्त कॉपीवर
+पुन्हा आकारली जातात.
+
+<Aside type="caution">
+  मूळ इन्व्हॉइस फाईल अस्पर्शित ठेवा. RTO Invoice Prep नेहमी **नवी** PDF
+  लिहिते — तुमच्या मूळ फाईली कधीच बदलत नाही.
+</Aside>
+
+## तुमचा डेटा कुठे राहतो
+
+कुठेही नाही. अ‍ॅप सत्रांमध्ये काहीही ठेवत नाही: ना खाती, ना सेव्ह केलेली
+वाहने, ना सेटिंग फाईली. प्रत्येक PDF डिस्कवरून वाचली जाते, मेमरीमध्ये
+प्रक्रिया होते, आणि तुम्ही निवडलेल्या ठिकाणी सेव्ह होते. नेटवर्क हालचाल
+फक्त नवीन रिलीज तपासणी एवढीच.

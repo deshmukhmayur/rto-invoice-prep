@@ -1,0 +1,198 @@
+---
+// Replaces Starlight's theme dropdown with a sun/moon switch.
+// Keeps the `starlight-theme-select` custom element so Starlight's
+// FOUC-free ThemeProvider still drives and syncs it.
+interface Props {
+	/* Rendered inside header and mobile menu by Starlight. */
+}
+
+const dark = Astro.locals.t('themeSelect.dark');
+const light = Astro.locals.t('themeSelect.light');
+---
+
+<starlight-theme-select data-theme-toggle>
+	<button
+		type="button"
+		role="switch"
+		class="theme-toggle"
+		aria-checked="false"
+		aria-label={`${light} / ${dark}`}
+		title={`${light} / ${dark}`}
+	>
+		<span class="theme-toggle-track" aria-hidden="true">
+			<svg class="theme-toggle-icon theme-toggle-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-15a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 18a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1ZM4.22 5.64l1.42 1.42a1 1 0 1 1-1.42 1.41L2.81 7.05a1 1 0 0 1 1.41-1.41Zm14.14 11.9 1.42 1.41a1 1 0 0 1-1.42 1.42l-1.41-1.42a1 1 0 1 1 1.41-1.41ZM2 12a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Zm18 0a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1ZM4.22 18.36a1 1 0 0 1 1.42-1.41 1 1 0 0 1 0 1.41l-1.42 1.42a1 1 0 0 1-1.41-1.42l1.41-1.41ZM18.36 5.64a1 1 0 0 1 1.42 1.41l-1.42 1.42a1 1 0 1 1-1.41-1.42l1.41-1.41Z"/></svg>
+			<svg class="theme-toggle-icon theme-toggle-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.05 8.05 0 0 1-3.32.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 9.69 1 1 0 0 0-.36-1.05Z"/></svg>
+			<span class="theme-toggle-knob" aria-hidden="true"></span>
+		</span>
+	</button>
+</starlight-theme-select>
+
+{/* Inlined by Starlight to avoid FOUC; syncs any `starlight-theme-select`. */}
+<script is:inline>
+	StarlightThemeProvider.updatePickers();
+</script>
+
+<script>
+	type Theme = 'auto' | 'dark' | 'light';
+
+	const storageKey = 'starlight-theme';
+
+	const parseTheme = (theme: unknown): Theme =>
+		theme === 'auto' || theme === 'dark' || theme === 'light' ? theme : 'auto';
+
+	const loadTheme = (): Theme =>
+		parseTheme(typeof localStorage !== 'undefined' && localStorage.getItem(storageKey));
+
+	function storeTheme(theme: Theme): void {
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem(storageKey, theme === 'light' || theme === 'dark' ? theme : '');
+		}
+	}
+
+	const getPreferredColorScheme = (): Theme =>
+		matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+
+	function onThemeChange(theme: Theme): void {
+		StarlightThemeProvider.updatePickers(theme);
+		document.documentElement.dataset.theme = theme === 'auto' ? getPreferredColorScheme() : theme;
+		storeTheme(theme);
+	}
+
+	/** The theme a toggle click should land on: the opposite of what is on screen. */
+	const oppositeOf = (theme: Theme): Theme =>
+		(theme === 'auto' ? getPreferredColorScheme() : theme) === 'dark' ? 'light' : 'dark';
+
+	matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+		if (loadTheme() === 'auto') onThemeChange('auto');
+	});
+
+	/** Reflect the resolved on-screen theme into every toggle on the page. */
+	function syncAllToggles(): void {
+		const resolved = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+		document.querySelectorAll('starlight-theme-select button').forEach((button) => {
+			button.setAttribute('aria-checked', resolved === 'dark' ? 'true' : 'false');
+			(button as HTMLElement).dataset.resolved = resolved;
+		});
+	}
+
+	class StarlightThemeToggle extends HTMLElement {
+		constructor() {
+			super();
+			onThemeChange(loadTheme());
+			syncAllToggles();
+
+			this.querySelector('button')?.addEventListener('click', () => {
+				onThemeChange(oppositeOf(loadTheme()));
+				syncAllToggles();
+			});
+		}
+	}
+
+	customElements.define('starlight-theme-select', StarlightThemeToggle);
+</script>
+
+<style>
+	@layer starlight.components {
+		.theme-toggle {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0.25rem;
+			border: none;
+			background: none;
+			cursor: pointer;
+			color: var(--sl-color-gray-3);
+		}
+
+		.theme-toggle-track {
+			position: relative;
+			width: 3.25rem;
+			height: 1.5rem;
+			border: 1px solid var(--ledger-hairline);
+			border-radius: 999px;
+			background: var(--ledger-card);
+			transition: background-color 0.25s ease, border-color 0.25s ease;
+		}
+
+		/* Icons pin to the two halves' centers so the knob lands on them. */
+		.theme-toggle-icon {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			pointer-events: none;
+		}
+
+		/* The knob paints over the active icon: keep icons above it. */
+		.theme-toggle :global(.theme-toggle-icon) {
+			z-index: 1;
+		}
+
+		.theme-toggle :global(.theme-toggle-knob) {
+			z-index: 0;
+		}
+
+		.theme-toggle :global(.theme-toggle-sun) {
+			inset-inline-start: 0.375rem;
+		}
+
+		.theme-toggle :global(.theme-toggle-moon) {
+			inset-inline-end: 0.375rem;
+		}
+
+		.theme-toggle-knob {
+			position: absolute;
+			top: 50%;
+			inset-inline-start: 0.28rem;
+			width: 1.06rem;
+			height: 1.06rem;
+			border-radius: 50%;
+			background: var(--ledger-ink);
+			transform: translateY(-50%);
+			transition: transform 0.25s ease, inset-inline-start 0.25s ease,
+				background-color 0.25s ease;
+		}
+
+		.theme-toggle[data-resolved='dark'] .theme-toggle-knob {
+			inset-inline-start: calc(100% - 1.34rem);
+			background: var(--ledger-green);
+		}
+
+		.theme-toggle[data-resolved='dark'] :global(.theme-toggle-moon) {
+			color: var(--ledger-card);
+		}
+
+		.theme-toggle[data-resolved='dark'] :global(.theme-toggle-sun) {
+			opacity: 0.45;
+		}
+
+		.theme-toggle[data-resolved='light'] :global(.theme-toggle-sun) {
+			color: var(--ledger-card);
+		}
+
+		.theme-toggle[data-resolved='light'] :global(.theme-toggle-moon) {
+			opacity: 0.45;
+		}
+
+		.theme-toggle[data-resolved='light'] .theme-toggle-knob {
+			background: var(--ledger-blue);
+		}
+
+		.theme-toggle:hover .theme-toggle-track {
+			border-color: var(--ledger-muted);
+		}
+
+		.theme-toggle:focus-visible {
+			outline: 2px solid var(--ledger-blue);
+			outline-offset: 2px;
+			border-radius: 999px;
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			.theme-toggle-track,
+			.theme-toggle-icon,
+			.theme-toggle-knob {
+				transition: none !important;
+			}
+		}
+	}
+</style>

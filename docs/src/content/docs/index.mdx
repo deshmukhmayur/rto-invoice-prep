@@ -1,0 +1,97 @@
+---
+title: RTO Invoice Prep
+description: >-
+  Prepare dealership invoices for RTO registration. Remove the discount line
+  from OEM tax invoices — right in the PDF.
+template: splash
+hero:
+  title: RTO Invoice Prep
+  tagline: One red line through the discount. Totals that add up for the RTO.
+  actions:
+    - text: Download v{{VERSION}} for Windows
+      link: "{{DOWNLOAD_URL}}"
+    - text: Other releases
+      link: "{{RELEASES_URL}}"
+      variant: secondary
+    - text: Get started
+      link: getting-started/
+      variant: minimal
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<div class="home-intro">
+Free Windows app for dealership desks that handle vehicle registration.
+Open the tax invoice PDF your OEM system printed, let the app strike the
+discount line, and it rewrites the GST breakdown and the amount in words
+so the RTO copy adds up.
+</div>
+
+<section class="home-section" aria-labelledby="how-it-works">
+  <span class="home-eyebrow" id="how-it-works">On the corrected copy</span>
+  <h2>What changes — and what doesn’t</h2>
+  <ul class="home-points">
+    <li>
+      <span class="point-label point-amber">struck</span>
+      <span>**Less: Dealer Discount** — gone, along with its share of taxable
+      value, CGST, and SGST.</span>
+    </li>
+    <li>
+      <span class="point-label">rewritten</span>
+      <span>**Totals and round-off**, recomputed at the GST rates printed on
+      your own invoice.</span>
+    </li>
+    <li>
+      <span class="point-label">rewritten</span>
+      <span>**Amount in words**, spelled out in Indian numbering for the new
+      grand total.</span>
+    </li>
+    <li>
+      <span class="point-label point-amber">untouched</span>
+      <span>**Everything else** — chassis, engine, HSN, dealer details, taxes
+      actually collected — exactly as the OEM printed it.</span>
+    </li>
+  </ul>
+</section>
+
+<section class="home-section" aria-labelledby="why-local">
+  <span class="home-eyebrow" id="why-local">On your desk</span>
+  <h2>Made for a single dealership desk</h2>
+  <ul class="home-points">
+    <li>
+      <span class="point-label">local</span>
+      <span>**Local first.** Invoices never leave your computer. The app talks
+      to the internet only to check for updates.</span>
+    </li>
+    <li>
+      <span class="point-label">2 min</span>
+      <span>**Two minutes per invoice.** Drop the PDF, export the corrected
+      copy to your chosen folder.</span>
+    </li>
+    <li>
+      <span class="point-label">0 setup</span>
+      <span>**No accounts, no servers, no subscriptions.** Nothing is stored
+      between sessions.</span>
+    </li>
+  </ul>
+</section>
+
+<div class="home-cta">
+  <a class="sl-link-button not-content primary" href="getting-started/">
+    Get started
+  </a>
+  <a
+    class="sl-link-button not-content secondary"
+    href="https://github.com/deshmukhmayur/rto-invoice-prep/releases"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Browse releases
+  </a>
+</div>
+
+<Aside type="tip">
+  The app reads OEM tax-invoice PDFs of the standard template used by
+  motorcycle makers. If your invoice layout is different, see the
+  [FAQ](faq/).
+</Aside>

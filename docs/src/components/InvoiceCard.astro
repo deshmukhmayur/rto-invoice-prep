@@ -1,0 +1,79 @@
+---
+// The signature element: a mock OEM tax invoice with the dealer-discount
+// line struck through in red pen, totals recomputed, and an RTO COPY stamp.
+// Kept in English on purpose — real OEM tax invoices are, even where the
+// desk's own language is Hindi or Marathi.
+---
+
+<figure class="invoice-card" aria-label="Mock tax invoice showing the dealer discount line removed and totals recomputed">
+	<span class="stamp" aria-hidden="true">RTO COPY</span>
+	<div class="invoice-card-head">
+		<span class="invoice-card-title">Tax Invoice</span>
+		<span class="invoice-card-gstin">GSTIN 27ABCDE1234F1Z5</span>
+	</div>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">Description</th>
+				<th scope="col">Amount (₹)</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>Motorcycle — ex-showroom</td>
+				<td class="num">1,10,000.00</td>
+			</tr>
+			<tr class="discount">
+				<td>Less: Dealer Discount</td>
+				<td class="num">10,000.00</td>
+				<td class="removal-tag" aria-hidden="true">removed for RTO</td>
+			</tr>
+			<tr class="recomputed">
+				<td>Total taxable value</td>
+				<td class="num">1,00,000.00</td>
+				<td class="num revised">1,10,000.00</td>
+			</tr>
+			<tr class="recomputed">
+				<td>CGST 9%</td>
+				<td class="num">9,000.00</td>
+				<td class="num revised">9,900.00</td>
+			</tr>
+			<tr class="recomputed">
+				<td>SGST 9%</td>
+				<td class="num">9,000.00</td>
+				<td class="num revised">9,900.00</td>
+			</tr>
+			<tr class="recomputed">
+				<td><strong>Grand total</strong></td>
+				<td class="num">1,18,000.00</td>
+				<td class="num revised">1,29,800.00</td>
+			</tr>
+		</tbody>
+	</table>
+	<p class="invoice-card-words">
+		Rupees One Lakh Eighteen Thousand Only &rarr;
+		<strong>Rupees One Lakh Twenty-Nine Thousand Eight Hundred Only</strong>
+	</p>
+</figure>
+
+<script>
+	const card = document.querySelector('.invoice-card');
+	if (card) {
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (reduceMotion) {
+			card.querySelector('.discount')?.classList.add('removed');
+			card.classList.add('stamped');
+			card.querySelectorAll('.num.revised').forEach((el) => el.classList.add('on'));
+			card.querySelector('.invoice-card-words strong')?.classList.add('on');
+		} else {
+			setTimeout(() => {
+				card.querySelector('.discount')?.classList.add('removed');
+				card.classList.add('stamped');
+			}, 1000);
+			setTimeout(() => {
+				card.querySelectorAll('.num.revised').forEach((el) => el.classList.add('on'));
+				card.querySelector('.invoice-card-words strong')?.classList.add('on');
+			}, 2300);
+		}
+	}
+</script>

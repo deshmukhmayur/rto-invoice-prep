@@ -1,0 +1,611 @@
+/* RTO Invoice Prep — "Corrected ledger" theme.
+   Form-paper grey-blue, navy ink, red proofreader's pen, stamp green. */
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root,
+:root[data-theme='light'] {
+	/* Starlight theme tokens */
+	--sl-color-bg: #eef1f3;
+	--sl-color-bg-nav: #e4e9ec;
+	--sl-color-bg-sidebar: #e8edf0;
+	--sl-color-bg-accent: #e2e8ec;
+	--sl-color-white: #1c2b3a;
+	--sl-color-gray-1: #33465a;
+	--sl-color-gray-2: #4d5f6f;
+	--sl-color-gray-3: #5a6b78;
+	--sl-color-gray-4: #8196a3;
+	--sl-color-gray-5: #b3c2cb;
+	--sl-color-gray-6: #cdd8de;
+	--sl-color-gray-7: #e4ebef;
+	--sl-color-accent: #005fb8;
+	--sl-color-accent-high: #00427e;
+	--sl-color-text-accent: #005fb8;
+	--sl-color-text-invert: #fdfdfd;
+	--sl-color-hairline-shade: #c9d4da;
+	--sl-color-backdrop-half: rgba(28, 43, 58, 0.5);
+	--sl-font: 'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;
+	--sl-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+	--sl-font-display: 'Bricolage Grotesque', var(--sl-font);
+
+	/* Corrected-ledger palette.
+	   --ledger-blue is the accent (matches the app's #005FB8).
+	   --ledger-red stays a *removal* color only: the struck discount line,
+	   caution asides — never the site's action color. */
+	--ledger-ink: #1c2b3a;
+	--ledger-paper: #eef1f3;
+	--ledger-card: #ffffff;
+	--ledger-hairline: #cdd8de;
+	--ledger-blue: #005fb8;
+	--ledger-blue-soft: #e1ecf7;
+	--ledger-red: #be3a1d;
+	--ledger-red-soft: #f6e4de;
+	--ledger-green: #1f6b4e;
+	--ledger-green-soft: #e2efe8;
+	--ledger-muted: #5a6b78;
+	--ledger-shadow: 0 1px 2px rgba(28, 43, 58, 0.06), 0 10px 30px -18px rgba(28, 43, 58, 0.35);
+}
+
+:root,
+:root[data-theme='dark'] {
+	--sl-color-bg: #10161b;
+	--sl-color-bg-nav: #151d23;
+	--sl-color-bg-sidebar: #131a20;
+	--sl-color-bg-accent: #1d272e;
+	--sl-color-white: #e3eaef;
+	--sl-color-gray-1: #d7e0e6;
+	--sl-color-gray-2: #b9c7d0;
+	--sl-color-gray-3: #9bb0bc;
+	--sl-color-gray-4: #718b9a;
+	--sl-color-gray-5: #3c4d59;
+	--sl-color-gray-6: #2a3740;
+	--sl-color-gray-7: #1b252c;
+	--sl-color-accent: #4cc2ff;
+	--sl-color-accent-high: #7dd6ff;
+	--sl-color-text-accent: #4cc2ff;
+	--sl-color-text-invert: #10161b;
+	--sl-color-hairline-shade: #2a3740;
+	--sl-color-backdrop-half: rgba(5, 10, 14, 0.6);
+
+	--ledger-ink: #e3eaef;
+	--ledger-paper: #10161b;
+	--ledger-card: #151d23;
+	--ledger-hairline: #2a3740;
+	--ledger-blue: #4cc2ff;
+	--ledger-blue-soft: rgba(76, 194, 255, 0.12);
+	--ledger-red: #ff8a73;
+	--ledger-red-soft: rgba(255, 138, 115, 0.12);
+	--ledger-green: #52c29a;
+	--ledger-green-soft: rgba(82, 194, 154, 0.12);
+	--ledger-muted: #9bb0bc;
+	--ledger-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -18px rgba(0, 0, 0, 0.7);
+}
+
+/* Typography */
+h1,
+h2,
+.site-title,
+.hero-title,
+.sl-link-button.hero {
+	font-family: var(--sl-font-display);
+	letter-spacing: -0.015em;
+}
+
+.site-title img {
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 6px;
+}
+
+.sl-container h1,
+#_top {
+	font-weight: 700;
+}
+
+/* Figures and inline code read like invoice fields */
+code,
+select {
+	font-family: var(--sl-font-mono);
+}
+
+/* Starlight sizes the language select at a fixed 7em, which truncates
+   non-Latin labels. Size it to the longest English label ("English")
+   instead: width comes from the current label's text via ch units, with
+   the icon + caret padding accounted for. */
+starlight-lang-select label {
+	--sl-select-width: 7.75rem !important;
+}
+
+starlight-lang-select select {
+	text-overflow: clip;
+}
+
+.sidebar-content a,
+.sl-link-button {
+	font-size: var(--sl-text-sm);
+}
+
+/* Headings: navy, with a red-pen tick for h2 in content */
+.content h2 {
+	color: var(--ledger-ink);
+}
+
+/* Links: red pen for content links, navy otherwise; unlayered so they
+   beat both Starlight's layered defaults and the UA's :visited purple. */
+.sl-markdown-content a:not(:where(.not-content *)) {
+	color: var(--sl-color-text-accent);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+}
+
+.sl-markdown-content a:not(:where(.not-content *)):hover {
+	color: var(--sl-color-white);
+}
+
+.sl-markdown-content a:not(:where(.not-content *)):visited {
+	color: var(--sl-color-text-accent);
+}
+
+/* Starlight components on paper */
+.content-panel,
+.sidebar-pane,
+.rightsidebar {
+	border-radius: 4px;
+}
+
+/* Starlight components on paper */
+.starlight-aside {
+	border-radius: 4px;
+	border: 1px solid var(--ledger-hairline);
+	border-left: 3px solid var(--ledger-muted);
+	background: var(--ledger-card);
+	color: var(--ledger-ink);
+}
+
+.starlight-aside--tip {
+	border-left-color: var(--ledger-green);
+}
+
+.starlight-aside--caution {
+	border-left-color: var(--ledger-red);
+}
+
+.starlight-aside--note {
+	border-left-color: var(--sl-color-blue);
+}
+
+.starlight-aside .starlight-aside__title {
+	color: var(--ledger-muted);
+}
+
+.starlight-aside--tip .starlight-aside__title {
+	color: var(--ledger-green);
+}
+
+.starlight-aside--caution .starlight-aside__title {
+	color: var(--ledger-red);
+}
+
+/* Buttons: squared like form fields, not pills.
+   Hierarchy: the primary action is the red pen; secondary is an outlined
+   field; the tertiary one is a plain pen-underline link. */
+.sl-link-button {
+	border-radius: 3px;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.sl-link-button.primary {
+	background: var(--ledger-blue);
+	border-color: var(--ledger-blue);
+	color: #fff;
+}
+
+:root[data-theme='dark'] .sl-link-button.primary {
+	color: #10161b;
+}
+
+.sl-link-button.primary:hover {
+	background: var(--ledger-blue-soft);
+	color: var(--ledger-blue);
+}
+
+:root[data-theme='dark'] .sl-link-button.primary:hover {
+	color: var(--ledger-blue);
+}
+
+.sl-link-button.secondary {
+	background: var(--ledger-card);
+	border-color: var(--ledger-hairline);
+	color: var(--ledger-ink);
+}
+
+.sl-link-button.secondary:hover {
+	border-color: var(--ledger-blue);
+	color: var(--ledger-blue);
+}
+
+.sl-link-button.minimal {
+	color: var(--ledger-ink);
+	padding-inline: 0.25rem;
+	text-decoration: underline;
+	text-decoration-color: var(--ledger-blue);
+	text-underline-offset: 4px;
+}
+
+.sl-link-button.minimal:hover {
+	color: var(--ledger-blue);
+}
+
+/* More room for the two-tier CTA row */
+.hero .actions,
+.hero-invoice-split .actions {
+	gap: 0.75rem 1rem;
+	margin-top: 0.5rem;
+}
+
+/* Keep the hero H1 compact enough to sit beside the invoice card */
+.hero-invoice-split h1 {
+	font-size: clamp(2rem, calc(1.25rem + 2.5vw), 2.75rem);
+}
+
+/* Without the left sidebar, cap the reading column and center it. */
+.main-pane {
+	max-width: 52rem;
+	margin-inline: auto;
+	padding-inline: var(--sl-content-pad-x);
+	width: 100%;
+}
+
+.sl-link-button.primary,
+.sl-link-button.secondary {
+	padding: 0.875rem 1.5rem;
+}
+
+.sl-link-button.minimal {
+	padding: 0.875rem 0.5rem;
+}
+
+/* Single-column homepage: sectioned, with invoice vocabulary */
+.home-intro {
+	max-width: 44rem;
+	font-size: 1.0625rem;
+}
+
+.home-section {
+	margin-top: 3.5rem;
+	padding-top: 2rem;
+	border-top: 1px solid var(--ledger-hairline);
+}
+
+.home-section > h2 {
+	font-family: var(--sl-font-display);
+	font-size: var(--sl-text-xl);
+	font-weight: 700;
+	color: var(--ledger-ink);
+}
+
+.home-eyebrow {
+	display: block;
+	font-family: var(--sl-font-mono);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ledger-muted);
+	margin-bottom: 0.5rem;
+}
+
+.home-points {
+	display: grid;
+	gap: 1rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.home-points li {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 0.75rem;
+	align-items: baseline;
+}
+
+.home-points .point-label {
+	font-family: var(--sl-font-mono);
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--ledger-green);
+	white-space: nowrap;
+}
+
+.home-points .point-label.point-amber {
+	color: #a05a00;
+}
+
+.home-cta {
+	margin-top: 2.5rem;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	align-items: center;
+}
+
+@media (max-width: 30rem) {
+	.home-points li {
+		grid-template-columns: 1fr;
+		gap: 0.25rem;
+	}
+}
+
+/* Focus visibility on paper */
+:focus-visible {
+	outline: 2px solid var(--ledger-blue);
+	outline-offset: 2px;
+}
+
+/* ---- Signature: the corrected invoice card ---- */
+.hero-invoice {
+	margin: 2rem auto;
+}
+
+.invoice-card {
+	font-family: var(--sl-font-mono);
+	font-size: 0.8125rem;
+	line-height: 1.6;
+	background: var(--ledger-card);
+	color: var(--ledger-ink);
+	border: 1px solid var(--ledger-hairline);
+	border-radius: 6px;
+	box-shadow: var(--ledger-shadow);
+	max-width: 30rem;
+	width: 100%;
+	margin-inline: auto;
+	text-align: left;
+	overflow: hidden;
+	position: relative;
+}
+
+.invoice-card-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	padding: 0.75rem 1rem;
+	border-bottom: 1px solid var(--ledger-hairline);
+}
+
+.invoice-card-title {
+	font-family: var(--sl-font-display);
+	font-weight: 700;
+	font-size: 0.9375rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.invoice-card-gstin {
+	color: var(--ledger-muted);
+	font-size: 0.6875rem;
+}
+
+.invoice-card table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.invoice-card th {
+	font-family: var(--sl-font);
+	font-weight: 600;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--ledger-muted);
+	text-align: right;
+	padding: 0.5rem 1rem;
+	border-bottom: 1px solid var(--ledger-hairline);
+}
+
+.invoice-card th:first-child,
+.invoice-card td:first-child {
+	text-align: left;
+}
+
+.invoice-card td {
+	padding: 0.45rem 1rem;
+	border-bottom: 1px solid var(--ledger-hairline);
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.invoice-card td:first-child {
+	color: var(--ledger-ink);
+}
+
+.invoice-card .num {
+	white-space: nowrap;
+}
+
+/* The discount row — the line the pen comes for */
+.invoice-card tr.discount {
+	position: relative;
+	color: var(--ledger-muted);
+	text-decoration-color: transparent;
+	text-decoration-thickness: 1.5px;
+}
+
+.invoice-card tr.discount.removed {
+	color: var(--ledger-red);
+	background: var(--ledger-red-soft);
+}
+
+.invoice-card tr.discount.removed td {
+	text-decoration: line-through;
+	text-decoration-color: var(--ledger-red);
+	text-decoration-thickness: 1.5px;
+}
+
+.invoice-card tr.discount .removal-tag {
+	position: absolute;
+	right: 1rem;
+	bottom: -0.35rem;
+	font-family: var(--sl-font);
+	font-size: 0.625rem;
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--ledger-red);
+	background: var(--ledger-card);
+	padding: 0 0.375rem;
+	opacity: 0;
+	transition: opacity 0.4s ease 1.4s;
+}
+
+.invoice-card tr.discount.removed .removal-tag {
+	opacity: 1;
+}
+
+/* Recomputed figures */
+.invoice-card tr.recomputed .num {
+	font-weight: 600;
+}
+
+.invoice-card tr.recomputed .num.revised {
+	color: var(--ledger-green);
+	background: var(--ledger-green-soft);
+	border-radius: 3px;
+	padding: 0 0.25rem;
+	opacity: 0;
+	transition: opacity 0.4s ease 2.2s;
+}
+
+.invoice-card tr.recomputed .num.revised.on {
+	opacity: 1;
+}
+
+/* Amount in words strip */
+.invoice-card-words {
+	padding: 0.625rem 1rem;
+	border-top: 2px solid var(--ledger-ink);
+	font-style: italic;
+	color: var(--ledger-muted);
+	font-size: 0.75rem;
+}
+
+.invoice-card-words strong {
+	color: var(--ledger-green);
+	font-style: normal;
+	margin-inline-start: 0.35em;
+	opacity: 0;
+	transition: opacity 0.4s ease 2.6s;
+}
+
+.invoice-card-words strong.on {
+	opacity: 1;
+}
+
+/* Rubber stamp */
+.invoice-card .stamp {
+	position: absolute;
+	top: 2.4rem;
+	right: 0.75rem;
+	font-family: var(--sl-font-display);
+	font-weight: 800;
+	font-size: 0.6875rem;
+	letter-spacing: 0.22em;
+	color: var(--ledger-green);
+	border: 2px solid currentColor;
+	border-radius: 3px;
+	padding: 0.2rem 0.5rem 0.2rem 0.72rem;
+	transform: rotate(-8deg) scale(1.35);
+	opacity: 0;
+	transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.invoice-card.stamped .stamp {
+	transform: rotate(-8deg) scale(1);
+	opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.invoice-card tr.discount,
+	.invoice-card .num.revised,
+	.invoice-card .removal-tag,
+	.invoice-card-words strong,
+	.invoice-card .stamp {
+		transition: none !important;
+	}
+	.invoice-card .num.revised,
+	.invoice-card-words strong {
+		opacity: 1;
+	}
+	.invoice-card .stamp,
+	.invoice-card tr.discount.removed .removal-tag {
+		opacity: 1;
+	}
+}
+
+/* ---- 404: the missing page notice ---- */
+.notfound-card .stamp {
+	color: var(--ledger-red);
+	top: 3.4rem;
+	right: auto;
+	left: 50%;
+	transform: translateX(-50%) rotate(-8deg) scale(1.1);
+	opacity: 0.9;
+}
+
+.notfound-card .invoice-card-words strong {
+	color: var(--ledger-red);
+	opacity: 1;
+}
+
+.notfound-card td {
+	color: var(--ledger-muted);
+}
+
+.notfound-card .status-missing {
+	color: var(--ledger-red);
+	background: var(--ledger-red-soft);
+	border-radius: 3px;
+	text-decoration: line-through;
+	text-decoration-color: var(--ledger-red);
+	text-decoration-thickness: 1.5px;
+}
+
+.notfound-card .status-fix {
+	color: var(--ledger-green);
+	background: var(--ledger-green-soft);
+	border-radius: 3px;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+	.invoice-card {
+		max-width: 100%;
+	}
+}
+
+/* Home CTA row: group the two buttons, keep the aside apart */
+.home-cta .sl-link-button:not(.primary) {
+	margin-inline-start: 0;
+}
+
+/* App screenshots: framed like paperwork in a file */
+.app-shot {
+	margin: 1.5rem 0;
+}
+
+.app-shot img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border: 1px solid var(--ledger-hairline);
+	border-radius: 6px;
+	box-shadow: var(--ledger-shadow);
+	background: var(--ledger-card);
+}
+
+.app-shot figcaption {
+	margin-top: 0.5rem;
+	font-size: var(--sl-text-sm);
+	color: var(--ledger-muted);
+}
