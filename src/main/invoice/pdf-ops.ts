@@ -132,6 +132,10 @@ export async function loadDocument(bytes: ArrayBuffer | Uint8Array): Promise<PDF
   return PDFDocument.load(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes), {
     ignoreEncryption: false,
     throwOnInvalidObject: false,
+    // pdf-lib's default updateMetadata:true replaces the original's Producer
+    // with "pdf-lib" and synthesizes ModDate/CreationDate in memory — the
+    // prepared file must preserve the original Info dict verbatim (spec §2).
+    updateMetadata: false,
   });
 }
 

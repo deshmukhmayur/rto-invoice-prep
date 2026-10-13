@@ -4,10 +4,10 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] App launches to the empty state styled per the prototype's Variant D
-- [ ] File (Upload Invoice Ctrl+O, New Window Ctrl+Shift+N, Quit Ctrl+Q), View (Zoom in/out/reset, DevTools F12), Help menus all present with working accelerators; mnemonics/Alt traversal come from Electron's native menu
-- [ ] Window follows the OS light/dark theme; title reads "RTO Invoice Prep v0.1"
-- [ ] Project is TypeScript (main + renderer), with Bun (`bun install`) as the package manager/script runner — no npm anywhere
-- [ ] Demoable: run the app, exercise every menu item that exists so far
+- [x] App launches to the empty state styled per the prototype's Variant D
+- [x] File (Upload Invoice Ctrl+O, New Window Ctrl+Shift+N, Quit Ctrl+Q), View (Zoom in/out/reset, DevTools F12), Help menus all present with working accelerators; mnemonics/Alt traversal come from Electron's native menu
+- [x] Window follows the OS light/dark theme; title reads "RTO Invoice Prep v0.1"
+- [x] Project is TypeScript (main + renderer), with Bun (`bun install`) as the package manager/script runner — no npm anywhere
+- [x] Demoable: run the app, exercise every menu item that exists so far
