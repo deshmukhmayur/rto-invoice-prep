@@ -1,0 +1,59 @@
+src/main.ts
+  s_4ec2fe6d9cb2be::t_15bc2af316c7eb 23,98,198,224
+src/shared/ingest.ts
+  s_4ec2fe6d9cb2be::t_17ce7ce24cebd1 66
+  s_4ec2fe6d9cb2be::t_1ef5fba5f22ff8 74
+src/renderer/renderer.ts
+  s_4ec2fe6d9cb2be::t_a6d469c2eee3cf 236
+  s_4ec2fe6d9cb2be::t_8d6b38c128e0e6 385
+  s_4ec2fe6d9cb2be::t_500726ae143ab2 161
+  s_4ec2fe6d9cb2be::t_a257ed0df25ca6 503
+  s_4ec2fe6d9cb2be::t_28c1213a42efd6 291-292
+  s_4ec2fe6d9cb2be::t_35cfde0c8263c0 358
+  s_4ec2fe6d9cb2be::t_9574bf17819614 242
+  s_4ec2fe6d9cb2be::t_0c74e3c03015b2 638
+  s_4ec2fe6d9cb2be::t_c25976599e21a9 37
+  s_4ec2fe6d9cb2be::t_7d0dc99eec1c91 87,90
+  s_4ec2fe6d9cb2be::t_1fa1784cb14722 497-498
+  s_4ec2fe6d9cb2be::t_ff51bd23a8785b 11
+  s_4ec2fe6d9cb2be::t_1f714b945c5f46 25-26
+  s_4ec2fe6d9cb2be::t_28fba553d46a61 502,504-505,509
+  s_4ec2fe6d9cb2be::t_c9b524563bb67c 412
+  s_4ec2fe6d9cb2be::t_c6e5e6543bf78f 151-160,162-164
+  s_4ec2fe6d9cb2be::t_068300bed90c40 639,642,651
+  s_4ec2fe6d9cb2be::t_a216ebabbf6237 499-501
+  s_4ec2fe6d9cb2be::t_049f68a05acc13 80-86,88-89,91-94
+src/renderer/styles.css
+  s_4ec2fe6d9cb2be::t_bbae21ab82c7bf 646-661,663-664,667,669-670,673,676,678-679,683-684
+  s_4ec2fe6d9cb2be::t_75cacbb8a1df9d 686
+  s_4ec2fe6d9cb2be::t_87d29eddd28814 662,665-666,668,671-672,674-675,677,680-682,685
+src/shared/naming.test.ts
+  s_4ec2fe6d9cb2be::t_dfcd99c2eb6bf1 2
+  s_4ec2fe6d9cb2be::t_99b07932213dc9 44-54
+  s_4ec2fe6d9cb2be::t_3b4577510cec7f 1,3-43,55-61
+scripts/browser-mock.ts
+  s_4ec2fe6d9cb2be::t_15bc2af316c7eb 19,133,160,175
+  s_4ec2fe6d9cb2be::t_df7b7646621e25 153
+src/shared/naming.ts
+  s_4ec2fe6d9cb2be::t_cdf247d610f698 22-31
+  s_4ec2fe6d9cb2be::t_d91d25c3e5b881 14
+  s_4ec2fe6d9cb2be::t_3ed8e938a1f9d2 13
+  s_4ec2fe6d9cb2be::t_b91818654406bc 15
+  s_4ec2fe6d9cb2be::t_f1f96556b2c2d2 1-12,16-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8e5b9040ad267411a909d25f50a8e1e274530337",
+  "prompts": {},
+  "sessions": {
+    "s_4ec2fe6d9cb2be": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ecb971424ffeoU8VZ0N8w94lwa",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
