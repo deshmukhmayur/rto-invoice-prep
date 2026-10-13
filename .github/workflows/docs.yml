@@ -1,11 +1,9 @@
 name: Docs deploy
 
+# Docs go live only when a release is published — the site advertises the
+# installer, so it must never lead the release itself. workflow_dispatch
+# remains for manual rebuilds of already-live docs.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "docs/**"
-      - ".github/workflows/docs.yml"
   release:
     types: [published]
   workflow_dispatch:
