@@ -1,0 +1,19 @@
+.gitignore
+  s_d9f4c63c53bab5::t_a2897d3d6ef1e5 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5bfebb7122e31708d28dfb6940921364ecd0c7a9",
+  "prompts": {},
+  "sessions": {
+    "s_d9f4c63c53bab5": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ecb03153fffeD3rtJqOlzzZL5H",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
