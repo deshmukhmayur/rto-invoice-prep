@@ -1,0 +1,19 @@
+.github/workflows/ci.yml
+  s_11db9ba22b766c::t_6bf935e7bce1f5 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f997ef0bbc9d7950a12a9aaea7234a5fae9e1fe0",
+  "prompts": {},
+  "sessions": {
+    "s_11db9ba22b766c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ed9bf53b2ffeo6RoU6TrN0ItfW",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
