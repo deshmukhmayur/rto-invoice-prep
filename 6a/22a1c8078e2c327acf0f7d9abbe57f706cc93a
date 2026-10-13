@@ -1,0 +1,20 @@
+.scratch/rto-invoice-fixer/issues/22-configurable-bulk-export-naming.md
+  s_4ec2fe6d9cb2be::t_792cc073e521a8 15-22
+  s_4ec2fe6d9cb2be::t_1516775dbecf3a 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6a22a1c8078e2c327acf0f7d9abbe57f706cc93a",
+  "prompts": {},
+  "sessions": {
+    "s_4ec2fe6d9cb2be": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_ecb971424ffeoU8VZ0N8w94lwa",
+        "model": "z-ai/glm-5.3-flash"
+      },
+      "human_author": "Mayur Deshmukh <deshmukhmayur@outlook.com>"
+    }
+  }
+}
