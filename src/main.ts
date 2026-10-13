@@ -311,17 +311,7 @@ function buildMenu(): void {
         },
         { type: "separator" },
         {
-          label: "&Quit",
-          accelerator: "CmdOrCtrl+Q",
-          role: "quit",
-        },
-      ],
-    },
-    {
-      label: "&Export",
-      submenu: [
-        {
-          label: "Export &files",
+          label: "&Export files",
           accelerator: "CmdOrCtrl+E",
           click: () => focused()?.webContents.send("menu:export-batch"),
         },
@@ -330,10 +320,14 @@ function buildMenu(): void {
           accelerator: "CmdOrCtrl+Shift+E",
           click: () => focused()?.webContents.send("menu:export-zip"),
         },
-        { type: "separator" },
         {
           label: "&Choose output folder…",
           click: () => focused()?.webContents.send("menu:choose-folder"),
+        },
+        {
+          label: "&Quit",
+          accelerator: "CmdOrCtrl+Q",
+          role: "quit",
         },
       ],
     },

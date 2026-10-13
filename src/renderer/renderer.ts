@@ -82,7 +82,6 @@ function render(): void {
   }
   const selected = rows.find((r) => r.id === selectedId) ?? null;
   main.innerHTML = `
-    ${exportBarHtml()}
     <div class="layout">
       <aside class="rail" id="rail">
         <button class="upload-block" id="upload-block" type="button">
@@ -94,6 +93,7 @@ function render(): void {
         ${!ingest && rows.length > 0 && rows.every((r) => r.status !== "valid")
           ? `<div class="refused-strip" role="alert">No file in this batch can be exported (refused or unreadable). Remove the files or upload different ones.</div>`
           : ""}
+        ${exportBarHtml()}
       </aside>
       <section class="cards" id="cards">
         ${selected ? cardHtml(selected) : cardsEmptyHtml()}
@@ -133,10 +133,25 @@ function render(): void {
     btn.addEventListener("click", () => void pickFolder());
   }
   document.getElementById("export-batch")?.addEventListener("click", () => void exportBatch());
+  for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-jump]")) {
+    btn.addEventListener("click", () => {
+      const target = rows.find((r) => r.status !== "valid") ?? rows[0];
+      if (!target) return;
+      selectedId = target.id;
+      render();
+      main.querySelector<HTMLElement>(`[data-row="${target.id}"]`)?.scrollIntoView({ block: "nearest" });
+    });
+  }
   document.getElementById("zip-caret")?.addEventListener("click", () => {
     zipMenuOpen = !zipMenuOpen;
     render();
   });
+  if (zipMenuOpen) {
+    setTimeout(() => {
+      document.addEventListener("click", closeZipMenuOnOutsideClick);
+      document.addEventListener("keydown", closeZipMenuOnEscape);
+    });
+  }
   for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-export-zip]")) {
     btn.addEventListener("click", () => void exportZip());
   }
@@ -149,6 +164,25 @@ function render(): void {
   for (const btn of main.querySelectorAll<HTMLButtonElement>("[data-report-bug]")) {
     btn.addEventListener("click", () => void window.app.reportBug());
   }
+}
+
+function closeZipMenuOnOutsideClick(e: MouseEvent) {
+  const target = e.target as Node;
+  const menu = document.querySelector(".export-menu");
+  const caret = document.getElementById("zip-caret");
+  if (menu?.contains(target) || caret?.contains(target)) return;
+  zipMenuOpen = false;
+  document.removeEventListener("click", closeZipMenuOnOutsideClick);
+  document.removeEventListener("keydown", closeZipMenuOnEscape);
+  render();
+}
+
+function closeZipMenuOnEscape(e: KeyboardEvent) {
+  if (e.key !== "Escape") return;
+  zipMenuOpen = false;
+  document.removeEventListener("click", closeZipMenuOnOutsideClick);
+  document.removeEventListener("keydown", closeZipMenuOnEscape);
+  render();
 }
 
 function cardsEmptyHtml(): string {
@@ -180,22 +214,50 @@ function zipNameForToday(): string {
 function exportBarHtml(): string {
   const valid = validRows();
   const n = valid.length;
-  const folderLabel = outDir ?? "Choose output folder";
   const attention = rows.filter((r) => r.status !== "valid").length;
+  const pendingCount = ingest ? ingest.pending.length : 0;
+  const folderLabel = outDir
+    ? outDir.split(/[\\/]/).filter(Boolean).pop() || outDir
+    : "Choose output folder";
+
+  const segments = [
+    ...rows.map((r) => `<span class="seg ${r.status === "valid" ? "ready" : r.status === "error" ? "crashed" : "blocked"}" title="${escapeHtml(r.fileName)}"></span>`),
+    ...Array.from({ length: pendingCount }, (_, i) => `<span class="seg reading" title="${escapeHtml(ingest!.pending[i] ?? "")}"></span>`),
+  ].join("");
+  const meter =
+    segments.length > 0
+      ? `<button class="tally" type="button" data-jump title="Show the first file that needs attention">${segments}</button>`
+      : "";
+
+  let note: string;
+  if (dirBlock) {
+    note = `<div class="tally-note error" role="alert"><span>Can't write to the output folder — ${escapeHtml(dirBlock.reason)}</span><button type="button" class="tally-note-action" data-pick-folder>Pick another folder</button></div>`;
+  } else if (batchSummary) {
+    note = `<div class="tally-note ${batchSummary.kind}" role="status">${escapeHtml(batchSummary.text)}</div>`;
+  } else {
+    note = `<div class="tally-note">${rows.length + pendingCount} file${rows.length + pendingCount === 1 ? "" : "s"} · ${
+      pendingCount > 0
+        ? "reading…"
+        : attention === 0
+          ? "all ready"
+          : `${attention} need${attention === 1 ? "s" : ""} attention`
+    }</div>`;
+  }
+
   const primary =
     n === 0
       ? `<button class="export-primary" id="export-batch" type="button" disabled>Nothing to export</button>`
       : `<button class="export-primary" id="export-batch" type="button" ${exporting ? "disabled" : ""}>${exporting ? "Exporting…" : `Export ${n} file${n === 1 ? "" : "s"}`}</button>`;
-  const status = batchSummary
-    ? `<div class="cmd-status ${batchSummary.kind}" role="status">${escapeHtml(batchSummary.text)}</div>`
-    : dirBlock
-      ? `<div class="cmd-status error" role="alert"><span>Export blocked — ${escapeHtml(dirBlock.reason)}</span><button type="button" class="cmd-status-action" data-pick-folder>Pick another folder</button></div>`
-      : `<div class="cmd-status">${rows.length} file${rows.length === 1 ? "" : "s"} · ${attention === 0 ? "all ready to export" : `${attention} need${attention === 1 ? "s" : ""} attention`}</div>`;
+
   return `
-    <header class="topbar">
-      <div class="command-bar">
-        ${status}
-        <div class="cmd-actions">
+    <footer class="rail-footer">
+      <div class="batch-bar">
+        <div class="tally-group">
+          ${meter}
+          ${note}
+        </div>
+        <div class="bar-actions">
+          <label class="save-to">Save to</label>
           <button class="folder-picker${dirBlock ? " blocked" : ""}" id="folder-picker" type="button" title="${escapeHtml(outDir ?? "Choose output folder")}">
             ${dirBlock ? `<span class="warn" aria-hidden="true">⚠</span>` : folderIcon()}
             <span class="folder-path">${escapeHtml(folderLabel)}</span>
@@ -209,7 +271,7 @@ function exportBarHtml(): string {
           </div>
         </div>
       </div>
-    </header>`;
+    </footer>`;
 }
 
 function folderIcon(): string {
@@ -221,6 +283,7 @@ async function pickFolder(): Promise<void> {
   if (dir) {
     outDir = dir;
     dirBlock = null;
+    batchSummary = null;
   }
   render();
 }
@@ -476,7 +539,7 @@ function facsimileHtml(row: RailRow): string {
     `<div class="fac-row ${cls}"><span class="fac-label">${label}</span><span class="fac-value">${value}</span></div>`;
   return `
     <div class="facsimile">
-      <div class="facsimile-title">Totals after preparation</div>
+      <div class="facsimile-title">Final Invoice Totals</div>
       ${facRow("Sub Total", escapeHtml(t.subTotal))}
       ${facRow("Discount", `<s class="old">${escapeHtml(t.discount)}</s> <span class="removed-note">✕ removed</span>`, "removed-row")}
       ${facRow("Taxable Value", changed(t.taxableValue, newTaxable))}
@@ -489,7 +552,7 @@ function facsimileHtml(row: RailRow): string {
       ${facRow("Net Amount", changed(t.netAmount, formatAmount(n.net)))}
       ${facRow("Grand Total", changed(t.grandTotal, grand))}
       ${facRow("Round Off", changed(t.roundOff, formatAmount(n.roundOff)))}
-      ${facRow("Grand Total (after Round Off)", changed(t.grandTotalAfterRoundOff, formatAmount(n.grandTotalAfterRoundOff)))}
+      ${facRow("Grand Total (after Round Off)", changed(t.grandTotalAfterRoundOff, formatAmount(n.grandTotalAfterRoundOff)), "grand-total-row")}
       ${facRow("Amount in words", changed(oldWords, newWords), "words")}
     </div>`;
 }
