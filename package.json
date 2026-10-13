@@ -34,18 +34,8 @@
     "win": {
       "icon": "build/icon.ico",
       "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "x64"
-          ]
-        }
+        "nsis",
+        "zip"
       ]
     },
     "nsis": {
@@ -53,9 +43,6 @@
       "perMachine": false,
       "deleteAppDataOnUninstall": false,
       "artifactName": "rto-invoice-prep-Setup-${version}.${ext}"
-    },
-    "zip": {
-      "artifactName": "rto-invoice-prep-${version}-portable.${ext}"
     }
   },
   "devDependencies": {
