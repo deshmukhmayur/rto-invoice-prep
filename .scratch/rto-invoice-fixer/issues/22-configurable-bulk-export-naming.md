@@ -4,7 +4,7 @@
 
 **Blocked by:** —
 
-**Status:** needs-triage
+**Status:** done
 
 Open questions for triage:
 
@@ -12,3 +12,11 @@ Open questions for triage:
 - Where does the setting live — inline on the export panel (persisted) or per-export only?
 - Does the single-file save-dialog default follow the same setting, so naming stays consistent?
 - ZIP inner entry names: same pattern, and does the ZIP's own name (`zipNameForToday()`, renderer.ts:174) become configurable too?
+
+## Resolution (implemented, commit 8e5b904)
+
+- Pattern template (`{name}`, `{date}`, `{seq}`), default `{name}-RTO`, edited in a Naming field on the export bar.
+- Each preview card header holds an editable export-name input seeded from the pattern; manual edits stick through pattern changes; clearing (or retyping the seed) reverts to the pattern. `{seq}` is the file position among valid rows at export time. Illegal chars (`/ \ : * ? " < > |`) are flagged red in the input and sanitised to `_` at export; `uniqueName()` dedup unchanged.
+- Single-file save-dialog default uses the same resolved name.
+- ZIP name stays `rto-invoices-{date}.zip`; inner entries follow the pattern.
+- Per-session only, matching the app stateless design. Naming logic in `src/shared/naming.ts` (pure, tested).
