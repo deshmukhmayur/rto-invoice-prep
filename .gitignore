@@ -1,6 +1,6 @@
 node_modules/
 dist/
 .scratch/samples/
-release/docs/.astro/
+release/
 docs/.astro/
 docs/dist/
